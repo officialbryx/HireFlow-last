@@ -7,6 +7,7 @@ import JobPosts from "./pages/JobPosts";
 import CreateJobPost from "./pages/CreateJobPost";
 import Apply from "./pages/Apply";
 import Home from "./pages/Home";
+import Messages from "./pages/Messages";
 import "./index.css";
 
 const App = () => {
@@ -26,6 +27,8 @@ const App = () => {
       document.title = "Create Job Post | HireFlow";
     } else if (location.pathname === "/apply") {
       document.title = "Apply Job for {company} | HireFlow";
+    } else if (location.pathname === "/messages") {
+      document.title = "Messaging | HireFlow";
     } else if (location.pathname === "/home") {
       document.title = "Home | HireFlow";
     }
@@ -53,6 +56,9 @@ const App = () => {
 
       {/* Application Page */}
       <Route path="/apply" element={<Apply />} />
+
+      {/* Messages Page */}
+      <Route path="/messages" element={<Messages />} />
     </Routes>
   );
 };
