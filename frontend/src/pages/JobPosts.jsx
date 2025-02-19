@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Navbar from "../components/Navbar";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -16,8 +17,12 @@ const JobPosts = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* NavBar */}
+      <div className="relative z-50 bg-white shadow fixed top-0 left-0 w-full">
+        <Navbar />
+      </div>
       {/* Search Header */}
-      <div className="bg-white shadow">
+      <div className="relative z-40 bg-white shadow mt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
@@ -49,7 +54,6 @@ const JobPosts = () => {
           </div>
         </div>
       </div>
-
       {/* Two Column Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
