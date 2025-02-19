@@ -77,7 +77,7 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
             <li>
               Should my application be successful, my Basic Identifiers and
               Contact Information as well as Company-Generated Information may
-              be shared with the Globe Group for the purpose of enabling contact
+              be shared with the company for the purpose of enabling contact
               and collaboration subject to proper documentation.
             </li>
             <li>
@@ -137,14 +137,14 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
             applicant’s explicit consent.
           </p>
           <p>
-            I authorize and consent for the Globe Group to retain the
+            I authorize and consent for the company to retain the
             information I provided for two years as part of its recruitment
-            database and share them within the Globe Group for future
+            database and share them within the company for future
             consideration in new employment opportunities.
           </p>
           <p>
             I understand that I may withhold my consent or later on withdraw it
-            at any time. Without such consent, however, the Globe Group will not
+            at any time. Without such consent, however, the company will not
             be able to continue with my application or employment.
           </p>
         </div>
@@ -159,7 +159,7 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
           />
           <p className="text-sm text-gray-500">
             I have read and understood the foregoing.
-            <span className="text-red-500">*</span>
+            <span className="text-red-500"> *</span>
           </p>
         </div>
       </div>
