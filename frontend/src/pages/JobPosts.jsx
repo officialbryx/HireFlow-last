@@ -202,76 +202,111 @@ const JobPosts = () => {
 const jobListings = [
   {
     id: 1,
-    title: "Senior Frontend Developer",
-    company: "TechCorp",
-    companyLogo: "/company-logos/techcorp.png",
-    location: "San Francisco, CA (Remote)",
-    type: "Full-time",
-    salary: "$120,000 - $150,000",
-    applicantsNeeded: 3,
-    companyDetails:
-      "TechCorp is revolutionizing the way people interact with technology through innovative web applications and digital experiences.",
+    title: "Junior Python Software Engineering",
+    company: "PDAX",
+    companyLogo: "/pdaxph_logo.jpg",
+    location: "Pasig, National Capital Region, Philippines",
+    type: "Hybrid/Full-time",
+    salary: "₱20,000-₱30,000",
+    applicantsNeeded: 10,
+    companyDetails: `
+  At PDAX, we believe that the future of money is digital, and our mission is to empower all Filipinos to grow their wealth through blockchain technology.
+
+  As one of the first crypto firms in the Philippine market, we feel a sense of duty to our users and to the ecosystem to set the standard for safety, ease of access, and reliability. We expect our team to share in this responsibility and cherish our vision of a more open and equitable financial system.
+
+  We are looking for new team members that are passionate about cryptocurrency, want to work in a disruptive, fast-growing industry, and thrive in a start-up environment.
+
+  If this sounds like you, then we’d love to talk!
+`,
+
     responsibilities: [
-      "Lead frontend development initiatives and architect scalable solutions",
-      "Mentor junior developers and promote best practices",
-      "Implement responsive designs and ensure cross-browser compatibility",
-      "Optimize application performance and user experience",
-      "Collaborate with UI/UX designers and backend developers",
-      "Participate in code reviews and technical planning",
+      "Design and maintain scalable, secure, and high-performance APIs.",
+      "Optimize and manage relational and non-relational databases.",
+      "Build and maintain reliable ETL pipelines for data processing and ingestion.",
+      "Deploy and manage backend systems and data pipelines on cloud platforms.",
+      "Ensure backend and data processes are scalable, efficient, and secure.",
+      "Work cross-functionally with teams and communicate technical concepts effectively.",
+      "Implement CI/CD workflows and automate testing, deployment, and monitoring.",
     ],
     qualifications: [
-      "5+ years of React experience",
-      "Strong TypeScript skills",
-      "Experience with modern CSS frameworks",
-      "Excellent communication skills",
-      "Experience with state management (Redux, Context API)",
-      "Knowledge of testing frameworks (Jest, React Testing Library)",
+      "Bachelor’s degree in Computer Science, Engineering, or related field (or equivalent experience).",
+      "Strong understanding of backend architecture, algorithms, and data structures.",
+      "Proficiency with Python, Redshift, DynamoDB, and ETL pipeline development.",
+      "Experience in architecture design for scalable, high-performance systems.",
+      "Knowledge of AWS services (e.g., S3, Lambda, EC2, RDS, Redshift).",
+      "Familiarity with data modeling, warehousing, and visualization tools like Metabase.",
+      "Experience deploying and managing systems on AWS and other cloud platforms.",
+      "Strong problem-solving, communication, and collaboration abilities.",
+      "Team player with the ability to work effectively in cross-functional teams.",
+      "Nice to haves: Familiarity with CI/CD, data governance, and advanced data processing frameworks.",
     ],
-    aboutCompany:
-      "TechCorp is a global leader in software development, serving millions of users worldwide. We offer competitive benefits, flexible work arrangements, and a culture of innovation.",
+    aboutCompany: `
+Founded in 2018, Philippine Digital Asset Exchange (PDAX) is empowering Filipinos by simplifying access to investment opportunities in the digital economy. PDAX offers a user-friendly interface that allows everyone, from beginners to seasoned investors, to participate confidently in the financial markets.
+
+At PDAX, we believe in democratizing finance and making investing accessible to all Filipinos. Our platform ensures simplicity, safety, and security, enabling users to trade a variety of digital assets effortlessly. Whether you're starting your investment journey or expanding your portfolio, PDAX equips you with the tools and resources to build wealth and achieve your financial goals.
+
+Learn more about how PDAX is redefining the future of finance at www.pdax.ph.
+`,
     skills: ["React", "TypeScript", "Tailwind CSS", "Redux", "Jest"],
     postedDate: "Posted 2 days ago",
   },
   {
     id: 2,
-    title: "Product Manager",
+    title: "Technical Architect - Software Dev",
     company: "InnovateTech",
-    companyLogo: "/company-logos/innovatetech.png",
-    location: "New York, NY (Hybrid)",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    applicantsNeeded: 2,
-    companyDetails:
-      "InnovateTech is a fast-growing startup focused on building AI-powered productivity tools for modern businesses.",
+    companyLogo: "/concentrix_catalyst_logo.jpg",
+    location: "Makati, National Capital Region, Philippines (Onsite/Full-time)",
+    type: "Onsite/Full-time",
+    salary: "₱30,000- ₱45,000",
+    applicantsNeeded: 16,
+    companyDetails: `
+The Technical Architect is a subject matter expert in one of our key practice areas (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). In this role, you will be responsible for ensuring technical design integrity, approving configuration checklists prior to implementation, and managing escalations during project execution. Additionally, you will serve as an instructor in our internal Academy, providing training and sharing best practices. 
+`,
+
     responsibilities: [
-      "Define product strategy and roadmap",
-      "Conduct market research and user interviews",
-      "Work closely with engineering and design teams",
-      "Prioritize features and manage backlog",
-      "Track and analyze key metrics",
-      "Present product updates to stakeholders",
+      "Own the architectural vision and technical strategy for your specific practice area.",
+      "Approve configuration checklists and design documents to ensure all solutions meet best practices and business requirements.",
+      "Conduct architecture reviews to confirm quality, scalability, and maintainability of the proposed solutions. ",
+      "Provide technical oversight during project implementations, ensuring alignment with approved designs and configurations. ",
+      "Serve as the final point of escalation for complex technical challenges, coordinating with cross-functional teams to resolve issues efficiently. ",
+      "Perform root-cause analysis on major incidents or issues, implementing long-term fixes and improvements. ",
+      "Act as an instructor and subject matter expert (SME) within the Academy, delivering specialized training sessions and workshops. ",
+      "Develop and update training materials, best practice guides, and documentation. ",
+      "Mentor and coach project teams, junior architects, and other stakeholders to continuously improve technical competencies within the organization. ",
+      "Work closely with Pre-Sales, Project Managers, and CX Consultants to propose effective, scalable solutions for new and existing clients. ",
+      "Engage with clients and senior leadership to gather technical requirements, clarify solution feasibility, and present architecture recommendations. ",
+      "Stay current on industry trends, emerging technologies, and best practices to maintain a forward-thinking approach. ",
     ],
     qualifications: [
-      "4+ years of product management experience",
-      "Strong analytical and problem-solving skills",
-      "Experience with agile methodologies",
-      "Excellent stakeholder management",
-      "Background in tech industry",
-      "MBA is a plus",
+      "Bachelor’s or Master’s degree in Computer Science, Information Technology, Engineering, or a related field. ",
+      "Proven experience (5+ years preferred) in solution architecture or a similar technical leadership role within the relevant domain (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). ",
+      "Strong track record of successfully designing and implementing complex solutions in enterprise environments. ",
+      "Exceptional problem-solving skills and the ability to handle high-stakes escalations under pressure. ",
+      "Experience delivering technical training or workshops; a passion for mentoring others is a plus. ",
+      "Excellent communication skills (verbal and written), with the ability to convey complex ideas to both technical and non-technical audiences. ",
+      "Relevant certifications (e.g., Zendesk Certified Administrator, Salesforce Architect, Genesys Certification, or equivalent) are highly desirable. ",
     ],
-    aboutCompany:
-      "InnovateTech is backed by top-tier investors and is on a mission to transform workplace productivity. We offer competitive equity packages and professional development opportunities.",
-    skills: ["Product Strategy", "Agile", "User Research", "Data Analytics"],
-    postedDate: "Posted 3 days ago",
+    aboutCompany: `
+We’re Concentrix Catalyst, the experience transformation and technology team at Concentrix -a global technology and services leader that powers the world’s best brands, today and into the future. We’re solution-focused, tech-powered, intelligence-fueled. Every day, we design, build, and run fully integrated, end-to-end solutions at speed and scale across the entire enterprise, helping more than 2,000 clients solve their toughest business challenges. With unique data and insights, deep industry expertise, and advanced technology solutions, we’re the intelligent transformation partner that powers a world that works, helping companies become refreshingly simple to work, interact, and transact with. 
+`,
+    skills: [
+      "Technical Expertise",
+      "Leadership & Influence",
+      "Adaptability",
+      "Collaboration",
+      "Continuous Learning",
+    ],
+    postedDate: "Posted 3 weeks ago",
   },
   {
     id: 3,
-    title: "DevOps Engineer",
-    company: "CloudScale",
-    companyLogo: "/company-logos/cloudscale.png",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$115,000 - $145,000",
+    title:
+      "Regulatory Affairs Software Development Specialist (Hybrid/Full-time)",
+    company: "Medtronic",
+    companyLogo: "/medtronic_logo.jpg",
+    location: "Taguig, National Capital Region, Philippines",
+    type: "Hybrid/Full-time",
+    salary: "₱50,000 - ₱100,000",
     applicantsNeeded: 4,
     companyDetails:
       "CloudScale provides enterprise-grade cloud infrastructure solutions to Fortune 500 companies.",
