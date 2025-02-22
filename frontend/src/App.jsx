@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import "./index.css";
+import { UserProvider } from "./context/UserContext";
 
 const App = () => {
   const location = useLocation();
@@ -38,34 +39,36 @@ const App = () => {
   }, [location]);
 
   return (
-    <Routes>
-      {/* Landing Page */}
-      <Route path="/" element={<LandingPage />} />
+    <UserProvider>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
 
-      {/* Home Feed Page */}
-      <Route path="/home" element={<Home />} />
+        {/* Home Feed Page */}
+        <Route path="/home" element={<Home />} />
 
-      {/* Sign Up Page */}
-      <Route path="/signup" element={<Signup />} />
+        {/* Sign Up Page */}
+        <Route path="/signup" element={<Signup />} />
 
-      {/* Sign In Page */}
-      <Route path="/login" element={<Login />} />
+        {/* Sign In Page */}
+        <Route path="/login" element={<Login />} />
 
-      {/* Job Posts Page */}
-      <Route path="/jobposts" element={<JobPosts />} />
+        {/* Job Posts Page */}
+        <Route path="/jobposts" element={<JobPosts />} />
 
-      {/* Create Job Post Page */}
-      <Route path="/createjobpost" element={<CreateJobPost />} />
+        {/* Create Job Post Page */}
+        <Route path="/createjobpost" element={<CreateJobPost />} />
 
-      {/* Application Page */}
-      <Route path="/apply" element={<Apply />} />
+        {/* Application Page */}
+        <Route path="/apply" element={<Apply />} />
 
-      {/* Messages Page */}
-      <Route path="/messages" element={<Messages />} />
+        {/* Messages Page */}
+        <Route path="/messages" element={<Messages />} />
 
-      {/* Settings Page */}
-      <Route path="/settings" element={<Settings />} />
-    </Routes>
+        {/* Settings Page */}
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </UserProvider>
   );
 };
 
