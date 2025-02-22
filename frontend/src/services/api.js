@@ -8,16 +8,27 @@ export const api = {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Login failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed");
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      if (data.token && data.user) {
+        // Store authentication data
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        return data;
+      } else {
+        throw new Error("Invalid response format from server");
+      }
     } catch (error) {
+      console.error("Login error:", error);
       throw error;
     }
   },

@@ -27,12 +27,21 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const data = await api.login(formData);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/home");
+      const response = await api.login(formData);
+
+      // Verify we have the required data
+      if (response.token && response.user) {
+        // Navigation will now happen after successful data storage
+        navigate("/home");
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.message ||
+          "Failed to login. Please check your credentials and try again."
+      );
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }

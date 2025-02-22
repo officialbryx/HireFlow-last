@@ -3,8 +3,11 @@ from flask_cors import CORS
 import mysql.connector
 from transformers import pipeline
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
+import jwt  # Change this line to use direct import
 import datetime
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -12,8 +15,9 @@ app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
         "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
-        "methods": ["GET", "POST", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
 
@@ -31,7 +35,7 @@ cursor = db.cursor()
 model = pipeline("summarization", model="facebook/bart-large-cnn")
 
 # JWT Configuration
-app.config['SECRET_KEY'] = 'your-secret-key'  # Change this to a secure secret key
+app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a secure secret key
 
 @app.route("/")  
 def home():
@@ -76,31 +80,55 @@ def signup():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@app.route("/api/auth/login", methods=["POST"])
+@app.route("/api/auth/login", methods=["POST", "OPTIONS"])
 def login():
-    data = request.json
-    
-    cursor.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
-    user = cursor.fetchone()
-    
-    if user and check_password_hash(user[4], data['password']):  # Index 4 is password
-        token = jwt.encode({
-            'user_id': user[0],  # Index 0 is user_id
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, app.config['SECRET_KEY'])
+    if request.method == "OPTIONS":
+        return "", 200
         
-        return jsonify({
-            "token": token,
-            "user": {
-                "id": user[0],
-                "email": user[3],
-                "firstName": user[1],
-                "lastName": user[2],
-                "userType": user[5]
+    try:
+        data = request.json
+        logging.debug(f"Login attempt for email: {data.get('email')}")
+        
+        cursor.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
+        columns = [col[0] for col in cursor.description]
+        user = cursor.fetchone()
+        
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+            
+        user_dict = dict(zip(columns, user))
+        
+        if check_password_hash(user_dict['password'], data['password']):
+            payload = {
+                'user_id': user_dict['id'],
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
             }
-        })
-    
-    return jsonify({"error": "Invalid credentials"}), 401
+            token = jwt.encode(
+                payload,
+                app.config['SECRET_KEY'],
+                algorithm='HS256'
+            )
+            
+            # Convert token to string if it's bytes
+            if isinstance(token, bytes):
+                token = token.decode('utf-8')
+            
+            return jsonify({
+                "token": token,
+                "user": {
+                    "id": user_dict['id'],
+                    "email": user_dict['email'],
+                    "firstName": user_dict['first_name'],
+                    "lastName": user_dict['last_name'],
+                    "userType": user_dict['user_type']
+                }
+            })
+        
+        return jsonify({"error": "Invalid password"}), 401
+        
+    except Exception as e:
+        logging.error(f"Login error: {str(e)}")
+        return jsonify({"error": "An error occurred during login"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
