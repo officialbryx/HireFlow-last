@@ -19,10 +19,11 @@ CORS(app, resources={
 
 # Connect to MySQL Database
 # Change password as needed
+# password="admin",
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root",
+    password="admin",
     database="hireflow"
 )
 cursor = db.cursor()

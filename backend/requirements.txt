@@ -2,6 +2,7 @@ flask
 flask-cors
 flask-mysql
 mysql-connector-python
+PyJWT
 requests
 transformers
 torch
