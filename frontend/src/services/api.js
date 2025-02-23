@@ -1,55 +1,65 @@
-const API_BASE_URL = "http://localhost:5000/api";
+import { supabase } from "./supabaseClient";
 
 export const api = {
-  async login(credentials) {
+  async login({ email, password }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(credentials),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed");
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-
-      if (data.token && data.user) {
-        // Store authentication data
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        return data;
-      } else {
-        throw new Error("Invalid response format from server");
-      }
+      return {
+        token: data.session.access_token,
+        user: data.user,
+      };
     } catch (error) {
       console.error("Login error:", error);
       throw error;
     }
   },
 
-  async signup(userData) {
+  async signup({ email, password, firstName, lastName, userType }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // First, sign up the user and wait for confirmation
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+          },
         },
-        body: JSON.stringify(userData),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Signup failed");
+      if (authError) throw authError;
+
+      // Wait for 2 seconds to ensure the user record is created in auth.users
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Create profile only if user was created successfully
+      if (authData.user?.id) {
+        const { error: insertError } = await supabase.from("profiles").insert([
+          {
+            id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+          },
+        ]);
+
+        if (insertError) {
+          console.error("Profile creation error:", insertError);
+          // Don't throw the error as the user is already created
+        }
       }
 
-      return await response.json();
+      return authData;
     } catch (error) {
+      console.error("Signup error:", error);
       throw error;
     }
   },
