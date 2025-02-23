@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../services/supabaseClient";
 import Navbar from "../components/Navbar";
 import {
   HandThumbUpIcon,
@@ -7,6 +8,32 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Home = () => {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const getProfile = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", user.id)
+            .single();
+
+          if (error) throw error;
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    getProfile();
+  }, []);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
@@ -26,7 +53,13 @@ const Home = () => {
               </div>
             </div>
             <div className="pt-12 pb-4 px-4 text-center">
-              <h2 className="font-semibold">Welcome, User!</h2>
+              <h2 className="font-semibold">
+                Welcome,{" "}
+                {profile
+                  ? `${profile.first_name} ${profile.last_name}`
+                  : "User"}
+                !
+              </h2>
               <p className="text-sm text-gray-500 mt-1">Add a photo</p>
             </div>
             <div className="border-t px-4 py-4">
