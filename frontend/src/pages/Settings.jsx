@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../services/supabaseClient";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    headline: "Software Engineer",
-    about: "Passionate about web development",
-    location: "New York, USA",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
+    firstName: "",
+    lastName: "",
+    headline: "",
+    about: "",
+    location: "",
+    email: "",
+    phone: "",
   });
 
   const [securityData, setSecurityData] = useState({
@@ -17,10 +18,65 @@ const Settings = () => {
     password: "********",
   });
 
-  const handleProfileUpdate = (e) => {
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, email")
+            .eq("id", user.id)
+            .single();
+
+          if (error) throw error;
+
+          setProfileData((prev) => ({
+            ...prev,
+            firstName: data.first_name || "",
+            lastName: data.last_name || "",
+            email: data.email || user.email,
+            // Keep other fields unchanged
+            headline: prev.headline,
+            about: prev.about,
+            location: prev.location,
+            phone: prev.phone,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    // Implement API call to update profile
-    alert("Profile updated successfully!");
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) throw new Error("No user found");
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
   };
 
   const handleSecurityUpdate = (e) => {
