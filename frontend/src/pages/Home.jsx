@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import { useUser } from "../context/UserContext";
 import {
   HandThumbUpIcon,
   ChatBubbleOvalLeftIcon,
@@ -7,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Home = () => {
+  const { user } = useUser();
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
@@ -26,7 +29,10 @@ const Home = () => {
               </div>
             </div>
             <div className="pt-12 pb-4 px-4 text-center">
-              <h2 className="font-semibold">Welcome, User!</h2>
+              <h2 className="font-semibold">
+                Welcome, {user ? `${user.firstName} ${user.lastName}` : "Guest"}
+                !
+              </h2>
               <p className="text-sm text-gray-500 mt-1">Add a photo</p>
             </div>
             <div className="border-t px-4 py-4">
