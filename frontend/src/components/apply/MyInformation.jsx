@@ -365,7 +365,7 @@ const MyInformation = ({ formData, setFormData }) => {
               <input
                 type="text"
                 name="givenAddress"
-                value={formData.givenAddress}
+                value={formData.givenAddress2}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 required

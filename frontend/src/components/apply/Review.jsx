@@ -23,12 +23,12 @@ const Review = ({ formData }) => {
           </div>
           <div>
             <span className="text-gray-500">Email:</span>
-            <p>{formData.email}</p>
+            <p>{formData.givenEmail}</p>
           </div>
           <div>
             <span className="text-gray-500">Phone:</span>
             <p>
-              {`${formData.phoneCode} ${formData.phoneNumber} ${formData.phoneDeviceType}`}{" "}
+              {formData.givenCountryPhoneCode} {formData.givenPhoneNumber}
             </p>
           </div>
         </div>
@@ -152,53 +152,54 @@ const Review = ({ formData }) => {
         <h3 className="text-lg font-semibold text-center">
           Application Questions
         </h3>
-        <div>
-          <p>
-            Have you been previously employed by Globe? (If you are a current
-            employee, please apply on the Workday site instead)
-          </p>
-          <p>
-            {`${formData.givenName} ${formData.middleName} ${formData.familyName} ${formData.suffix}`.trim()}
-          </p>
-        </div>
-        <div>
-          <p>Was your application previously processed with Globe Telecom?*</p>
-          <p>{formData.givenAddress}</p>
-        </div>
-        <div>
-          <p>
-            Have you been directly employed by Globe, any of the Globe
-            subsidiaries or other Ayala companies?*
-          </p>{" "}
-          <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>
-            Do you have relatives working with Globe, any of the Globe
-            subsidiaries or other Ayala companies?*
-          </p>{" "}
-          <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>
-            Do you have any relatives working with other Telecom companies?*
-          </p>{" "}
-          <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>Do you have a bond with your current employer?*</p>{" "}
-          <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>Do you have a non-compete clause?*</p> <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>Are you / will you be undergoing international studies?*</p>{" "}
-          <p>{formData.email}</p>
-        </div>
-        <div>
-          <p>Are you applying for a VISA?*</p> <p>{formData.email}</p>
-        </div>
+        {[
+          {
+            question:
+              "Have you been previously processed for employment with this company?",
+            answer: formData.applicationQuestions.previouslyProcessed,
+          },
+          {
+            question:
+              "Are you directly employed or engaged by any company at present?",
+            answer: formData.applicationQuestions.directlyEmployed,
+          },
+          {
+            question: "Do you have any relatives employed in this company?",
+            answer: formData.applicationQuestions.relativesInCompany,
+          },
+          {
+            question: "Do you have any relatives working in the same industry?",
+            answer: formData.applicationQuestions.relativesInIndustry,
+          },
+          {
+            question:
+              "Are you under any bond or contract with your current employer?",
+            answer: formData.applicationQuestions.currentEmployerBond,
+          },
+          {
+            question: "Are you bound by any non-compete agreement?",
+            answer: formData.applicationQuestions.nonCompete,
+          },
+          {
+            question: "Are you a Filipino citizen?",
+            answer: formData.applicationQuestions.filipinoCitizen,
+          },
+          {
+            question: "Have you studied abroad?",
+            answer: formData.applicationQuestions.internationalStudies,
+          },
+        ].map((item, index) => (
+          <div key={index} className="border-b pb-4">
+            <p className="font-medium">{item.question}</p>
+            <p className="text-blue-600 mt-1">
+              {item.answer === "yes"
+                ? "Yes"
+                : item.answer === "no"
+                ? "No"
+                : "Not answered"}
+            </p>
+          </div>
+        ))}
       </section>
 
       <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />

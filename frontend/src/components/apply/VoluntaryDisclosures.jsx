@@ -77,8 +77,8 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
             <li>
               Should my application be successful, my Basic Identifiers and
               Contact Information as well as Company-Generated Information may
-              be shared with the company for the purpose of enabling contact
-              and collaboration subject to proper documentation.
+              be shared with the company for the purpose of enabling contact and
+              collaboration subject to proper documentation.
             </li>
             <li>
               The processing of my data may be outsourced or contracted to
@@ -137,15 +137,15 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
             applicant’s explicit consent.
           </p>
           <p>
-            I authorize and consent for the company to retain the
-            information I provided for two years as part of its recruitment
-            database and share them within the company for future
-            consideration in new employment opportunities.
+            I authorize and consent for the company to retain the information I
+            provided for two years as part of its recruitment database and share
+            them within the company for future consideration in new employment
+            opportunities.
           </p>
           <p>
             I understand that I may withhold my consent or later on withdraw it
-            at any time. Without such consent, however, the company will not
-            be able to continue with my application or employment.
+            at any time. Without such consent, however, the company will not be
+            able to continue with my application or employment.
           </p>
         </div>
 
