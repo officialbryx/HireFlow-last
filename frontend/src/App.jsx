@@ -9,6 +9,7 @@ import Apply from "./pages/Apply";
 import Home from "./pages/Home";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
+import ViewApplicants from "./pages/ViewApplicants";
 import "./index.css";
 
 const App = () => {
@@ -26,13 +27,15 @@ const App = () => {
       document.title = "Job Posts | HireFlow";
     } else if (location.pathname === "/createjobpost") {
       document.title = "Create Job Post | HireFlow";
-    } else if (location.pathname.startsWith('/apply/')) {
-      const company = decodeURIComponent(location.pathname.split('/')[2]);
+    } else if (location.pathname.startsWith("/apply/")) {
+      const company = decodeURIComponent(location.pathname.split("/")[2]);
       document.title = `Apply Job for ${company} | HireFlow`;
     } else if (location.pathname === "/messages") {
       document.title = "Messaging | HireFlow";
     } else if (location.pathname === "/home") {
       document.title = "Home | HireFlow";
+    } else if (location.pathname === "/viewapplicants") {
+      document.title = "View Applicants | HireFlow";
     } else if (location.pathname === "/settings") {
       document.title = "Settings | HireFlow";
     }
@@ -63,6 +66,9 @@ const App = () => {
 
       {/* Messages Page */}
       <Route path="/messages" element={<Messages />} />
+
+      {/* View Applicants Page */}
+      <Route path="/viewapplicants" element={<ViewApplicants />} />
 
       {/* Settings Page */}
       <Route path="/settings" element={<Settings />} />
