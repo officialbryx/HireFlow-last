@@ -401,7 +401,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   From Date <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={edu.fromYear}
                   onChange={(e) =>
                     handleEducationChange(index, "fromYear", e.target.value)
@@ -417,7 +417,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={edu.toYear}
                   onChange={(e) =>
                     handleEducationChange(index, "toYear", e.target.value)

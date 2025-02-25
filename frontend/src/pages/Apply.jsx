@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import ApplicationQuestions from "../components/apply/ApplicationQuestions";
 import MyExperience from "../components/apply/MyExperience";
 import MyInformation from "../components/apply/MyInformation";
 import Review from "../components/apply/Review";
 import VoluntaryDisclosures from "../components/apply/VoluntaryDisclosures";
 import { CheckIcon } from "@heroicons/react/24/solid"; // Import CheckIcon
+import { api } from "../services/api";
 
 const stages = [
   { id: 1, name: "My Information" },
@@ -15,6 +17,8 @@ const stages = [
 ];
 
 const Apply = () => {
+  const { company } = useParams();
+  const navigate = useNavigate();
   const [currentStage, setCurrentStage] = useState(1);
   const [formData, setFormData] = useState({
     // Personal Information
@@ -133,6 +137,33 @@ const Apply = () => {
     setCurrentStage((prev) => Math.min(prev + 1, stages.length));
   };
 
+  const handleSubmitApplication = async () => {
+    try {
+      // Show loading state
+      setIsSubmitting(true);
+
+      // Submit application
+      await api.submitApplication({
+        company,
+        ...formData,
+      });
+
+      // Show success message
+      alert("Application submitted successfully!");
+
+      // Redirect to job posts page
+      navigate("/jobposts");
+    } catch (error) {
+      console.error("Failed to submit application:", error);
+      alert("Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Add loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const renderCurrentStage = () => {
     switch (currentStage) {
       case 1:
@@ -158,6 +189,9 @@ const Apply = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow p-8 max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold mb-6">
+            Apply for Position at {company}
+          </h1>
           {renderStageIndicator()}
           {renderCurrentStage()}
 
@@ -171,10 +205,21 @@ const Apply = () => {
               </button>
             )}
             <button
-              onClick={handleSaveAndContinue}
-              className="ml-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              onClick={
+                currentStage === stages.length
+                  ? handleSubmitApplication
+                  : handleSaveAndContinue
+              }
+              disabled={isSubmitting}
+              className={`ml-auto px-6 py-2 rounded-md ${
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
             >
-              {currentStage === stages.length
+              {isSubmitting
+                ? "Submitting..."
+                : currentStage === stages.length
                 ? "Submit Application"
                 : "Save & Continue"}
             </button>

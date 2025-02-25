@@ -9,11 +9,17 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 const JobPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate();
+
+  const handleApply = (company) => {
+    navigate(`/apply/${company}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,7 +156,10 @@ const JobPosts = () => {
               </div>
 
               <div className="mt-6 flex gap-4">
-                <button className="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700">
+                <button
+                  className="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700"
+                  onClick={() => handleApply(selectedJob.company)}
+                >
                   Apply Now
                 </button>
                 <button className="border border-gray-300 text-gray-700 px-8 py-2 rounded-md hover:bg-gray-50">
@@ -209,16 +218,12 @@ const jobListings = [
     type: "Hybrid/Full-time",
     salary: "₱20,000-₱30,000",
     applicantsNeeded: 10,
-    companyDetails: `
-  At PDAX, we believe that the future of money is digital, and our mission is to empower all Filipinos to grow their wealth through blockchain technology.
-
-  As one of the first crypto firms in the Philippine market, we feel a sense of duty to our users and to the ecosystem to set the standard for safety, ease of access, and reliability. We expect our team to share in this responsibility and cherish our vision of a more open and equitable financial system.
-
-  We are looking for new team members that are passionate about cryptocurrency, want to work in a disruptive, fast-growing industry, and thrive in a start-up environment.
-
-  If this sounds like you, then we’d love to talk!
-`,
-
+    companyDetails:
+      "At PDAX, we believe that the future of money is digital, and our mission is to empower all Filipinos to grow their wealth through blockchain technology. " +
+      "As one of the first crypto firms in the Philippine market, we feel a sense of duty to our users and to the ecosystem to set the standard for safety, ease of access, and reliability. " +
+      "We expect our team to share in this responsibility and cherish our vision of a more open and equitable financial system. " +
+      "We are looking for new team members that are passionate about cryptocurrency, want to work in a disruptive, fast-growing industry, and thrive in a start-up environment. " +
+      "If this sounds like you, then we'd love to talk!",
     responsibilities: [
       "Design and maintain scalable, secure, and high-performance APIs.",
       "Optimize and manage relational and non-relational databases.",
@@ -240,13 +245,13 @@ const jobListings = [
       "Team player with the ability to work effectively in cross-functional teams.",
       "Nice to haves: Familiarity with CI/CD, data governance, and advanced data processing frameworks.",
     ],
-    aboutCompany: `
-Founded in 2018, Philippine Digital Asset Exchange (PDAX) is empowering Filipinos by simplifying access to investment opportunities in the digital economy. PDAX offers a user-friendly interface that allows everyone, from beginners to seasoned investors, to participate confidently in the financial markets.
-
-At PDAX, we believe in democratizing finance and making investing accessible to all Filipinos. Our platform ensures simplicity, safety, and security, enabling users to trade a variety of digital assets effortlessly. Whether you're starting your investment journey or expanding your portfolio, PDAX equips you with the tools and resources to build wealth and achieve your financial goals.
-
-Learn more about how PDAX is redefining the future of finance at www.pdax.ph.
-`,
+    aboutCompany:
+      "Founded in 2018, Philippine Digital Asset Exchange (PDAX) is empowering Filipinos by simplifying access to investment opportunities in the digital economy. " +
+      "PDAX offers a user-friendly interface that allows everyone, from beginners to seasoned investors, to participate confidently in the financial markets. " +
+      "At PDAX, we believe in democratizing finance and making investing accessible to all Filipinos. " +
+      "Our platform ensures simplicity, safety, and security, enabling users to trade a variety of digital assets effortlessly. " +
+      "Whether you're starting your investment journey or expanding your portfolio, PDAX equips you with the tools and resources to build wealth and achieve your financial goals. " +
+      "Learn more about how PDAX is redefining the future of finance at www.pdax.ph.",
     skills: ["React", "TypeScript", "Tailwind CSS", "Redux", "Jest"],
     postedDate: "Posted 2 days ago",
   },
@@ -259,10 +264,10 @@ Learn more about how PDAX is redefining the future of finance at www.pdax.ph.
     type: "Onsite/Full-time",
     salary: "₱30,000- ₱45,000",
     applicantsNeeded: 16,
-    companyDetails: `
-The Technical Architect is a subject matter expert in one of our key practice areas (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). In this role, you will be responsible for ensuring technical design integrity, approving configuration checklists prior to implementation, and managing escalations during project execution. Additionally, you will serve as an instructor in our internal Academy, providing training and sharing best practices. 
-`,
-
+    companyDetails:
+      "The Technical Architect is a subject matter expert in one of our key practice areas (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). " +
+      "In this role, you will be responsible for ensuring technical design integrity, approving configuration checklists prior to implementation, and managing escalations during project execution. " +
+      "Additionally, you will serve as an instructor in our internal Academy, providing training and sharing best practices.",
     responsibilities: [
       "Own the architectural vision and technical strategy for your specific practice area.",
       "Approve configuration checklists and design documents to ensure all solutions meet best practices and business requirements.",
@@ -286,9 +291,11 @@ The Technical Architect is a subject matter expert in one of our key practice ar
       "Excellent communication skills (verbal and written), with the ability to convey complex ideas to both technical and non-technical audiences. ",
       "Relevant certifications (e.g., Zendesk Certified Administrator, Salesforce Architect, Genesys Certification, or equivalent) are highly desirable. ",
     ],
-    aboutCompany: `
-We’re Concentrix Catalyst, the experience transformation and technology team at Concentrix -a global technology and services leader that powers the world’s best brands, today and into the future. We’re solution-focused, tech-powered, intelligence-fueled. Every day, we design, build, and run fully integrated, end-to-end solutions at speed and scale across the entire enterprise, helping more than 2,000 clients solve their toughest business challenges. With unique data and insights, deep industry expertise, and advanced technology solutions, we’re the intelligent transformation partner that powers a world that works, helping companies become refreshingly simple to work, interact, and transact with. 
-`,
+    aboutCompany:
+      "We're Concentrix Catalyst, the experience transformation and technology team at Concentrix - a global technology and services leader that powers the world's best brands, today and into the future. " +
+      "We're solution-focused, tech-powered, intelligence-fueled. Every day, we design, build, and run fully integrated, end-to-end solutions at speed and scale across the entire enterprise, " +
+      "helping more than 2,000 clients solve their toughest business challenges. With unique data and insights, deep industry expertise, and advanced technology solutions, " +
+      "we're the intelligent transformation partner that powers a world that works, helping companies become refreshingly simple to work, interact, and transact with.",
     skills: [
       "Technical Expertise",
       "Leadership & Influence",

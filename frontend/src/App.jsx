@@ -26,8 +26,9 @@ const App = () => {
       document.title = "Job Posts | HireFlow";
     } else if (location.pathname === "/createjobpost") {
       document.title = "Create Job Post | HireFlow";
-    } else if (location.pathname === "/apply") {
-      document.title = "Apply Job for {company} | HireFlow";
+    } else if (location.pathname.startsWith('/apply/')) {
+      const company = decodeURIComponent(location.pathname.split('/')[2]);
+      document.title = `Apply Job for ${company} | HireFlow`;
     } else if (location.pathname === "/messages") {
       document.title = "Messaging | HireFlow";
     } else if (location.pathname === "/home") {
@@ -58,7 +59,7 @@ const App = () => {
       <Route path="/createjobpost" element={<CreateJobPost />} />
 
       {/* Application Page */}
-      <Route path="/apply" element={<Apply />} />
+      <Route path="/apply/:company" element={<Apply />} />
 
       {/* Messages Page */}
       <Route path="/messages" element={<Messages />} />
