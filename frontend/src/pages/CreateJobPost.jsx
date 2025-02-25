@@ -5,20 +5,21 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { api } from "../services/api";
 
 const CreateJobPost = () => {
   const [formData, setFormData] = useState({
-    title: "",
-    company: "",
-    companyLogo: "",
-    location: "",
-    type: "Full-time",
-    salary: "",
-    applicantsNeeded: "",
-    companyDetails: "",
-    responsibilities: [""],
-    qualifications: [""],
-    aboutCompany: "",
+    job_title: "", 
+    company_name: "", 
+    company_logo_url: "", 
+    location: "", 
+    employment_type: "Full-time",
+    salary_range: "", 
+    applicants_needed: "", 
+    company_description: "", 
+    about_company: "", 
+    responsibilities: [""], 
+    qualifications: [""], 
     skills: [""],
   });
 
@@ -51,10 +52,24 @@ const CreateJobPost = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log(formData);
+  
+    try {
+      console.log("Submitting job post:", formData); // Debugging before sending
+      
+      const response = await api.createJobPosting(formData); // Call API
+  
+      console.log("Job post created successfully:", response); // Debugging success
+      alert("Job post created successfully!");
+  
+      // Reset form after successful submission (optional)
+      // setFormData({ title: "", description: "", responsibilities: [], qualifications: [], skills: [] });
+  
+    } catch (error) {
+      console.error("Error creating job post:", error);
+      alert("Failed to create job post! Please try again."); // User-friendly error message
+    }
   };
 
   return (
@@ -79,8 +94,8 @@ const CreateJobPost = () => {
                   </label>
                   <input
                     type="text"
-                    name="title"
-                    value={formData.title}
+                    name="job_title"
+                    value={formData.job_title}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -93,8 +108,8 @@ const CreateJobPost = () => {
                   </label>
                   <input
                     type="text"
-                    name="company"
-                    value={formData.company}
+                    name="company_name"
+                    value={formData.company_name}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -125,8 +140,8 @@ const CreateJobPost = () => {
                   <div className="mt-1 relative">
                     <BriefcaseIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
-                      name="type"
-                      value={formData.type}
+                      name="employment_type"
+                      value={formData.employment_type}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                     >
@@ -146,8 +161,8 @@ const CreateJobPost = () => {
                     <CurrencyDollarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="text"
-                      name="salary"
-                      value={formData.salary}
+                      name="salary_range"
+                      value={formData.salary_range}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       placeholder="e.g. $80,000 - $100,000"
@@ -164,8 +179,8 @@ const CreateJobPost = () => {
                     <UserGroupIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="number"
-                      name="applicantsNeeded"
-                      value={formData.applicantsNeeded}
+                      name="applicants_needed"
+                      value={formData.applicants_needed}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       required
@@ -187,8 +202,8 @@ const CreateJobPost = () => {
                 </label>
                 <input
                   type="text"
-                  name="companyLogo"
-                  value={formData.companyLogo}
+                  name="company_logo_url"
+                  value={formData.company_logo_url}
                   onChange={handleInputChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   placeholder="/company-logos/your-company.png"
@@ -201,8 +216,8 @@ const CreateJobPost = () => {
                   Company Description
                 </label>
                 <textarea
-                  name="companyDetails"
-                  value={formData.companyDetails}
+                  name="company_description"
+                  value={formData.company_description}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -215,8 +230,8 @@ const CreateJobPost = () => {
                   About the Company
                 </label>
                 <textarea
-                  name="aboutCompany"
-                  value={formData.aboutCompany}
+                  name="about_company"
+                  value={formData.about_company}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"

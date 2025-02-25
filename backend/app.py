@@ -55,6 +55,7 @@ def get_applicants():
     applicants = cursor.fetchall()
     return jsonify({"applicants": applicants})
 
+# ============================== AUTHENTICATION ============================== #
 @app.route("/api/auth/signup", methods=["POST"])
 def signup():
     data = request.json
@@ -102,6 +103,129 @@ def login():
         })
     
     return jsonify({"error": "Invalid credentials"}), 401
+
+@app.route("/api/job-postings", methods=["GET"])
+def get_all_jobs():
+    cursor.execute("SELECT * FROM job_posting")
+    jobs = cursor.fetchall()
+
+    job_list = []
+    for job in jobs:
+        job_list.append({
+            "id": job[0],
+            "job_title": job[1],  
+            "company_name": job[2],  
+            "location": job[3],  
+            "employment_type": job[4],  
+            "salary_range": job[5],  
+            "applicants_needed": job[6],  
+            "company_logo_url": job[7],  
+            "company_description": job[8],  
+            "about_company": job[9],  
+            "created_at": job[10]  
+        })
+    
+    return jsonify({"jobs": job_list})
+
+@app.route("/api/job-postings/<int:job_id>", methods=["GET"])
+def get_job(job_id):
+    cursor.execute("SELECT * FROM job_posting WHERE id = %s", (job_id,))
+    job = cursor.fetchone()
+
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    return jsonify({
+        "id": job[0],
+        "job_title": job[1],
+        "company_name": job[2],
+        "location": job[3],
+        "employment_type": job[4],
+        "salary_range": job[5],
+        "applicants_needed": job[6],
+        "company_logo_url": job[7],
+        "company_description": job[8],
+        "about_company": job[9],
+        "created_at": job[10]
+    })
+
+@app.route("/api/job-postings", methods=["POST"])
+def create_job():
+    data = request.json
+    try:
+        cursor.execute(
+            """
+            INSERT INTO job_posting 
+            (job_title, company_name, location, employment_type, salary_range, applicants_needed, 
+            company_logo_url, company_description, about_company, created_at) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            """,
+            (
+                data["job_title"], data["company_name"], data["location"], data["employment_type"], 
+                data["salary_range"], data["applicants_needed"], data["company_logo_url"], 
+                data["company_description"], data["about_company"]
+            )
+        )
+        db.commit()
+        job_id = cursor.lastrowid  # Get the inserted job ID
+        return jsonify({"message": "Job created successfully", "job_id": job_id}), 201
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 400
+
+# ============================== JOB RESPONSIBILITIES CRUD ============================== #
+@app.route("/api/job-postings/<int:job_id>/responsibilities", methods=["GET"])
+def get_job_responsibilities(job_id):
+    cursor.execute("SELECT responsibility FROM job_responsibility WHERE job_posting_id = %s", (job_id,))
+    responsibilities = [row[0] for row in cursor.fetchall()]
+    return jsonify({"responsibilities": responsibilities})
+
+@app.route("/api/job-postings/<int:job_id>/responsibilities", methods=["POST"])
+def add_job_responsibility(job_id):
+    data = request.json
+    try:
+        for responsibility in data["responsibilities"]:
+            cursor.execute("INSERT INTO job_responsibility (job_posting_id, responsibility) VALUES (%s, %s)", (job_id, responsibility))
+        db.commit()
+        return jsonify({"message": "Responsibilities added successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# ============================== JOB QUALIFICATIONS CRUD ============================== #
+@app.route("/api/job-postings/<int:job_id>/qualifications", methods=["GET"])
+def get_job_qualifications(job_id):
+    cursor.execute("SELECT qualification FROM job_qualification WHERE job_posting_id = %s", (job_id,))
+    qualifications = [row[0] for row in cursor.fetchall()]
+    return jsonify({"qualifications": qualifications})
+
+@app.route("/api/job-postings/<int:job_id>/qualifications", methods=["POST"])
+def add_job_qualification(job_id):
+    data = request.json
+    try:
+        for qualification in data["qualifications"]:
+            cursor.execute("INSERT INTO job_qualification (job_posting_id, qualification) VALUES (%s, %s)", (job_id, qualification))
+        db.commit()
+        return jsonify({"message": "Qualifications added successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    
+# ============================== JOB SKILLS CRUD ============================== #
+@app.route("/api/job-postings/<int:job_id>/skills", methods=["GET"])
+def get_job_skills(job_id):
+    cursor.execute("SELECT skill FROM job_skills WHERE job_posting_id = %s", (job_id,))
+    skills = [row[0] for row in cursor.fetchall()]
+    return jsonify({"skills": skills})
+
+@app.route("/api/job-postings/<int:job_id>/skills", methods=["POST"])
+def add_job_skills(job_id):
+    data = request.json
+    try:
+        for skill in data["skills"]:
+            cursor.execute("INSERT INTO job_skills (job_posting_id, skill) VALUES (%s, %s)", (job_id, skill))
+        db.commit()
+        return jsonify({"message": "Skills added successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
