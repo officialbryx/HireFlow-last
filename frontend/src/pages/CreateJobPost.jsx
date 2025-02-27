@@ -1,26 +1,30 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   MapPinIcon,
   BriefcaseIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { api } from "../services/api"; // Import the api object
 
 const CreateJobPost = () => {
   const [formData, setFormData] = useState({
     title: "",
-    company: "",
-    companyLogo: "",
+    companyName: "",
+    companyLogoUrl: "",
     location: "",
-    type: "Full-time",
-    salary: "",
+    employmentType: "Full-time",
+    salaryRange: "",
     applicantsNeeded: "",
-    companyDetails: "",
+    companyDescription: "",
     responsibilities: [""],
     qualifications: [""],
     aboutCompany: "",
     skills: [""],
   });
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,10 +55,20 @@ const CreateJobPost = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log(formData);
+    try {
+      const response = await api.createJobPost(formData);
+      setModalMessage("Job post created successfully!");
+      setModalVisible(true);
+      console.log("Job post created successfully:", response);
+      // Optionally, redirect or show a success message
+    } catch (error) {
+      setModalMessage("Error creating job post. Please try again.");
+      setModalVisible(true);
+      console.error("Error creating job post:", error);
+      // Optionally, show an error message
+    }
   };
 
   return (
@@ -93,8 +107,8 @@ const CreateJobPost = () => {
                   </label>
                   <input
                     type="text"
-                    name="company"
-                    value={formData.company}
+                    name="companyName"
+                    value={formData.companyName}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -125,8 +139,8 @@ const CreateJobPost = () => {
                   <div className="mt-1 relative">
                     <BriefcaseIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
-                      name="type"
-                      value={formData.type}
+                      name="employmentType"
+                      value={formData.employmentType}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                     >
@@ -146,8 +160,8 @@ const CreateJobPost = () => {
                     <CurrencyDollarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="text"
-                      name="salary"
-                      value={formData.salary}
+                      name="salaryRange"
+                      value={formData.salaryRange}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       placeholder="e.g. $80,000 - $100,000"
@@ -187,8 +201,8 @@ const CreateJobPost = () => {
                 </label>
                 <input
                   type="text"
-                  name="companyLogo"
-                  value={formData.companyLogo}
+                  name="companyLogoUrl"
+                  value={formData.companyLogoUrl}
                   onChange={handleInputChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                   placeholder="/company-logos/your-company.png"
@@ -201,8 +215,8 @@ const CreateJobPost = () => {
                   Company Description
                 </label>
                 <textarea
-                  name="companyDetails"
-                  value={formData.companyDetails}
+                  name="companyDescription"
+                  value={formData.companyDescription}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -371,6 +385,21 @@ const CreateJobPost = () => {
           </form>
         </div>
       </div>
+
+      {/* Modal */}
+      {modalVisible && (
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow p-8">
+            <p className="text-lg font-semibold text-gray-900">{modalMessage}</p>
+            <button
+              onClick={() => setModalVisible(false)}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
