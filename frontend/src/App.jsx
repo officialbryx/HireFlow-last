@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
+import JobPostTest from './pages/JobPostTest';
 import "./index.css";
 
 const App = () => {
@@ -72,6 +73,9 @@ const App = () => {
 
       {/* Settings Page */}
       <Route path="/settings" element={<Settings />} />
+
+      {/* Test Page */} 
+      <Route path="/jobs-test" element={<JobPostTest />} />
     </Routes>
   );
 };

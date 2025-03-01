@@ -1,17 +1,19 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MapPinIcon,
   BriefcaseIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../services/api"; // Import the api object
+import { api } from "../services/api";
 
 const CreateJobPost = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     companyName: "",
-    companyLogo: null, // Update to store the file
+    companyLogo: null,
     location: "",
     employmentType: "Full-time",
     salaryRange: "",
@@ -25,6 +27,7 @@ const CreateJobPost = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -35,11 +38,29 @@ const CreateJobPost = () => {
   };
 
   const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files[0],
-    }));
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!validTypes.includes(file.type)) {
+        setModalMessage("Please upload a valid image file (JPEG, PNG, or GIF)");
+        setModalVisible(true);
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setModalMessage("File size should be less than 5MB");
+        setModalVisible(true);
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        companyLogo: file
+      }));
+    }
   };
 
   const handleArrayInputChange = (index, field, value) => {
@@ -65,17 +86,31 @@ const CreateJobPost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
+      // Validate form data
+      if (formData.responsibilities.some(r => !r.trim()) ||
+          formData.qualifications.some(q => !q.trim()) ||
+          formData.skills.some(s => !s.trim())) {
+        throw new Error("Please fill in all fields");
+      }
+
       const response = await api.createJobPost(formData);
+      
       setModalMessage("Job post created successfully!");
       setModalVisible(true);
-      console.log("Job post created successfully:", response);
-      // Optionally, redirect or show a success message
+      
+      // Reset form or redirect after successful submission
+      setTimeout(() => {
+        navigate('/jobs-test'); // Adjust the route as needed
+      }, 2000);
+
     } catch (error) {
-      setModalMessage("Error creating job post. Please try again.");
+      setModalMessage(error.message || "Error creating job post. Please try again.");
       setModalVisible(true);
-      console.error("Error creating job post:", error);
-      // Optionally, show an error message
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -207,13 +242,13 @@ const CreateJobPost = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Company Logo
                 </label>
-                <div className="mt-1 flex items-center space-x-2 border border-gray-300 rounded-md shadow-sm bg-gray-100">
-                  {/* Hidden File Input */}
+                <div className="mt-2 flex items-center">
                   <input
                     type="file"
                     name="companyLogo"
                     onChange={handleFileChange}
-                    className="file:mr-4  file:border-0 file:bg-violet-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-violet-100 dark:file:bg-blue-600 dark:file:text-violet-100 dark:hover:file:bg-blue-500"
+                    accept="image/jpeg,image/png,image/gif"
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
                   />
                 </div>
               </div>
@@ -378,9 +413,14 @@ const CreateJobPost = () => {
             <div className="pt-4 flex gap-4">
               <button
                 type="submit"
-                className="w-1/2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+                disabled={isSubmitting}
+                className={`w-1/2 px-6 py-3 rounded-md text-white transition-colors ${
+                  isSubmitting 
+                    ? 'bg-blue-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Create Job Post
+                {isSubmitting ? 'Creating...' : 'Create Job Post'}
               </button>
               <button
                 type="button"
