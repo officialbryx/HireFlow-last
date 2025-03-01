@@ -144,76 +144,75 @@ export const api = {
 
   async createJobPost(jobPostData) {
     try {
-      // First upload company logo if exists
-      let companyLogoBinary = null;
+      // Format job post data
+      const formattedData = {
+        job_title: jobPostData.title,
+        company_name: jobPostData.companyName,
+        location: jobPostData.location,
+        employment_type: jobPostData.employmentType,
+        salary_range: jobPostData.salaryRange,
+        applicants_needed: jobPostData.applicantsNeeded,
+        company_description: jobPostData.companyDescription,
+        about_company: jobPostData.aboutCompany,
+        created_at: new Date().toISOString(),
+      };
+
+      // If company logo exists, process it
       if (jobPostData.companyLogo instanceof File) {
         const fileReader = new FileReader();
-        fileReader.readAsArrayBuffer(jobPostData.companyLogo);
-        fileReader.onload = async () => {
-          companyLogoBinary = fileReader.result;
+        const logoPromise = new Promise((resolve, reject) => {
+          fileReader.onload = () => resolve(fileReader.result);
+          fileReader.onerror = () => reject(new Error('Failed to read file'));
+          fileReader.readAsArrayBuffer(jobPostData.companyLogo);
+        });
 
-          // Format job post data
-          const formattedData = {
-            job_title: jobPostData.title,
-            company_name: jobPostData.companyName,
-            location: jobPostData.location,
-            employment_type: jobPostData.employmentType,
-            salary_range: jobPostData.salaryRange,
-            applicants_needed: jobPostData.applicantsNeeded,
-            company_logo: companyLogoBinary,
-            company_description: jobPostData.companyDescription,
-            about_company: jobPostData.aboutCompany,
-            created_at: new Date().toISOString(),
-          };
-
-          // Insert job post data
-          const { data: jobPost, error: jobPostError } = await supabase
-            .from("job_posting")
-            .insert([formattedData])
-            .select();
-
-          if (jobPostError) throw jobPostError;
-
-          const jobPostId = jobPost[0].id;
-
-          // Insert job responsibilities
-          const responsibilities = jobPostData.responsibilities.map((responsibility) => ({
-            job_posting_id: jobPostId,
-            responsibility,
-          }));
-          const { error: responsibilitiesError } = await supabase
-            .from("job_responsibility")
-            .insert(responsibilities);
-
-          if (responsibilitiesError) throw responsibilitiesError;
-
-          // Insert job qualifications
-          const qualifications = jobPostData.qualifications.map((qualification) => ({
-            job_posting_id: jobPostId,
-            qualification,
-          }));
-          const { error: qualificationsError } = await supabase
-            .from("job_qualification")
-            .insert(qualifications);
-
-          if (qualificationsError) throw qualificationsError;
-
-          // Insert required skills
-          const skills = jobPostData.skills.map((skill) => ({
-            job_posting_id: jobPostId,
-            skill,
-          }));
-          const { error: skillsError } = await supabase
-            .from("job_skill")
-            .insert(skills);
-
-          if (skillsError) throw skillsError;
-
-          return jobPost;
-        };
-      } else {
-        throw new Error("Company logo is required and must be a file.");
+        formattedData.company_logo = await logoPromise;
       }
+
+      // Insert job post data
+      const { data: jobPost, error: jobPostError } = await supabase
+        .from("job_posting")
+        .insert([formattedData])
+        .select();
+
+      if (jobPostError) throw jobPostError;
+
+      const jobPostId = jobPost[0].id;
+
+      // Insert job responsibilities
+      const responsibilities = jobPostData.responsibilities.map((responsibility) => ({
+        job_posting_id: jobPostId,
+        responsibility,
+      }));
+      const { error: responsibilitiesError } = await supabase
+        .from("job_responsibility")
+        .insert(responsibilities);
+
+      if (responsibilitiesError) throw responsibilitiesError;
+
+      // Insert job qualifications
+      const qualifications = jobPostData.qualifications.map((qualification) => ({
+        job_posting_id: jobPostId,
+        qualification,
+      }));
+      const { error: qualificationsError } = await supabase
+        .from("job_qualification")
+        .insert(qualifications);
+
+      if (qualificationsError) throw qualificationsError;
+
+      // Insert required skills
+      const skills = jobPostData.skills.map((skill) => ({
+        job_posting_id: jobPostId,
+        skill,
+      }));
+      const { error: skillsError } = await supabase
+        .from("job_skill")
+        .insert(skills);
+
+      if (skillsError) throw skillsError;
+
+      return jobPost;
     } catch (error) {
       console.error("Error creating job post:", error);
       throw error;
