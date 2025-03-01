@@ -11,7 +11,7 @@ const CreateJobPost = () => {
   const [formData, setFormData] = useState({
     title: "",
     companyName: "",
-    companyLogoUrl: "",
+    companyLogo: null, // Update to store the file
     location: "",
     employmentType: "Full-time",
     salaryRange: "",
@@ -31,6 +31,14 @@ const CreateJobPost = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files[0],
     }));
   };
 
@@ -197,17 +205,17 @@ const CreateJobPost = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Company Logo URL
+                  Company Logo
                 </label>
-                <input
-                  type="text"
-                  name="companyLogoUrl"
-                  value={formData.companyLogoUrl}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  placeholder="/company-logos/your-company.png"
-                  required
-                />
+                <div className="mt-1 flex items-center space-x-2 border border-gray-300 rounded-md shadow-sm bg-gray-100">
+                  {/* Hidden File Input */}
+                  <input
+                    type="file"
+                    name="companyLogo"
+                    onChange={handleFileChange}
+                    className="file:mr-4  file:border-0 file:bg-violet-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-violet-100 dark:file:bg-blue-600 dark:file:text-violet-100 dark:hover:file:bg-blue-500"
+                  />
+                </div>
               </div>
 
               <div>
@@ -390,7 +398,9 @@ const CreateJobPost = () => {
       {modalVisible && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow p-8">
-            <p className="text-lg font-semibold text-gray-900">{modalMessage}</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {modalMessage}
+            </p>
             <button
               onClick={() => setModalVisible(false)}
               className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
