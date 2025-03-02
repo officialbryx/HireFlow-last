@@ -144,6 +144,10 @@ export const api = {
 
   async createJobPost(jobPostData) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
       let logoUrl = null;
 
       if (jobPostData.companyLogo instanceof File) {
@@ -181,6 +185,7 @@ export const api = {
         about_company: jobPostData.aboutCompany,
         company_logo_url: logoUrl,
         created_at: new Date().toISOString(),
+        creator_id: user.id  // Add the creator's ID
       };
 
       // Insert job post data

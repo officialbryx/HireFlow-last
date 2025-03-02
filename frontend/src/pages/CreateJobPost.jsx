@@ -6,7 +6,7 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../services/api";
+import { jobPostsApi } from "../services/api/jobPosts";
 
 const CreateJobPost = () => {
   const navigate = useNavigate();
@@ -96,14 +96,14 @@ const CreateJobPost = () => {
         throw new Error("Please fill in all fields");
       }
 
-      const response = await api.createJobPost(formData);
+      const response = await jobPostsApi.createJobPost(formData);
       
       setModalMessage("Job post created successfully!");
       setModalVisible(true);
       
       // Reset form or redirect after successful submission
       setTimeout(() => {
-        navigate('/jobs-test'); // Adjust the route as needed
+        navigate('/jobs'); // Adjust the route as needed
       }, 2000);
 
     } catch (error) {
