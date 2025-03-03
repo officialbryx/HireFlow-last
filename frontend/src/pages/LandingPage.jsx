@@ -35,24 +35,6 @@ const LandingPage = () => {
               <span className="font-bold text-xl text-blue-600">HireFlow</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a
-                href="#features"
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#testimonials"
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Testimonials
-              </a>
-              <a
-                href="#pricing"
-                className="text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                Pricing
-              </a>
               <Link
                 to="/login"
                 className="text-blue-600 hover:text-blue-700 transition-colors"
@@ -177,31 +159,6 @@ const LandingPage = () => {
                     />
                   </svg>
                 </Link>
-                <button className="px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                  Watch Demo
-                </button>
-              </div>
-              <div className="mt-8 flex items-center space-x-4 opacity-0 animate-fade-in-delay-long">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gray-300 overflow-hidden"
-                    >
-                      <img
-                        src={`https://randomuser.me/api/portraits/men/${
-                          i + 10
-                        }.jpg`}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">10,000+</span> professionals
-                  joined this month
-                </p>
               </div>
             </div>
 
@@ -332,107 +289,6 @@ const LandingPage = () => {
               </p>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Testimonials Section */}
-      <div
-        id="testimonials"
-        className="py-20 bg-gradient-to-b from-white to-blue-50"
-      >
-        <div className="container mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              What Our Users Say
-            </h2>
-            <p className="text-xl text-gray-600">
-              Success stories from professionals like you
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "UX Designer at Google",
-                image: "https://randomuser.me/api/portraits/women/44.jpg",
-                quote:
-                  "HireFlow completely transformed my job search. I found my dream position in just two weeks!",
-              },
-              {
-                name: "Michael Chen",
-                role: "Software Engineer at Meta",
-                image: "https://randomuser.me/api/portraits/men/32.jpg",
-                quote:
-                  "The personalized job matches and career guidance helped me land a role that perfectly aligns with my skills.",
-              },
-              {
-                name: "Priya Patel",
-                role: "Marketing Director at Spotify",
-                image: "https://randomuser.me/api/portraits/women/68.jpg",
-                quote:
-                  "Not only did I find a great job, but the networking opportunities have been invaluable for my career growth.",
-              },
-            ].map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="flex items-center mb-6">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full mr-4 border-2 border-blue-100"
-                  />
-                  <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-gray-500 text-sm">{testimonial.role}</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">"{testimonial.quote}"</p>
-                <div className="mt-4 flex text-yellow-400">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className="w-5 h-5 fill-current"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-20 bg-blue-600 text-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Transform Your Career?
-            </h2>
-            <p className="text-xl mb-8 text-blue-100">
-              Join thousands of professionals who've found their dream jobs and
-              advanced their careers with HireFlow
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link
-                to="/signup"
-                className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                Get Started for Free
-              </Link>
-              <button className="px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Schedule a Demo
-              </button>
-            </div>
-            <p className="mt-6 text-blue-200 text-sm">
-              No credit card required • Free 14-day trial
-            </p>
-          </div>
         </div>
       </div>
 
