@@ -324,4 +324,60 @@ export const api = {
       throw error;
     }
   },
+
+  // Add these new methods
+  getUserProfile: async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) throw profileError;
+    return { user, profile };
+  },
+
+  updateUserProfile: async (profileData) => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const [profileError, metadataError] = await Promise.all([
+      supabase.from("profiles").update(profileData).eq("id", user.id),
+      supabase.auth.updateUser({ data: profileData }),
+    ]);
+
+    if (profileError) throw profileError;
+    if (metadataError) throw metadataError;
+
+    return true;
+  },
+
+  updateUserEmail: async (newEmail) => {
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) throw error;
+    return true;
+  },
+
+  updateUserPassword: async (newPassword) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Password update error:", error);
+      throw new Error(error.message || "Failed to update password");
+    }
+  },
 };

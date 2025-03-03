@@ -6,7 +6,6 @@ import Login from "./pages/Login";
 import JobPosts from "./pages/JobPosts";
 import CreateJobPost from "./pages/CreateJobPost";
 import Apply from "./pages/Apply";
-import Home from "./pages/Home";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
@@ -34,8 +33,6 @@ const App = () => {
       document.title = `Apply Job for ${company} | HireFlow`;
     } else if (location.pathname === "/messages") {
       document.title = "Messaging | HireFlow";
-    } else if (location.pathname === "/home") {
-      document.title = "Home | HireFlow";
     } else if (location.pathname === "/viewapplicants") {
       document.title = "View Applicants | HireFlow";
     } else if (location.pathname === "/settings") {
@@ -49,9 +46,6 @@ const App = () => {
     <Routes>
       {/* Landing Page */}
       <Route path="/" element={<LandingPage />} />
-
-      {/* Home Feed Page */}
-      <Route path="/home" element={<Home />} />
 
       {/* Sign Up Page */}
       <Route path="/signup" element={<Signup />} />

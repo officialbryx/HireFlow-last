@@ -81,7 +81,7 @@ const Login = () => {
           if (insertError) throw insertError;
         }
 
-        navigate("/home");
+        navigate("/jobposts");
       }
     } catch (err) {
       setError(

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import {
   MagnifyingGlassIcon,
@@ -15,7 +15,59 @@ const JobPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
+  const [filteredJobs, setFilteredJobs] = useState(jobListings);
   const navigate = useNavigate();
+
+  // Add search and filter functionality
+  useEffect(() => {
+    let results = [...jobListings];
+
+    // Apply search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      results = results.filter(
+        (job) =>
+          job.title.toLowerCase().includes(query) ||
+          job.company.toLowerCase().includes(query) ||
+          job.skills.some((skill) => skill.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply job type filter
+    switch (selectedFilter) {
+      case "fulltime":
+        results = results.filter((job) =>
+          job.type.toLowerCase().includes("full-time")
+        );
+        break;
+      case "parttime":
+        results = results.filter((job) =>
+          job.type.toLowerCase().includes("part-time")
+        );
+        break;
+      case "remote":
+        results = results.filter((job) =>
+          job.type.toLowerCase().includes("remote")
+        );
+        break;
+      case "recent":
+        results.sort((a, b) => {
+          const dateA = new Date(a.postedDate.replace("Posted ", ""));
+          const dateB = new Date(b.postedDate.replace("Posted ", ""));
+          return dateB - dateA;
+        });
+        break;
+      default:
+        // 'all' - no additional filtering needed
+        break;
+    }
+
+    setFilteredJobs(results);
+    // Reset selected job if it's not in filtered results
+    if (selectedJob && !results.find((job) => job.id === selectedJob.id)) {
+      setSelectedJob(null);
+    }
+  }, [searchQuery, selectedFilter]);
 
   const handleApply = (company) => {
     navigate(`/apply/${company}`);
@@ -53,9 +105,6 @@ const JobPosts = () => {
                 <option value="fulltime">Full Time</option>
                 <option value="parttime">Part Time</option>
               </select>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
-                Search
-              </button>
             </div>
           </div>
         </div>
@@ -67,42 +116,50 @@ const JobPosts = () => {
           <div className="w-1/3">
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
-                {jobListings.map((job, index) => (
-                  <div
-                    key={job.id}
-                    className={`relative cursor-pointer transition-all duration-200
-                      ${
-                        selectedJob?.id === job.id
-                          ? "bg-gray-50 border-l-4 border-black"
-                          : "border-l-4 border-transparent hover:border-l-4 hover:border-gray-300"
-                      }
-                      ${index !== 0 ? "border-t border-black" : ""}`}
-                    onClick={() => setSelectedJob(job)}
-                  >
-                    <div className="p-4">
-                      <div className="flex gap-4">
-                        <img
-                          src={job.companyLogo}
-                          alt={job.company}
-                          className="w-12 h-12 rounded"
-                        />
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {job.title}
-                          </h3>
-                          <p className="text-gray-600 text-sm">{job.company}</p>
-                          <div className="flex items-center text-gray-500 text-sm mt-1">
-                            <MapPinIcon className="h-4 w-4 mr-1" />
-                            {job.location}
+                {filteredJobs.length > 0 ? (
+                  filteredJobs.map((job, index) => (
+                    <div
+                      key={job.id}
+                      className={`relative cursor-pointer transition-all duration-200
+                        ${
+                          selectedJob?.id === job.id
+                            ? "bg-gray-50 border-l-4 border-black"
+                            : "border-l-4 border-transparent hover:border-l-4 hover:border-gray-300"
+                        }
+                        ${index !== 0 ? "border-t border-black" : ""}`}
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <div className="p-4">
+                        <div className="flex gap-4">
+                          <img
+                            src={job.companyLogo}
+                            alt={job.company}
+                            className="w-12 h-12 rounded"
+                          />
+                          <div>
+                            <h3 className="font-semibold text-gray-900">
+                              {job.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm">
+                              {job.company}
+                            </p>
+                            <div className="flex items-center text-gray-500 text-sm mt-1">
+                              <MapPinIcon className="h-4 w-4 mr-1" />
+                              {job.location}
+                            </div>
+                            <p className="text-gray-500 text-sm mt-2">
+                              {job.postedDate}
+                            </p>
                           </div>
-                          <p className="text-gray-500 text-sm mt-2">
-                            {job.postedDate}
-                          </p>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    No jobs match your search criteria
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

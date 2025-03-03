@@ -133,6 +133,8 @@ const Signup = () => {
     }`;
   };
 
+  const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -158,7 +160,8 @@ const Signup = () => {
                   htmlFor="firstName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name *
+                  First name
+                  <RequiredIndicator />
                 </label>
                 <input
                   type="text"
@@ -192,7 +195,8 @@ const Signup = () => {
                   htmlFor="lastName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Last name *
+                  Last name
+                  <RequiredIndicator />
                 </label>
                 <input
                   type="text"
@@ -213,6 +217,7 @@ const Signup = () => {
                 className="block text-sm font-medium text-gray-700"
               >
                 Email address
+                <RequiredIndicator />
               </label>
               <input
                 type="email"
@@ -229,7 +234,8 @@ const Signup = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password *
+                Password
+                <RequiredIndicator />
               </label>
               <div className="mt-1 relative">
                 <input
@@ -287,7 +293,8 @@ const Signup = () => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                Confirm Password *
+                Confirm Password
+                <RequiredIndicator />
               </label>
               <div className="mt-1 relative">
                 <input
