@@ -107,7 +107,7 @@ const CreateJobPost = () => {
         throw new Error("Please fill in all fields");
       }
 
-      const response = await jobPostsApi.createJobPost(formData);
+      await jobPostsApi.createJobPost(formData);
       
       setModalMessage("Job post created successfully!");
       setModalVisible(true);
