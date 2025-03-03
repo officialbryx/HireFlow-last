@@ -6,23 +6,86 @@ const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     userType: "jobseeker",
+  });
+  const [touchedFields, setTouchedFields] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+
+      if (name === "password" || name === "confirmPassword") {
+        const match =
+          name === "password"
+            ? value === newData.confirmPassword
+            : newData.password === value;
+        setPasswordsMatch(match);
+      }
+
+      return newData;
     });
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouchedFields((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
+
+  const validateField = (name, value) => {
+    if (!touchedFields[name]) return true;
+    if (name === "middleName") return true;
+    return value.trim() !== "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setTouchedFields({
+      firstName: true,
+      lastName: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    });
+
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "confirmPassword",
+    ];
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field].trim()
+    );
+
+    if (missingFields.length > 0) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     setError("");
     setIsLoading(true);
 
@@ -31,8 +94,9 @@ const Signup = () => {
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
+        middleName: formData.middleName,
         lastName: formData.lastName,
-        userType: formData.userType
+        userType: formData.userType,
       });
       navigate("/login");
     } catch (err) {
@@ -40,6 +104,27 @@ const Signup = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getInputClassName = (fieldName) => {
+    const baseClasses =
+      "mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500";
+
+    if (fieldName === "confirmPassword" && formData.confirmPassword) {
+      return `${baseClasses} ${
+        passwordsMatch ? "border-green-500" : "border-red-500"
+      }`;
+    }
+
+    if (fieldName === "middleName") {
+      return `${baseClasses} border-gray-300`;
+    }
+
+    return `${baseClasses} ${
+      !validateField(fieldName, formData[fieldName])
+        ? "border-red-500"
+        : "border-gray-300"
+    }`;
   };
 
   return (
@@ -61,21 +146,44 @@ const Signup = () => {
             {error && (
               <div className="text-red-600 text-sm text-center">{error}</div>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label
                   htmlFor="firstName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name
+                  First name *
                 </label>
                 <input
                   type="text"
                   name="firstName"
                   id="firstName"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("firstName")}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.firstName}
+                />
+                {!validateField("firstName", formData.firstName) && (
+                  <p className="mt-1 text-sm text-red-600">
+                    First name is required
+                  </p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="middleName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Middle name
+                </label>
+                <input
+                  type="text"
+                  name="middleName"
+                  id="middleName"
+                  className={getInputClassName("middleName")}
+                  onChange={handleChange}
+                  value={formData.middleName}
                 />
               </div>
               <div>
@@ -83,16 +191,23 @@ const Signup = () => {
                   htmlFor="lastName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Last name
+                  Last name *
                 </label>
                 <input
                   type="text"
                   name="lastName"
                   id="lastName"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("lastName")}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.lastName}
                 />
+                {!validateField("lastName", formData.lastName) && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Last name is required
+                  </p>
+                )}
               </div>
             </div>
 
@@ -101,16 +216,21 @@ const Signup = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Email address *
               </label>
               <input
                 type="email"
                 name="email"
                 id="email"
                 required
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className={getInputClassName("email")}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                value={formData.email}
               />
+              {!validateField("email", formData.email) && (
+                <p className="mt-1 text-sm text-red-600">Email is required</p>
+              )}
             </div>
 
             <div>
@@ -126,9 +246,39 @@ const Signup = () => {
                 id="password"
                 required
                 minLength={6}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className={getInputClassName("password")}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                value={formData.password}
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                required
+                minLength={6}
+                className={getInputClassName("confirmPassword")}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={formData.confirmPassword}
+              />
+              {formData.confirmPassword && !passwordsMatch && (
+                <p className="mt-1 text-sm text-red-600">
+                  Passwords do not match
+                </p>
+              )}
+              {formData.confirmPassword && passwordsMatch && (
+                <p className="mt-1 text-sm text-green-600">Passwords match</p>
+              )}
             </div>
 
             <div>
