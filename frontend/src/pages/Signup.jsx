@@ -1,39 +1,136 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
+import { validatePassword } from "../utils/passwordValidation";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     userType: "jobseeker",
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    isValid: false,
+    requirements: [],
+    meetsComplexityRequirement: false,
+    isCommonPassword: false,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "password") {
+      setPasswordValidation(validatePassword(value));
+    }
   };
+
+  const handleBlur = (e) => {
+    if (isSubmitted) {
+      setTouched((prev) => ({
+        ...prev,
+        [e.target.name]: true,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    // Only set passwords as matching if both fields have values and they match
+    setPasswordsMatch(
+      formData.password !== "" &&
+        formData.confirmPassword !== "" &&
+        formData.password === formData.confirmPassword
+    );
+  }, [formData.password, formData.confirmPassword]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+
+    // Mark all required fields as touched on submit
+    setTouched({
+      firstName: true,
+      lastName: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    });
+
+    // Check if any required fields are empty
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "confirmPassword",
+    ];
+    const emptyFields = requiredFields.filter((field) => !formData[field]);
+
+    if (emptyFields.length > 0) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!passwordValidation.isValid) {
+      setError("Please meet all password requirements");
+      return;
+    }
+
     setError("");
     setIsLoading(true);
 
     try {
-      await api.signup(formData);
+      const submitData = { ...formData };
+      delete submitData.confirmPassword;
+      await api.signup(submitData);
       navigate("/login");
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getInputClassName = (fieldName) => {
+    const baseClasses =
+      "mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500";
+
+    if (fieldName === "middleName") return `${baseClasses} border-gray-300`;
+
+    if (!isSubmitted && !touched[fieldName])
+      return `${baseClasses} border-gray-300`;
+
+    if (fieldName === "confirmPassword" || fieldName === "password") {
+      if (!formData[fieldName]) return `${baseClasses} border-red-500`;
+      return `${baseClasses} ${
+        passwordsMatch ? "border-green-500" : "border-red-500"
+      }`;
+    }
+
+    return `${baseClasses} ${
+      formData[fieldName] ? "border-green-500" : "border-red-500"
+    }`;
   };
 
   return (
@@ -55,21 +152,39 @@ const Signup = () => {
             {error && (
               <div className="text-red-600 text-sm text-center">{error}</div>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label
                   htmlFor="firstName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name
+                  First name *
                 </label>
                 <input
                   type="text"
                   name="firstName"
                   id="firstName"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("firstName")}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.firstName}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="middleName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Middle name
+                </label>
+                <input
+                  type="text"
+                  name="middleName"
+                  id="middleName"
+                  className={getInputClassName("middleName")}
+                  onChange={handleChange}
+                  value={formData.middleName}
                 />
               </div>
               <div>
@@ -77,15 +192,17 @@ const Signup = () => {
                   htmlFor="lastName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Last name
+                  Last name *
                 </label>
                 <input
                   type="text"
                   name="lastName"
                   id="lastName"
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("lastName")}
                   onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.lastName}
                 />
               </div>
             </div>
@@ -112,17 +229,95 @@ const Signup = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password (6 or more characters)
+                Password *
               </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
-                required
-                minLength={6}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                onChange={handleChange}
-              />
+              <div className="mt-1 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  id="password"
+                  required
+                  minLength={12}
+                  className={getInputClassName("password")}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.password}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {(isSubmitted || formData.password) && (
+                <div className="mt-2 text-sm">
+                  <p className="font-medium text-gray-700">
+                    Password must have:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {passwordValidation.requirements.map((req) => (
+                      <li
+                        key={req.id}
+                        className={
+                          req.isMet ? "text-green-600" : "text-red-600"
+                        }
+                      >
+                        {req.message}
+                      </li>
+                    ))}
+                  </ul>
+                  {passwordValidation.isCommonPassword && (
+                    <p className="text-red-600 mt-1">
+                      This password is too common. Please choose a more unique
+                      password.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password *
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  required
+                  minLength={12}
+                  className={getInputClassName("confirmPassword")}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={formData.confirmPassword}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {touched.confirmPassword && !passwordsMatch && (
+                <p className="text-red-500 text-sm mt-1">
+                  Passwords do not match
+                </p>
+              )}
             </div>
 
             <div>

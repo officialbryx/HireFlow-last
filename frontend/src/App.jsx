@@ -10,7 +10,8 @@ import Home from "./pages/Home";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
-import JobPostTest from './pages/JobPostTest';
+import JobPostTest from "./pages/JobPostTest";
+import ForgotPassword from "./pages/ForgotPassword";
 import "./index.css";
 
 const App = () => {
@@ -39,6 +40,8 @@ const App = () => {
       document.title = "View Applicants | HireFlow";
     } else if (location.pathname === "/settings") {
       document.title = "Settings | HireFlow";
+    } else if (location.pathname === "/forgot-password") {
+      document.title = "Forgot Password | HireFlow";
     }
   }, [location]);
 
@@ -74,8 +77,11 @@ const App = () => {
       {/* Settings Page */}
       <Route path="/settings" element={<Settings />} />
 
-      {/* Test Page */} 
+      {/* Test Page */}
       <Route path="/jobs-test" element={<JobPostTest />} />
+
+      {/* Forgot Password Page */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
     </Routes>
   );
 };

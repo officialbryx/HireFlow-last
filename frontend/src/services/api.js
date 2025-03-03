@@ -20,7 +20,7 @@ export const api = {
     }
   },
 
-  async signup({ email, password, firstName, lastName, userType }) {
+  async signup({ email, password, firstName, middleName, lastName, userType }) {
     try {
       // First, sign up the user and wait for confirmation
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -29,6 +29,7 @@ export const api = {
         options: {
           data: {
             first_name: firstName,
+            middle_name: middleName, // Add this line
             last_name: lastName,
             user_type: userType,
           },
@@ -147,22 +148,26 @@ export const api = {
       let logoUrl = null;
 
       if (jobPostData.companyLogo instanceof File) {
-        const fileExt = jobPostData.companyLogo.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
+        const fileExt = jobPostData.companyLogo.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(7)}.${fileExt}`;
+
         const { data: fileData, error: fileError } = await supabase.storage
           .from("company-logos")
           .upload(`logos/${fileName}`, jobPostData.companyLogo, {
-            cacheControl: '3600',
-            upsert: true
+            cacheControl: "3600",
+            upsert: true,
           });
 
         if (fileError) {
-          console.error('File upload error:', fileError);
-          throw new Error('Failed to upload company logo');
+          console.error("File upload error:", fileError);
+          throw new Error("Failed to upload company logo");
         }
 
-        const { data: { publicUrl } } = supabase.storage
+        const {
+          data: { publicUrl },
+        } = supabase.storage
           .from("company-logos")
           .getPublicUrl(`logos/${fileName}`);
 
@@ -194,10 +199,12 @@ export const api = {
       const jobPostId = jobPost[0].id;
 
       // Insert job responsibilities
-      const responsibilities = jobPostData.responsibilities.map((responsibility) => ({
-        job_posting_id: jobPostId,
-        responsibility,
-      }));
+      const responsibilities = jobPostData.responsibilities.map(
+        (responsibility) => ({
+          job_posting_id: jobPostId,
+          responsibility,
+        })
+      );
       const { error: responsibilitiesError } = await supabase
         .from("job_responsibility")
         .insert(responsibilities);
@@ -205,10 +212,12 @@ export const api = {
       if (responsibilitiesError) throw responsibilitiesError;
 
       // Insert job qualifications
-      const qualifications = jobPostData.qualifications.map((qualification) => ({
-        job_posting_id: jobPostId,
-        qualification,
-      }));
+      const qualifications = jobPostData.qualifications.map(
+        (qualification) => ({
+          job_posting_id: jobPostId,
+          qualification,
+        })
+      );
       const { error: qualificationsError } = await supabase
         .from("job_qualification")
         .insert(qualifications);
@@ -237,34 +246,36 @@ export const api = {
     try {
       // Fetch the main job posting data
       const { data: jobPost, error: jobPostError } = await supabase
-        .from('job_posting')
-        .select('*')
-        .eq('id', jobPostId)
+        .from("job_posting")
+        .select("*")
+        .eq("id", jobPostId)
         .single();
 
       if (jobPostError) throw jobPostError;
 
       // Fetch responsibilities
-      const { data: responsibilities, error: responsibilitiesError } = await supabase
-        .from('job_responsibility')
-        .select('responsibility')
-        .eq('job_posting_id', jobPostId);
+      const { data: responsibilities, error: responsibilitiesError } =
+        await supabase
+          .from("job_responsibility")
+          .select("responsibility")
+          .eq("job_posting_id", jobPostId);
 
       if (responsibilitiesError) throw responsibilitiesError;
 
       // Fetch qualifications
-      const { data: qualifications, error: qualificationsError } = await supabase
-        .from('job_qualification')
-        .select('qualification')
-        .eq('job_posting_id', jobPostId);
+      const { data: qualifications, error: qualificationsError } =
+        await supabase
+          .from("job_qualification")
+          .select("qualification")
+          .eq("job_posting_id", jobPostId);
 
       if (qualificationsError) throw qualificationsError;
 
       // Fetch skills
       const { data: skills, error: skillsError } = await supabase
-        .from('job_skill')
-        .select('skill')
-        .eq('job_posting_id', jobPostId);
+        .from("job_skill")
+        .select("skill")
+        .eq("job_posting_id", jobPostId);
 
       if (skillsError) throw skillsError;
 
@@ -272,21 +283,20 @@ export const api = {
       return {
         ...jobPost,
         company_logo_url: jobPost.company_logo_url, // Use the stored URL directly
-        responsibilities: responsibilities.map(r => r.responsibility),
-        qualifications: qualifications.map(q => q.qualification),
-        skills: skills.map(s => s.skill)
+        responsibilities: responsibilities.map((r) => r.responsibility),
+        qualifications: qualifications.map((q) => q.qualification),
+        skills: skills.map((s) => s.skill),
       };
     } catch (error) {
-      console.error('Error fetching job posting details:', error);
+      console.error("Error fetching job posting details:", error);
       throw error;
     }
   },
 
   async getAllJobPostings() {
     try {
-      const { data: jobPostings, error: jobPostingsError } = await supabase
-        .from('job_posting')
-        .select(`
+      const { data: jobPostings, error: jobPostingsError } =
+        await supabase.from("job_posting").select(`
           *,
           job_responsibility(responsibility),
           job_qualification(qualification),
@@ -296,20 +306,22 @@ export const api = {
       if (jobPostingsError) throw jobPostingsError;
 
       // Process each job posting
-      const processedJobPostings = jobPostings.map(post => {
+      const processedJobPostings = jobPostings.map((post) => {
         return {
           ...post,
           company_logo_url: post.company_logo_url, // Use the stored URL directly
-          responsibilities: post.job_responsibility.map(r => r.responsibility),
-          qualifications: post.job_qualification.map(q => q.qualification),
-          skills: post.job_skill.map(s => s.skill)
+          responsibilities: post.job_responsibility.map(
+            (r) => r.responsibility
+          ),
+          qualifications: post.job_qualification.map((q) => q.qualification),
+          skills: post.job_skill.map((s) => s.skill),
         };
       });
 
       return processedJobPostings;
     } catch (error) {
-      console.error('Error fetching all job postings:', error);
+      console.error("Error fetching all job postings:", error);
       throw error;
     }
-  }
+  },
 };

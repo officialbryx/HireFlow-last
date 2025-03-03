@@ -14,6 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -22,8 +23,26 @@ const Login = () => {
     });
   };
 
+  const getInputClassName = (fieldName) => {
+    const baseClasses =
+      "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500";
+
+    if (!isSubmitted) return `${baseClasses} border-gray-300`;
+    return `${baseClasses} ${
+      formData[fieldName] ? "border-gray-300" : "border-red-500"
+    }`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+
+    // Check if any required fields are empty
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
     setError("");
     setIsLoading(true);
 
@@ -111,7 +130,7 @@ const Login = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("email")}
                   onChange={handleChange}
                 />
               </div>
@@ -131,7 +150,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className={getInputClassName("password")}
                   onChange={handleChange}
                 />
                 <button
@@ -165,12 +184,12 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a
-                  href="#"
+                <Link
+                  to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 
