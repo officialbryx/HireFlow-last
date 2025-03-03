@@ -4,14 +4,27 @@ const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
+  console.error("Supabase configuration error:", {
+    url: supabaseUrl ? "present" : "missing",
+    key: supabaseAnonKey ? "present" : "missing",
+  });
+  throw new Error("Missing Supabase configuration");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage, // Explicitly set storage
+    storageKey: "supabase.auth.token",
   },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+  debug: true, // Enable debug mode to see what's happening
 });
 
 // Configure custom email template
@@ -56,4 +69,34 @@ supabase.auth.setConfig({
   emailAuth: {
     emailTemplate,
   },
+});
+
+// Add debug logging
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log("Auth state changed:", { event, session });
+
+  if (event === "SIGNED_IN") {
+    console.log("User signed in:", session?.user?.email);
+  } else if (event === "SIGNED_OUT") {
+    console.log("User signed out");
+    localStorage.removeItem("supabase.auth.token");
+  } else if (event === "TOKEN_REFRESHED") {
+    console.log("Token refreshed");
+  } else if (event === "USER_UPDATED") {
+    console.log("User updated");
+  } else if (event === "USER_DELETED") {
+    console.log("User deleted");
+    localStorage.removeItem("supabase.auth.token");
+  }
+});
+
+// Test the connection
+supabase.auth.getSession().then(({ data: { session }, error }) => {
+  if (error) {
+    console.error("Error checking session:", error.message);
+  } else if (session) {
+    console.log("Existing session found:", session.user.email);
+  } else {
+    console.log("No session found");
+  }
 });
