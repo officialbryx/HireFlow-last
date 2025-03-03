@@ -1,14 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Missing Supabase environment variables");
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    site: "https://hire-flow-last-fv7m44pjy-bryan-tiamzons-projects.vercel.app",
   },
 });
 

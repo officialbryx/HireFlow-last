@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
@@ -12,10 +13,18 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/node",
-      "config": {
-        "zeroConfig": true
-      }
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_PUBLIC_SUPABASE_URL": "@vite_public_supabase_url",
+    "VITE_PUBLIC_SUPABASE_ANON_KEY": "@vite_public_supabase_anon_key"
+  }
 }
