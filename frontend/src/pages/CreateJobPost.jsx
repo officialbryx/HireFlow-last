@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { jobPostsApi } from "../services/api/jobPosts";
+import { storageApi } from "../services/api/storage";
 
 const CreateJobPost = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const CreateJobPost = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type and size
@@ -56,10 +57,20 @@ const CreateJobPost = () => {
         return;
       }
 
-      setFormData(prev => ({
-        ...prev,
-        companyLogo: file
-      }));
+      try {
+        setIsSubmitting(true);
+        const logoUrl = await storageApi.uploadCompanyLogo(file);
+        setFormData(prev => ({
+          ...prev,
+          companyLogo: file,
+          logoUrl: logoUrl
+        }));
+      } catch (error) {
+        setModalMessage("Failed to upload company logo");
+        setModalVisible(true);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 

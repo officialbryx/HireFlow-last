@@ -27,5 +27,25 @@ export const storageApi = {
       console.error("Error uploading file:", error);
       throw error;
     }
+  },
+
+  async uploadResume(file) {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .upload(`applications/${fileName}`, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('resumes')
+        .getPublicUrl(`applications/${fileName}`);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Resume upload error:', error);
+      throw new Error('Failed to upload resume');
+    }
   }
 };

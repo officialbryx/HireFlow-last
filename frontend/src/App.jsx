@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import LandingPage from "./pages/LandingPage";
-import Signup from "./pages/Signup";
+import Signup from "./pages/SignUp";
 import Login from "./pages/Login";
 import JobPosts from "./pages/JobPosts";
 import CreateJobPost from "./pages/CreateJobPost";

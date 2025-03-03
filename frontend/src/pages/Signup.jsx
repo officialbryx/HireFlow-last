@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+import { authApi } from "../services/api/auth";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -27,7 +27,13 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      await api.signup(formData);
+      await authApi.signup({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        userType: formData.userType
+      });
       navigate("/login");
     } catch (err) {
       setError(err.message);

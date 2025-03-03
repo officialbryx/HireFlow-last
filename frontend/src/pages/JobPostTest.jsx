@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+import { jobPostsApi } from "../services/api/jobPosts";
 
 const JobPostTest = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +25,7 @@ const JobPostTest = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const data = await api.getAllJobPostings();
+        const data = await jobPostsApi.getAllJobPostings();
         setJobListings(data);
         setIsLoading(false);
       } catch (err) {

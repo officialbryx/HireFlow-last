@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { api } from "../services/api";
+import { authApi } from "../services/api/auth";
 import { supabase } from "../services/supabaseClient"; // Add this import
 
 const Login = () => {
@@ -28,48 +28,14 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Sign in with Supabase auth
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { user } = await authApi.login({
         email: formData.email,
-        password: formData.password,
+        password: formData.password
       });
-
-      if (error) throw error;
-
-      if (data.user) {
-        // Check if profile exists
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError && profileError.code !== "PGRST116") {
-          throw profileError;
-        }
-
-        // If profile doesn't exist, create it
-        if (!profileData) {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                id: data.user.id,
-                email: data.user.email,
-              },
-            ]);
-
-          if (insertError) throw insertError;
-        }
-
-        navigate("/home");
-      }
-    } catch (err) {
-      setError(
-        err.message ||
-          "Failed to login. Please check your credentials and try again."
-      );
-      console.error("Login error:", err);
+      
+      navigate('/dashboard');
+    } catch (error) {
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }

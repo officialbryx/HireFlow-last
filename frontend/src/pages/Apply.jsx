@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ApplicationQuestions from "../components/apply/ApplicationQuestions";
 import MyExperience from "../components/apply/MyExperience";
 import MyInformation from "../components/apply/MyInformation";
 import Review from "../components/apply/Review";
 import VoluntaryDisclosures from "../components/apply/VoluntaryDisclosures";
-import { CheckIcon } from "@heroicons/react/24/solid"; // Import CheckIcon
-import { api } from "../services/api";
+import { CheckIcon } from "@heroicons/react/24/solid";
+import { applicationsApi } from "../services/api/applications";
+import { storageApi } from "../services/api/storage";
 
 const stages = [
   { id: 1, name: "My Information" },
@@ -139,19 +140,23 @@ const Apply = () => {
 
   const handleSubmitApplication = async () => {
     try {
-      // Show loading state
       setIsSubmitting(true);
 
-      // Submit application
-      await api.submitApplication({
+      // Handle resume upload if exists
+      let resumeUrl = null;
+      if (formData.resume instanceof File) {
+        resumeUrl = await storageApi.uploadResume(formData.resume);
+      }
+
+      // Submit application with resume URL
+      await applicationsApi.submitApplication({
         company,
         ...formData,
+        resumeUrl
       });
 
-      // Show success message
+      // Show success message and redirect
       alert("Application submitted successfully!");
-
-      // Redirect to job posts page
       navigate("/jobposts");
     } catch (error) {
       console.error("Failed to submit application:", error);
