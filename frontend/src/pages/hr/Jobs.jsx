@@ -4,63 +4,51 @@ import ViewJobs from "../../components/jobs/ViewJobs";
 import CreateJob from "../../components/jobs/CreateJob";
 import ArchivedJobs from "../../components/jobs/ArchivedJobs";
 import { api } from "../../services/api";
-import {
-  MapPinIcon,
-  BriefcaseIcon,
-  CurrencyDollarIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
 import JobFormModal from '../../components/modals/JobFormModal';
 import Toast from '../../components/notifications/Toast';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import { useJobs } from '../../hooks/useJobs';
+import { usePagination } from '../../hooks/usePagination';
+import { useToast } from '../../hooks/useToast';
+import { useJobModals } from '../../hooks/useJobModals';
 
 const Jobs = () => {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showMessage, setShowMessage] = useState(false);
-  const [messageType, setMessageType] = useState('');
-  const [message, setMessage] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [jobsPerPage] = useState(9); // Show 9 jobs per page (3x3 grid)
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [jobToDelete, setJobToDelete] = useState(null);
-  const [activeTab, setActiveTab] = useState('view'); // Add this state
+  const { jobs, loading, fetchJobs } = useJobs();
+  const { getPaginatedData } = usePagination();
+  const { showMessage, messageType, message, showToast } = useToast();
+  const {
+    showCreateModal,
+    setShowCreateModal,
+    showEditModal,
+    setShowEditModal,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedJob,
+    setSelectedJob,
+    jobToDelete,
+    setJobToDelete
+  } = useJobModals();
+  
+  const [activeTab, setActiveTab] = useState('view');
+
+  const { currentItems: currentJobs, totalPages, currentPage, handlePageChange } = 
+    getPaginatedData(jobs.filter(job => activeTab === 'archived' ? 
+      job.status === 'archived' : 
+      job.status !== 'archived'
+    ));
 
   useEffect(() => {
     fetchJobs();
   }, []);
-
-  const fetchJobs = async () => {
-    try {
-      const data = await api.getAllJobPostings();
-      setJobs(data);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleJobCreated = async (jobData) => {
     try {
       await api.createJobPost(jobData);
       await fetchJobs(); // Refresh the job list
       setShowCreateModal(false); // Close the create modal
-      setMessageType('success');
-      setMessage('Job post created successfully!');
-      setShowMessage(true);
-      
-      // Auto hide message after 3 seconds
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 3000);
+      showToast('success', 'Job post created successfully!');
     } catch (error) {
-      setMessageType('error');
-      setMessage(error.message || 'Error creating job post');
-      setShowMessage(true);
+      showToast('error', error.message || 'Error creating job post');
     }
   };
 
@@ -98,9 +86,7 @@ const Jobs = () => {
       setShowEditModal(true);
     } catch (error) {
       console.error('Error fetching job details:', error);
-      setMessageType('error');
-      setMessage('Error fetching job details');
-      setShowMessage(true);
+      showToast('error', 'Error fetching job details');
     }
   };
 
@@ -135,61 +121,47 @@ const Jobs = () => {
       // Fetch fresh data after update
       await fetchJobs();
       
-      setMessageType('success');
-      setMessage('Job post updated successfully!');
-      setShowMessage(true);
-      
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 3000);
+      showToast('success', 'Job post updated successfully!');
     } catch (error) {
       console.error('Error updating job:', error);
-      setMessageType('error');
-      setMessage(error.message || 'Error updating job post');
-      setShowMessage(true);
+      showToast('error', error.message || 'Error updating job post');
     }
   };
 
-  const handleDeleteJob = async (jobId, e) => {
-    // Stop event propagation to prevent edit modal from opening
+  // Rename handleDeleteJob to handleArchiveJob
+  const handleArchiveJob = async (jobId, e) => {
     e?.stopPropagation();
-    
-    // Set the job to delete and show the confirmation modal
-    setJobToDelete(jobId);
+    setJobToDelete(jobId); // We can keep this state name for now
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = async () => {
+  // Rename handleConfirmDelete to handleConfirmArchive
+  const handleConfirmArchive = async () => {
     try {
-      await api.deleteJobPost(jobToDelete);
+      await api.archiveJobPost(jobToDelete);
       await fetchJobs();
       
-      setMessageType('success');
-      setMessage('Job post deleted successfully!');
-      setShowMessage(true);
-      
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 3000);
+      showToast('success', 'Job post archived successfully!');
     } catch (error) {
-      console.error('Error deleting job:', error);
-      setMessageType('error');
-      setMessage(error.message || 'Error deleting job post');
-      setShowMessage(true);
+      console.error('Error archiving job:', error);
+      showToast('error', error.message || 'Error archiving job post');
     } finally {
       setShowDeleteModal(false);
       setJobToDelete(null);
     }
   };
 
-  const indexOfLastJob = currentPage * jobsPerPage;
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-  const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
-  const totalPages = Math.ceil(jobs.length / jobsPerPage);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Add restore functionality
+  const handleRestore = async (jobId) => {
+    try {
+      await api.restoreJobPost(jobId);
+      await fetchJobs();
+      
+      showToast('success', 'Job post restored successfully!');
+    } catch (error) {
+      console.error('Error restoring job:', error);
+      showToast('error', error.message || 'Error restoring job post');
+    }
   };
 
   return (
@@ -236,11 +208,11 @@ const Jobs = () => {
           {/* Tab Content */}
           {activeTab === 'view' && (
             <ViewJobs
-              jobs={jobs}
+              jobs={jobs.filter(job => job.status !== 'archived')}
               loading={loading}
-              currentJobs={currentJobs}
+              currentJobs={currentJobs.filter(job => job.status !== 'archived')}
               handleEditJob={handleEditJob}
-              handleDeleteJob={handleDeleteJob}
+              handleDeleteJob={handleArchiveJob} // Update the prop name in ViewJobs component
               currentPage={currentPage}
               totalPages={totalPages}
               handlePageChange={handlePageChange}
@@ -254,9 +226,7 @@ const Jobs = () => {
           {activeTab === 'archived' && (
             <ArchivedJobs
               archivedJobs={jobs.filter(job => job.status === 'archived')}
-              handleRestore={(jobId) => {
-                // Add restore functionality
-              }}
+              handleRestore={handleRestore}
             />
           )}
         </div>
@@ -282,15 +252,16 @@ const Jobs = () => {
         initialData={selectedJob}
       />
 
+      {/* Update the confirmation modal text */}
       <ConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
           setJobToDelete(null);
         }}
-        onConfirm={handleConfirmDelete}
-        title="Delete Job Posting"
-        message="Are you sure you want to delete this job posting? This action cannot be undone."
+        onConfirm={handleConfirmArchive}
+        title="Archive Job Posting"
+        message="Are you sure you want to archive this job posting? It will be moved to the archived jobs section."
       />
     </div>
   );

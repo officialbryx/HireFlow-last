@@ -510,5 +510,35 @@ export const api = {
       console.error('Error deleting job post:', error);
       throw new Error('Failed to delete job post');
     }
+  },
+
+  async archiveJobPost(jobId) {
+    try {
+      const { error } = await supabase
+        .from('job_posting')
+        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .eq('id', jobId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error archiving job post:', error);
+      throw new Error('Failed to archive job post');
+    }
+  },
+
+  async restoreJobPost(jobId) {
+    try {
+      const { error } = await supabase
+        .from('job_posting')
+        .update({ status: 'active', updated_at: new Date().toISOString() })
+        .eq('id', jobId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error restoring job post:', error);
+      throw new Error('Failed to restore job post');
+    }
   }
 };

@@ -1,9 +1,9 @@
 import {
-    MapPinIcon,
-    BriefcaseIcon,
-    CurrencyDollarIcon,
-    UserGroupIcon,
-  } from "@heroicons/react/24/outline";
+  MapPinIcon,
+  BriefcaseIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
 const ViewJobs = ({
   jobs,
@@ -104,15 +104,18 @@ const ViewJobs = ({
                   <div className="flex space-x-2">
                     <button
                       className="text-gray-600 hover:text-blue-600 transition-colors"
-                      onClick={() => handleEditJob(job.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditJob(job.id);
+                      }}
                     >
                       Edit
                     </button>
                     <button
-                      className="text-gray-600 hover:text-red-600 transition-colors"
                       onClick={(e) => handleDeleteJob(job.id, e)}
+                      className="text-gray-600 hover:text-orange-600 transition-colors"
                     >
-                      Delete
+                      Archive
                     </button>
                   </div>
                 </div>
