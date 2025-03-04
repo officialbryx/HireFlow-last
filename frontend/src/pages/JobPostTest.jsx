@@ -26,9 +26,22 @@ const JobPostTest = () => {
     const fetchJobs = async () => {
       try {
         const data = await api.getAllJobPostings();
-        setJobListings(data);
+        // Map the jobs data to include the required fields
+        const mappedJobs = data.map(job => ({
+          id: job.id,
+          job_title: job.job_title,
+          company_name: job.company_name,
+          company_logo_url: job.company_logo_url,
+          location: job.location,
+          employment_type: job.employment_type,
+          created_at: job.created_at,
+          // Map skills from job_skill array if it exists
+          skills: job.job_skill?.map(s => s.skill) || []
+        }));
+        setJobListings(mappedJobs);
         setIsLoading(false);
       } catch (err) {
+        console.error('Error fetching jobs:', err);
         setError("Failed to fetch job postings");
         setIsLoading(false);
       }
@@ -50,7 +63,25 @@ const JobPostTest = () => {
   const handleJobSelect = async (job) => {
     try {
       const jobDetails = await api.getJobPostingDetails(job.id);
-      setSelectedJob(jobDetails);
+      // Map the API response to the expected format
+      const mappedJobDetails = {
+        id: jobDetails.id,
+        job_title: jobDetails.job_title,
+        company_name: jobDetails.company_name,
+        company_logo_url: jobDetails.company_logo_url,
+        location: jobDetails.location,
+        employment_type: jobDetails.employment_type,
+        salary_range: jobDetails.salary_range,
+        applicants_needed: jobDetails.applicants_needed,
+        company_description: jobDetails.company_description,
+        about_company: jobDetails.about_company,
+        created_at: jobDetails.created_at,
+        // Map the nested arrays correctly
+        responsibilities: jobDetails.job_responsibility?.map(r => r.responsibility) || [],
+        qualifications: jobDetails.job_qualification?.map(q => q.qualification) || [],
+        skills: jobDetails.job_skill?.map(s => s.skill) || []
+      };
+      setSelectedJob(mappedJobDetails);
     } catch (err) {
       console.error('Error fetching job details:', err);
       setError("Failed to load job details");
