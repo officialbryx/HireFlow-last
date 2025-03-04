@@ -7,6 +7,7 @@ import {
   BellIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  UserCircleIcon, // Add this import
 } from "@heroicons/react/24/outline";
 
 const Navbar = () => {
@@ -34,6 +35,11 @@ const Navbar = () => {
 
           {/* Right side - Navigation Items */}
           <div className="flex items-center space-x-6">
+            <NavItem
+              icon={<UserCircleIcon className="h-5 w-5" />} // Add Profile icon
+              text="Profile"
+              to="/profile"
+            />
             <NavItem
               icon={<UserGroupIcon className="h-5 w-5" />}
               text="Network"

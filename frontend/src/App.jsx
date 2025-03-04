@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
 import JobPostTest from "./pages/JobPostTest";
 import ForgotPassword from "./pages/ForgotPassword";
+import Profile from "./pages/Profile";
 import "./index.css";
 
 const App = () => {
@@ -39,6 +40,8 @@ const App = () => {
       document.title = "Settings | HireFlow";
     } else if (location.pathname === "/forgot-password") {
       document.title = "Forgot Password | HireFlow";
+    } else if (location.pathname === "/profile") {
+      document.title = "My Profile | HireFlow";
     }
   }, [location]);
 
@@ -76,6 +79,9 @@ const App = () => {
 
       {/* Forgot Password Page */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* Profile Page */}
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   );
 };
