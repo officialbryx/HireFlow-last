@@ -1,4 +1,10 @@
 import React from "react";
+import {
+  UserCircleIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
 
 const suffixOptions = [
   "I",
@@ -159,6 +165,26 @@ const countries = [
   { code: "ZW", name: "Zimbabwe" },
 ];
 
+const FormSection = ({ icon, title, children }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+    <div className="flex items-center space-x-3 mb-6">
+      {icon}
+      <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+    </div>
+    <div className="space-y-4">{children}</div>
+  </div>
+);
+
+const FormField = ({ label, required, children, className = "" }) => (
+  <div className={`space-y-1 ${className}`}>
+    <label className="block text-sm font-medium text-gray-700">
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    {children}
+  </div>
+);
+
 const MyInformation = ({ formData, setFormData }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -168,287 +194,314 @@ const MyInformation = ({ formData, setFormData }) => {
     }));
   };
 
+  const inputStyles =
+    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+  const selectStyles =
+    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white appearance-none";
+
   return (
-    <div className="space-y-1">
-      <h2 className="text-xl font-semibold text-center">My Information</h2>
-      <div className="space-y-5">
-        <p className="text-sm text-gray-500">
-          <span className="text-red-500">*</span> Indicates a required field
-        </p>
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Info Banner */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg
+              className="h-5 w-5 text-blue-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-blue-700">
+              Please fill in all required fields marked with an asterisk (
+              <span className="text-red-500">*</span>)
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Have you been previously employed by {formData.company}?
-            <span className="text-red-500"> *</span>
-          </label>
-          <div className="mt-2 flex flex-col">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="previouslyEmployed"
-                value="yes"
-                checked={formData.previouslyEmployed === "yes"}
-                onChange={handleChange}
-                className="mr-2 accent-blue-500"
-              />
-              <span className="text-sm">Yes</span>
-            </label>
-
-            <label className="flex items-center mt-2">
-              <input
-                type="radio"
-                name="previouslyEmployed"
-                value="no"
-                checked={formData.previouslyEmployed === "no"}
-                onChange={handleChange}
-                className="mr-2 accent-blue-500"
-              />
-              <span className="text-sm">No</span>
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            What was your Employee ID?
-          </label>
-          <input
-            type="text"
-            name="employeeID"
-            value={formData.employeeID}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Who was your manager?
-          </label>
-          <input
-            type="text"
-            name="givenManager"
-            value={formData.givenManager}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            required
-          />
-        </div>
-
-        {/* Country Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Country <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 max-h-40 overflow-y-auto appearance-none"
-              required
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "#4B5563 #E5E7EB",
-              }}
-            >
-              <option value="">select one</option>
-              {countries.map(({ code, name }) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg
-                className="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
+      {/* Previous Employment Section */}
+      <FormSection
+        icon={<UserCircleIcon className="h-6 w-6 text-blue-500" />}
+        title="Previous Employment"
+      >
+        <FormField
+          label={`Have you been previously employed by ${formData.company}?`}
+          required
+        >
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            {["Yes", "No"].map((option) => (
+              <label
+                key={option}
+                className="relative flex cursor-pointer rounded-lg border p-4 focus:outline-none"
               >
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
-            </div>
+                <input
+                  type="radio"
+                  name="previouslyEmployed"
+                  value={option.toLowerCase()}
+                  checked={formData.previouslyEmployed === option.toLowerCase()}
+                  onChange={handleChange}
+                  className="sr-only"
+                />
+                <span className="flex flex-1">
+                  <span className="flex flex-col">
+                    <span className="block text-sm font-medium text-gray-900">
+                      {option}
+                    </span>
+                  </span>
+                </span>
+                <span
+                  className={`border-2 absolute -inset-px rounded-lg pointer-events-none ${
+                    formData.previouslyEmployed === option.toLowerCase()
+                      ? "border-blue-500"
+                      : "border-transparent"
+                  }`}
+                  aria-hidden="true"
+                ></span>
+              </label>
+            ))}
           </div>
-        </div>
+        </FormField>
 
-        <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
+        {formData.previouslyEmployed === "yes" && (
+          <>
+            <FormField label="Employee ID" required>
+              <input
+                type="text"
+                name="employeeID"
+                value={formData.employeeID}
+                onChange={handleChange}
+                className={inputStyles}
+                placeholder="Enter your previous employee ID"
+              />
+            </FormField>
 
-        <h2 className="text-xl font-semibold">Name</h2>
+            <FormField label="Previous Manager" required>
+              <input
+                type="text"
+                name="givenManager"
+                value={formData.givenManager}
+                onChange={handleChange}
+                className={inputStyles}
+                placeholder="Enter your previous manager's name"
+              />
+            </FormField>
+          </>
+        )}
+      </FormSection>
 
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Given Name(s) <span className="text-red-500">*</span>
-            </label>
+      {/* Personal Information Section */}
+      <FormSection
+        icon={<UserCircleIcon className="h-6 w-6 text-blue-500" />}
+        title="Personal Information"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField label="Given Name" required>
             <input
               type="text"
               name="givenName"
               value={formData.givenName}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className={inputStyles}
+              placeholder="Enter your given name"
               required
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Middle Name <span className="text-red-500">*</span>
-            </label>
+          <FormField label="Middle Name">
             <input
               type="text"
               name="middleName"
               value={formData.middleName}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className={inputStyles}
+              placeholder="Enter your middle name"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Family Name <span className="text-red-500">*</span>
-            </label>
+          <FormField label="Family Name" required>
             <input
               type="text"
               name="familyName"
               value={formData.familyName}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className={inputStyles}
+              placeholder="Enter your family name"
               required
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Suffix
-            </label>
+          <FormField label="Suffix">
             <select
               name="suffix"
               value={formData.suffix}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white"
+              className={selectStyles}
             >
-              <option value="">select one</option>
+              <option value="">Select suffix</option>
               {suffixOptions.map((suffix) => (
                 <option key={suffix} value={suffix}>
                   {suffix}
                 </option>
               ))}
             </select>
-          </div>
-
-          <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-          <h2 className="text-xl font-semibold">Address</h2>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Address Line 1
-              </label>
-              <input
-                type="text"
-                name="givenAddress"
-                value={formData.givenAddress}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Additional
-              </label>
-              <input
-                type="text"
-                name="givenAddress"
-                value={formData.givenAddress2}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-            <h2 className="text-xl font-semibold">Email Address</h2>
-
-            <div>
-              <input
-                type="text"
-                name="givenEmail"
-                value={formData.givenEmail}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-            <h2 className="text-xl font-semibold">Phone</h2>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone Device Type <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="givenPhoneDeviceType"
-                value={formData.givenPhoneDeviceType}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Country Phone Code <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="givenCountryPhoneCode"
-                value={formData.givenCountryPhoneCode}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="givenPhoneNumber"
-                value={formData.givenPhoneNumber}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone Extension
-              </label>
-              <input
-                type="text"
-                name="givenPhoneExtension"
-                value={formData.givenPhoneExtension}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                required
-              />
-            </div>
-          </div>
+          </FormField>
         </div>
-      </div>
+      </FormSection>
+
+      {/* Address Section */}
+      <FormSection
+        icon={<MapPinIcon className="h-6 w-6 text-blue-500" />}
+        title="Address"
+      >
+        <FormField label="Country" required>
+          <select
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            className={selectStyles}
+            required
+          >
+            <option value="">Select your country</option>
+            {countries.map(({ code, name }) => (
+              <option key={code} value={code}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+
+        <div className="grid grid-cols-1 gap-6">
+          <FormField label="Street Address" required>
+            <input
+              type="text"
+              name="street"
+              value={formData.street}
+              onChange={handleChange}
+              className={inputStyles}
+              placeholder="Enter your street address"
+              required
+            />
+          </FormField>
+
+          <FormField label="Additional Address">
+            <input
+              type="text"
+              name="additionalAddress"
+              value={formData.additionalAddress}
+              onChange={handleChange}
+              className={inputStyles}
+              placeholder="Apartment, suite, unit, building, floor, etc."
+            />
+          </FormField>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FormField label="City" required>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className={inputStyles}
+              required
+            />
+          </FormField>
+
+          <FormField label="State/Province" required>
+            <input
+              type="text"
+              name="province"
+              value={formData.province}
+              onChange={handleChange}
+              className={inputStyles}
+              required
+            />
+          </FormField>
+
+          <FormField label="Postal Code" required>
+            <input
+              type="text"
+              name="postalCode"
+              value={formData.postalCode}
+              onChange={handleChange}
+              className={inputStyles}
+              required
+            />
+          </FormField>
+        </div>
+      </FormSection>
+
+      {/* Contact Information Section */}
+      <FormSection
+        icon={<PhoneIcon className="h-6 w-6 text-blue-500" />}
+        title="Contact Information"
+      >
+        <FormField label="Email Address" required>
+          <div className="relative">
+            <EnvelopeIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`${inputStyles} pl-10`}
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+        </FormField>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FormField label="Phone Type" required>
+            <select
+              name="phoneType"
+              value={formData.phoneType}
+              onChange={handleChange}
+              className={selectStyles}
+              required
+            >
+              <option value="">Select type</option>
+              <option value="mobile">Mobile</option>
+              <option value="home">Home</option>
+              <option value="work">Work</option>
+            </select>
+          </FormField>
+
+          <FormField label="Country Code" required>
+            <select
+              name="phoneCode"
+              value={formData.phoneCode}
+              onChange={handleChange}
+              className={selectStyles}
+              required
+            >
+              <option value="">Select code</option>
+              <option value="+1">+1 (US/Canada)</option>
+              <option value="+44">+44 (UK)</option>
+              <option value="+63">+63 (Philippines)</option>
+            </select>
+          </FormField>
+
+          <FormField label="Phone Number" required>
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className={inputStyles}
+              placeholder="Enter phone number"
+              required
+            />
+          </FormField>
+        </div>
+      </FormSection>
     </div>
   );
 };

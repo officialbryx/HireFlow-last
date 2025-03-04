@@ -178,117 +178,174 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="py-12 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { label: "Active Users", value: "250K+" },
-              { label: "Companies", value: "5,000+" },
-              { label: "Job Placements", value: "100K+" },
-              { label: "Success Rate", value: "92%" },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="p-4 transform hover:scale-105 transition-transform duration-300"
-              >
-                <p className="text-3xl md:text-4xl font-bold text-blue-600">
-                  {stat.value}
-                </p>
-                <p className="text-gray-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
+      {/* Replace existing Features Section with this new AI Features Section */}
       <div id="features" className="py-20 container mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Powerful Features
+            AI-Powered Recruitment
           </h2>
           <p className="text-xl text-gray-600">
-            Everything you need to accelerate your career journey
+            Leveraging advanced machine learning models for precise candidate
+            matching
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: (
-                <svg
-                  className="h-10 w-10 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              ),
-              title: "Smart Job Matching",
-              description:
-                "AI-powered job recommendations tailored to your skills and experience, ensuring you find the perfect fit for your career aspirations.",
-            },
-            {
-              icon: (
-                <svg
-                  className="h-10 w-10 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              ),
-              title: "Professional Network",
-              description:
-                "Build meaningful connections with industry professionals, mentors, and potential employers to expand your opportunities.",
-            },
-            {
-              icon: (
-                <svg
-                  className="h-10 w-10 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
-              ),
-              title: "Career Growth",
-              description:
-                "Access resources, courses, and personalized roadmaps to develop your skills and advance your career to the next level.",
-            },
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition duration-300 border border-gray-100 group"
-            >
-              <div className="mb-6 inline-block p-4 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors duration-300">
-                {feature.icon}
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">
-                {feature.description}
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* JobBERT Feature */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition duration-300 border border-gray-100 group">
+            <div className="mb-6 inline-block p-4 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors duration-300">
+              <svg
+                className="h-10 w-10 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
             </div>
-          ))}
+            <h3 className="text-2xl font-semibold mb-4">JobBERT Analysis</h3>
+            <div className="space-y-4">
+              <p className="text-gray-600 leading-relaxed">
+                Advanced natural language processing model specifically trained
+                for job matching and resume analysis.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  98% accuracy in skill extraction
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Contextual understanding of job requirements
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Semantic matching of qualifications
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* XGBoost Feature */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition duration-300 border border-gray-100 group">
+            <div className="mb-6 inline-block p-4 bg-blue-50 rounded-xl group-hover:bg-blue-100 transition-colors duration-300">
+              <svg
+                className="h-10 w-10 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-semibold mb-4">XGBoost Screening</h3>
+            <div className="space-y-4">
+              <p className="text-gray-600 leading-relaxed">
+                Machine learning-based candidate screening using gradient
+                boosting for accurate candidate ranking.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  95% candidate-job match accuracy
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Automated resume scoring and ranking
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <svg
+                    className="h-5 w-5 mr-2 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Real-time processing of applications
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional AI Benefits Section */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center p-6">
+            <div className="text-blue-600 text-4xl font-bold mb-2">85%</div>
+            <p className="text-gray-600">Reduction in screening time</p>
+          </div>
+          <div className="text-center p-6">
+            <div className="text-blue-600 text-4xl font-bold mb-2">93%</div>
+            <p className="text-gray-600">Matching accuracy</p>
+          </div>
+          <div className="text-center p-6">
+            <div className="text-blue-600 text-4xl font-bold mb-2">2.5s</div>
+            <p className="text-gray-600">Average processing time per resume</p>
+          </div>
         </div>
       </div>
 

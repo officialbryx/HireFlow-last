@@ -1,4 +1,47 @@
 import React from "react";
+import {
+  QuestionMarkCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+
+const FormSection = ({ title, children }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+    <div className="space-y-4">
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-100 pb-2">
+          {title}
+        </h3>
+      )}
+      {children}
+    </div>
+  </div>
+);
+
+const QuestionItem = ({ question, value, onChange, required }) => (
+  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors duration-200">
+    <div className="flex items-start space-x-3">
+      <QuestionMarkCircleIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          {question}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        <select
+          value={value || ""}
+          onChange={onChange}
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white shadow-sm"
+          required={required}
+        >
+          <option value="" disabled>
+            Select your answer
+          </option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+  </div>
+);
 
 const ApplicationQuestions = ({ formData, setFormData }) => {
   const handleChange = (field, value) => {
@@ -55,31 +98,50 @@ const ApplicationQuestions = ({ formData, setFormData }) => {
   ];
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-center">
-        Application Questions
-      </h2>
-      <p className="text-sm text-gray-500">
-        <span className="text-red-500">*</span> Indicates a required field
-      </p>
-      <div className="space-y-6">
-        {questions.map(({ id, text }) => (
-          <div key={id} className="space-y-2">
-            <label className="block text-sm text-gray-700">{text}</label>
-            <select
-              value={formData.applicationQuestions[id] || ""}
-              onChange={(e) => handleChange(id, e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              required
-            >
-              <option value="" disabled>
-                Select one
-              </option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Info Banner */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-blue-400" />
           </div>
-        ))}
+          <div className="ml-3">
+            <p className="text-sm text-blue-700">
+              Please answer all required questions marked with (
+              <span className="text-red-500">*</span>)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Questions Form */}
+      <FormSection title="Application Questions">
+        <div className="space-y-4">
+          {questions.map(({ id, text }) => (
+            <QuestionItem
+              key={id}
+              question={text}
+              value={formData.applicationQuestions[id]}
+              onChange={(e) => handleChange(id, e.target.value)}
+              required={text.includes("*")}
+            />
+          ))}
+        </div>
+      </FormSection>
+
+      {/* Additional Information */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-yellow-400" />
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-yellow-700">
+              Your honest responses help us better understand your background
+              and ensure compliance with our policies.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
