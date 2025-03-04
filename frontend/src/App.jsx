@@ -4,13 +4,15 @@ import LandingPage from "./pages/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import JobPosts from "./pages/JobPosts";
-import CreateJobPost from "./pages/CreateJobPost";
+import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
 import JobPostTest from "./pages/JobPostTest";
 import ForgotPassword from "./pages/ForgotPassword";
+import Dashboard from "./pages/hr/Dashboard";
+import Jobs from "./pages/hr/Jobs";
 import "./index.css";
 
 const App = () => {
@@ -76,6 +78,10 @@ const App = () => {
 
       {/* Forgot Password Page */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      
+      {/* HR Routes */}
+      <Route path="/hr/dashboard" element={<Dashboard />} />
+      <Route path="/hr/jobs" element={<Jobs />} />
     </Routes>
   );
 };
