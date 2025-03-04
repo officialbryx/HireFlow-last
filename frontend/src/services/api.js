@@ -325,22 +325,52 @@ export const api = {
     }
   },
 
-  // Add these new methods
   getUserProfile: async () => {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError) throw userError;
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-    if (profileError) throw profileError;
-    return { user, profile };
+      if (profileError && profileError.code !== "PGRST116") {
+        throw profileError;
+      }
+
+      // If profile doesn't exist, create an empty one
+      if (!profile) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: user.id,
+              email: user.email,
+              personal_summary: "",
+              career_history: [],
+              education: [],
+              certifications: [],
+              skills: [],
+              languages: [],
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return { user, profile: newProfile };
+      }
+
+      return { user, profile };
+    } catch (error) {
+      console.error("Error in getUserProfile:", error);
+      throw error;
+    }
   },
 
   updateUserProfile: async (profileData) => {
