@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 import { validatePassword } from "../utils/passwordValidation";
+import SignupModal from '../components/SignupModal';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -28,6 +29,9 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalStatus, setModalStatus] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,8 +108,13 @@ const Signup = () => {
       const submitData = { ...formData };
       delete submitData.confirmPassword;
       await api.signup(submitData);
-      navigate("/login");
+      setModalStatus('success');
+      setModalMessage('Your account has been created! Please check your email for a confirmation message to complete the setup. If you don’t see it in your inbox, check your spam or junk folder.');
+      setShowModal(true);
     } catch (err) {
+      setModalStatus('error');
+      setModalMessage(err.message || 'An error occurred during signup. Please try again.');
+      setShowModal(true);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -379,6 +388,17 @@ const Signup = () => {
           </div>
         </div>
       </div>
+      <SignupModal
+        isOpen={showModal}
+        status={modalStatus}
+        message={modalMessage}
+        onClose={() => {
+          setShowModal(false);
+          if (modalStatus === 'success') {
+            navigate('/login');
+          }
+        }}
+      />
     </div>
   );
 };
