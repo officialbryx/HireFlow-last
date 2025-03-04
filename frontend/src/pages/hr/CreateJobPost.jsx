@@ -247,7 +247,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Company Description
+                  Job Description
                 </label>
                 <textarea
                   name="companyDescription"
@@ -406,7 +406,9 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-1/2 px-6 py-3 rounded-md text-white transition-colors ${
+                className={`${
+                  isEditing ? 'w-1/2' : 'w-full'
+                } px-6 py-3 rounded-md text-white transition-colors ${
                   isSubmitting 
                     ? 'bg-blue-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700'
@@ -414,13 +416,16 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
               >
                 {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Job Post'}
               </button>
-              <button
-                type="button"
-                onClick={onClose} // Use the onClose prop
-                className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
-              >
-                Cancel
-              </button>
+              
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>

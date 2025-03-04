@@ -3,8 +3,6 @@ import Navbar from "../components/Navbar";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
-  BriefcaseIcon,
-  CurrencyDollarIcon,
   ShareIcon,
   UserGroupIcon,
   BuildingOfficeIcon,
@@ -24,18 +22,20 @@ const JobPostTest = () => {
     const fetchJobs = async () => {
       try {
         const data = await api.getAllJobPostings();
-        // Map the jobs data to include the required fields
-        const mappedJobs = data.map(job => ({
-          id: job.id,
-          job_title: job.job_title,
-          company_name: job.company_name,
-          company_logo_url: job.company_logo_url,
-          location: job.location,
-          employment_type: job.employment_type,
-          created_at: job.created_at,
-          // Map skills from job_skill array if it exists
-          skills: job.job_skill?.map(s => s.skill) || []
-        }));
+        // Filter out archived jobs and map the remaining jobs data
+        const mappedJobs = data
+          .filter(job => job.status !== 'archived')
+          .map(job => ({
+            id: job.id,
+            job_title: job.job_title,
+            company_name: job.company_name,
+            company_logo_url: job.company_logo_url,
+            location: job.location,
+            employment_type: job.employment_type,
+            created_at: job.created_at,
+            status: job.status,
+            skills: job.job_skill?.map(s => s.skill) || []
+          }));
         setJobListings(mappedJobs);
         setIsLoading(false);
       } catch (err) {
@@ -55,31 +55,33 @@ const JobPostTest = () => {
         }
       });
     };
-  }, [jobListings]);
+  }, []);
 
   // When selecting a job, fetch its full details
   const handleJobSelect = async (job) => {
     try {
       const jobDetails = await api.getJobPostingDetails(job.id);
-      // Map the API response to the expected format
-      const mappedJobDetails = {
-        id: jobDetails.id,
-        job_title: jobDetails.job_title,
-        company_name: jobDetails.company_name,
-        company_logo_url: jobDetails.company_logo_url,
-        location: jobDetails.location,
-        employment_type: jobDetails.employment_type,
-        salary_range: jobDetails.salary_range,
-        applicants_needed: jobDetails.applicants_needed,
-        company_description: jobDetails.company_description,
-        about_company: jobDetails.about_company,
-        created_at: jobDetails.created_at,
-        // Map the nested arrays correctly
-        responsibilities: jobDetails.job_responsibility?.map(r => r.responsibility) || [],
-        qualifications: jobDetails.job_qualification?.map(q => q.qualification) || [],
-        skills: jobDetails.job_skill?.map(s => s.skill) || []
-      };
-      setSelectedJob(mappedJobDetails);
+      // Only show job details if the job is not archived
+      if (jobDetails.status !== 'archived') {
+        const mappedJobDetails = {
+          id: jobDetails.id,
+          job_title: jobDetails.job_title,
+          company_name: jobDetails.company_name,
+          company_logo_url: jobDetails.company_logo_url,
+          location: jobDetails.location,
+          employment_type: jobDetails.employment_type,
+          salary_range: jobDetails.salary_range,
+          applicants_needed: jobDetails.applicants_needed,
+          company_description: jobDetails.company_description,
+          about_company: jobDetails.about_company,
+          created_at: jobDetails.created_at,
+          status: jobDetails.status,
+          responsibilities: jobDetails.job_responsibility?.map(r => r.responsibility) || [],
+          qualifications: jobDetails.job_qualification?.map(q => q.qualification) || [],
+          skills: jobDetails.job_skill?.map(s => s.skill) || []
+        };
+        setSelectedJob(mappedJobDetails);
+      }
     } catch (err) {
       console.error('Error fetching job details:', err);
       setError("Failed to load job details");
