@@ -11,12 +11,9 @@ import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/ViewApplicants";
 import JobPostTest from "./pages/JobPostTest";
 import ForgotPassword from "./pages/ForgotPassword";
-<<<<<<< HEAD
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
-=======
 import Profile from "./pages/Profile";
->>>>>>> ea78a85b711a1675afc4fd94dc95113398b9d890
 import "./index.css";
 
 const App = () => {
@@ -84,16 +81,13 @@ const App = () => {
 
       {/* Forgot Password Page */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
-<<<<<<< HEAD
       
       {/* HR Routes */}
       <Route path="/hr/dashboard" element={<Dashboard />} />
       <Route path="/hr/jobs" element={<Jobs />} />
-=======
 
       {/* Profile Page */}
       <Route path="/profile" element={<Profile />} />
->>>>>>> ea78a85b711a1675afc4fd94dc95113398b9d890
     </Routes>
   );
 };
