@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import HRNavbar from "../../components/HRNavbar";
-import CreateJobPost from "../hr/CreateJobPost";
+import ViewJobs from "../../components/jobs/ViewJobs";
+import CreateJob from "../../components/jobs/CreateJob";
+import ArchivedJobs from "../../components/jobs/ArchivedJobs";
 import { api } from "../../services/api";
 import {
   MapPinIcon,
@@ -25,6 +27,7 @@ const Jobs = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState('view'); // Add this state
 
   useEffect(() => {
     fetchJobs();
@@ -194,177 +197,73 @@ const Jobs = () => {
       <HRNavbar />
       <div className="pt-16 px-4">
         <div className="max-w-7xl mx-auto py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">Job Management</h1>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              Create New Job
-            </button>
+          {/* Tabs */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('view')}
+                className={`${
+                  activeTab === 'view'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                View Jobs
+              </button>
+              <button
+                onClick={() => setActiveTab('create')}
+                className={`${
+                  activeTab === 'create'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Create Job
+              </button>
+              <button
+                onClick={() => setActiveTab('archived')}
+                className={`${
+                  activeTab === 'archived'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Archived Jobs
+              </button>
+            </nav>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {currentJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => handleEditJob(job.id)}
-                  >
-                    <div className="flex items-start space-x-4 mb-4">
-                      <div className="flex-shrink-0">
-                        {job.company_logo_url ? (
-                          <img
-                            src={job.company_logo_url}
-                            alt={`${job.company_name} logo`}
-                            className="h-12 w-12 object-contain rounded"
-                          />
-                        ) : (
-                          <div className="h-12 w-12 rounded bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 text-lg font-semibold">
-                              {job.company_name?.charAt(0)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-xl font-semibold text-gray-800 truncate">
-                          {job.job_title}
-                        </h2>
-                        <p className="text-gray-600">{job.company_name}</p>
-                      </div>
-                    </div>
+          {/* Tab Content */}
+          {activeTab === 'view' && (
+            <ViewJobs
+              jobs={jobs}
+              loading={loading}
+              currentJobs={currentJobs}
+              handleEditJob={handleEditJob}
+              handleDeleteJob={handleDeleteJob}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={handlePageChange}
+            />
+          )}
 
-                    <div className="space-y-3">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MapPinIcon className="h-4 w-4 mr-2" />
-                        {job.location}
-                      </div>
+          {activeTab === 'create' && (
+            <CreateJob onJobCreated={handleJobCreated} />
+          )}
 
-                      <div className="flex items-center text-sm text-gray-500">
-                        <BriefcaseIcon className="h-4 w-4 mr-2" />
-                        {job.employment_type}
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-500">
-                        <CurrencyDollarIcon className="h-4 w-4 mr-2" />
-                        {job.salary_range}
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-500">
-                        <UserGroupIcon className="h-4 w-4 mr-2" />
-                        {job.applicants_needed} applicants needed
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-500">
-                        <svg
-                          className="h-4 w-4 mr-2"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Created: {new Date(job.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-                      <span className={`text-sm font-medium px-2 py-1 rounded-full ${
-                        job.status === 'active' 
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {job.status}
-                      </span>
-                      <div className="flex space-x-2">
-                        <button
-                          className="text-gray-600 hover:text-blue-600 transition-colors"
-                          onClick={() => handleEditJob(job.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="text-gray-600 hover:text-red-600 transition-colors"
-                          onClick={(e) => handleDeleteJob(job.id, e)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {jobs.length > 0 && (
-                <div className="mt-8 flex justify-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`px-3 py-1 rounded-md ${
-                      currentPage === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index + 1}
-                      onClick={() => handlePageChange(index + 1)}
-                      className={`px-3 py-1 rounded-md ${
-                        currentPage === index + 1
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`px-3 py-1 rounded-md ${
-                      currentPage === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-
-              {jobs.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">
-                    No jobs found. Create your first job posting!
-                  </p>
-                </div>
-              )}
-            </>
+          {activeTab === 'archived' && (
+            <ArchivedJobs
+              archivedJobs={jobs.filter(job => job.status === 'archived')}
+              handleRestore={(jobId) => {
+                // Add restore functionality
+              }}
+            />
           )}
         </div>
       </div>
 
-      <Toast 
-        show={showMessage}
-        type={messageType}
-        message={message}
-      />
-
+      {/* Keep the modals */}
+      <Toast show={showMessage} type={messageType} message={message} />
       <JobFormModal 
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
