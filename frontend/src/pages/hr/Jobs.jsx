@@ -11,14 +11,13 @@ import { useJobs } from '../../hooks/useJobs';
 import { usePagination } from '../../hooks/usePagination';
 import { useToast } from '../../hooks/useToast';
 import { useJobModals } from '../../hooks/useJobModals';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Jobs = () => {
   const { jobs, loading, fetchJobs } = useJobs();
   const { getPaginatedData } = usePagination();
   const { showMessage, messageType, message, showToast } = useToast();
   const {
-    showCreateModal,
-    setShowCreateModal,
     showEditModal,
     setShowEditModal,
     showDeleteModal,
@@ -30,6 +29,8 @@ const Jobs = () => {
   } = useJobModals();
   
   const [activeTab, setActiveTab] = useState('view');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { currentItems: currentJobs, totalPages, currentPage, handlePageChange } = 
     getPaginatedData(jobs.filter(job => activeTab === 'archived' ? 
@@ -41,11 +42,18 @@ const Jobs = () => {
     fetchJobs();
   }, []);
 
+  useEffect(() => {
+    // Set active tab based on URL query parameter
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['view', 'create', 'archived'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
   const handleJobCreated = async (jobData) => {
     try {
       await api.createJobPost(jobData);
       await fetchJobs(); // Refresh the job list
-      setShowCreateModal(false); // Close the create modal
       showToast('success', 'Job post created successfully!');
     } catch (error) {
       showToast('error', error.message || 'Error creating job post');
@@ -234,12 +242,6 @@ const Jobs = () => {
 
       {/* Keep the modals */}
       <Toast show={showMessage} type={messageType} message={message} />
-      <JobFormModal 
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={handleJobCreated}
-        isEditing={false}
-      />
 
       <JobFormModal 
         isOpen={showEditModal}

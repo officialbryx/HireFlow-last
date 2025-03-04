@@ -540,5 +540,92 @@ export const api = {
       console.error('Error restoring job post:', error);
       throw new Error('Failed to restore job post');
     }
+  },
+
+  async getJobStats() {
+    const { data, error } = await supabase
+      .from('job_posting')
+      .select('status')
+      .then(res => ({
+        active: res.data.filter(job => job.status === 'active').length,
+        archived: res.data.filter(job => job.status === 'archived').length
+      }));
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getRecentJobs(limit = 5) {
+    try {
+      const { data, error } = await supabase
+        .from('job_posting')
+        .select(`
+          id,
+          job_title,
+          status,
+          created_at,
+          applications:job_applications(count)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+
+      return data.map(job => ({
+        id: job.id,
+        title: job.job_title,
+        status: job.status,
+        applicants_count: job.applications?.[0]?.count || 0,
+        created_at: job.created_at
+      }));
+    } catch (error) {
+      console.error('Error fetching recent jobs:', error);
+      return null;
+    }
+  },
+
+  async getApplicantStats() {
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select('created_at')
+      .then(res => {
+        const total = res.data.length;
+        const lastMonth = res.data.filter(app => 
+          new Date(app.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        ).length;
+        return {
+          total,
+          monthlyChange: ((lastMonth / total) * 100).toFixed(1)
+        };
+      });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getShortlistedStats() {
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select('count')
+      .eq('status', 'shortlisted')
+      .single();
+
+    if (error) throw error;
+    return { total: data.count };
+  },
+
+  async getPopularJobRoles() {
+    const { data, error } = await supabase
+      .from('job_posting')
+      .select(`
+        id,
+        job_title,
+        applications:job_applications(count)
+      `)
+      .order('applications.count', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    return data;
   }
 };
