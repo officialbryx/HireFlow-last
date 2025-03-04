@@ -6,9 +6,9 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 
-const CreateJobPost = () => {
+const CreateJobPost = ({ onClose, onJobCreated }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -96,15 +96,15 @@ const CreateJobPost = () => {
         throw new Error("Please fill in all fields");
       }
 
-      const response = await api.createJobPost(formData);
-      
+      await onJobCreated(formData);
       setModalMessage("Job post created successfully!");
       setModalVisible(true);
       
-      // Reset form or redirect after successful submission
+      // Close modal after showing success message
       setTimeout(() => {
-        navigate('/jobs-test'); // Adjust the route as needed
-      }, 2000);
+        setModalVisible(false);
+        onClose(); // Close the create job modal
+      }, 1500);
 
     } catch (error) {
       setModalMessage(error.message || "Error creating job post. Please try again.");
@@ -115,8 +115,8 @@ const CreateJobPost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="relative">
+      <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
             Create Job Post
@@ -424,7 +424,7 @@ const CreateJobPost = () => {
               </button>
               <button
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={onClose} // Use the onClose prop
                 className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
               >
                 Cancel
