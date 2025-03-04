@@ -380,4 +380,22 @@ export const api = {
       throw new Error(error.message || "Failed to update password");
     }
   },
+
+  uploadResume: async (file) => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .upload(`user-resumes/${fileName}`, file);
+
+    if (error) throw error;
+    return data.path;
+  },
 };
