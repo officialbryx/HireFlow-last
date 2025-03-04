@@ -8,6 +8,9 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import JobFormModal from '../../components/modals/JobFormModal';
+import Toast from '../../components/notifications/Toast';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
 
 const Jobs = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -20,6 +23,8 @@ const Jobs = () => {
   const [jobsPerPage] = useState(9); // Show 9 jobs per page (3x3 grid)
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
 
   useEffect(() => {
     fetchJobs();
@@ -142,20 +147,18 @@ const Jobs = () => {
     }
   };
 
-  // Add this new function after handleJobEdited
   const handleDeleteJob = async (jobId, e) => {
+    // Stop event propagation to prevent edit modal from opening
+    e?.stopPropagation();
+    
+    // Set the job to delete and show the confirmation modal
+    setJobToDelete(jobId);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      // Stop event propagation to prevent edit modal from opening
-      e?.stopPropagation();
-      
-      if (!window.confirm('Are you sure you want to delete this job posting?')) {
-        return;
-      }
-  
-      // Delete the job post
-      await api.deleteJobPost(jobId);
-      
-      // Refresh the job list
+      await api.deleteJobPost(jobToDelete);
       await fetchJobs();
       
       setMessageType('success');
@@ -170,6 +173,9 @@ const Jobs = () => {
       setMessageType('error');
       setMessage(error.message || 'Error deleting job post');
       setShowMessage(true);
+    } finally {
+      setShowDeleteModal(false);
+      setJobToDelete(null);
     }
   };
 
@@ -353,59 +359,40 @@ const Jobs = () => {
         </div>
       </div>
 
-      {showMessage && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <div className={`rounded-lg shadow-lg p-4 ${
-            messageType === 'success' 
-              ? 'bg-green-100 border-l-4 border-green-500' 
-              : 'bg-red-100 border-l-4 border-red-500'
-          }`}>
-            <div className="flex items-center">
-              {messageType === 'success' ? (
-                <svg className="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-              <p className={`text-sm font-medium ${
-                messageType === 'success' ? 'text-green-800' : 'text-red-800'
-              }`}>
-                {message}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <Toast 
+        show={showMessage}
+        type={messageType}
+        message={message}
+      />
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CreateJobPost
-              onClose={() => setShowCreateModal(false)}
-              onJobCreated={handleJobCreated}
-            />
-          </div>
-        </div>
-      )}
+      <JobFormModal 
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleJobCreated}
+        isEditing={false}
+      />
 
-      {showEditModal && selectedJob && (
-        <div className="fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CreateJobPost
-              isEditing={true}
-              initialData={selectedJob}
-              onClose={() => {
-                setShowEditModal(false);
-                setSelectedJob(null);
-              }}
-              onJobCreated={handleJobEdited}
-            />
-          </div>
-        </div>
-      )}
+      <JobFormModal 
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedJob(null);
+        }}
+        onSubmit={handleJobEdited}
+        isEditing={true}
+        initialData={selectedJob}
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setJobToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Job Posting"
+        message="Are you sure you want to delete this job posting? This action cannot be undone."
+      />
     </div>
   );
 };

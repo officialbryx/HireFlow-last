@@ -10,7 +10,6 @@ import {
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 const JobPostTest = () => {
@@ -20,7 +19,6 @@ const JobPostTest = () => {
   const [jobListings, setJobListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -57,7 +55,7 @@ const JobPostTest = () => {
         }
       });
     };
-  }, []);
+  }, [jobListings]);
 
   // When selecting a job, fetch its full details
   const handleJobSelect = async (job) => {
@@ -126,7 +124,7 @@ const JobPostTest = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* NavBar */}
-      <div className="relative z-50 bg-white shadow fixed top-0 left-0 w-full">
+      <div className="z-50 bg-white shadow fixed top-0 left-0 w-full">
         <Navbar />
       </div>
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 import { validatePassword } from "../utils/passwordValidation";
-import SignupModal from "../components/SignupModal";
+import SignupModal from "../components/modals/SignupModal";
 
 const Signup = () => {
   const navigate = useNavigate();

@@ -1,15 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   MapPinIcon,
   BriefcaseIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../../services/api";
+
 
 const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState(
     initialData || {
       title: "",
@@ -228,7 +226,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                 <label className="block text-sm font-medium text-gray-700">
                   Company Logo
                 </label>
-                <div className="mt-2 flex items-center">
+                <div className="mt-2 space-y-2">
                   <input
                     type="file"
                     name="companyLogo"
@@ -236,6 +234,14 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                     accept="image/jpeg,image/png,image/gif"
                     className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
                   />
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-xs text-gray-500">
+                      Accepted file types: JPEG, PNG, GIF
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Maximum file size: 5MB
+                    </p>
+                  </div>
                 </div>
               </div>
 
