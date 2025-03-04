@@ -3,14 +3,11 @@ import Navbar from "../components/Navbar";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
-  BriefcaseIcon,
-  CurrencyDollarIcon,
   ShareIcon,
   UserGroupIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 
 const JobPostTest = () => {
@@ -20,15 +17,29 @@ const JobPostTest = () => {
   const [jobListings, setJobListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const data = await api.getAllJobPostings();
-        setJobListings(data);
+        // Filter out archived jobs and map the remaining jobs data
+        const mappedJobs = data
+          .filter(job => job.status !== 'archived')
+          .map(job => ({
+            id: job.id,
+            job_title: job.job_title,
+            company_name: job.company_name,
+            company_logo_url: job.company_logo_url,
+            location: job.location,
+            employment_type: job.employment_type,
+            created_at: job.created_at,
+            status: job.status,
+            skills: job.job_skill?.map(s => s.skill) || []
+          }));
+        setJobListings(mappedJobs);
         setIsLoading(false);
       } catch (err) {
+        console.error('Error fetching jobs:', err);
         setError("Failed to fetch job postings");
         setIsLoading(false);
       }
@@ -50,7 +61,27 @@ const JobPostTest = () => {
   const handleJobSelect = async (job) => {
     try {
       const jobDetails = await api.getJobPostingDetails(job.id);
-      setSelectedJob(jobDetails);
+      // Only show job details if the job is not archived
+      if (jobDetails.status !== 'archived') {
+        const mappedJobDetails = {
+          id: jobDetails.id,
+          job_title: jobDetails.job_title,
+          company_name: jobDetails.company_name,
+          company_logo_url: jobDetails.company_logo_url,
+          location: jobDetails.location,
+          employment_type: jobDetails.employment_type,
+          salary_range: jobDetails.salary_range,
+          applicants_needed: jobDetails.applicants_needed,
+          company_description: jobDetails.company_description,
+          about_company: jobDetails.about_company,
+          created_at: jobDetails.created_at,
+          status: jobDetails.status,
+          responsibilities: jobDetails.job_responsibility?.map(r => r.responsibility) || [],
+          qualifications: jobDetails.job_qualification?.map(q => q.qualification) || [],
+          skills: jobDetails.job_skill?.map(s => s.skill) || []
+        };
+        setSelectedJob(mappedJobDetails);
+      }
     } catch (err) {
       console.error('Error fetching job details:', err);
       setError("Failed to load job details");
@@ -95,7 +126,7 @@ const JobPostTest = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* NavBar */}
-      <div className="relative z-50 bg-white shadow fixed top-0 left-0 w-full">
+      <div className="z-50 bg-white shadow fixed top-0 left-0 w-full">
         <Navbar />
       </div>
 

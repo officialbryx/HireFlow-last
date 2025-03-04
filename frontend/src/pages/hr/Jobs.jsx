@@ -1,35 +1,174 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import HRNavbar from "../../components/HRNavbar";
-import CreateJobPost from "../hr/CreateJobPost";
+import ViewJobs from "../../components/jobs/ViewJobs";
+import CreateJob from "../../components/jobs/CreateJob";
+import ArchivedJobs from "../../components/jobs/ArchivedJobs";
 import { api } from "../../services/api";
+import JobFormModal from '../../components/modals/JobFormModal';
+import Toast from '../../components/notifications/Toast';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import { useJobs } from '../../hooks/useJobs';
+import { usePagination } from '../../hooks/usePagination';
+import { useToast } from '../../hooks/useToast';
+import { useJobModals } from '../../hooks/useJobModals';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Jobs = () => {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { jobs, loading, fetchJobs } = useJobs();
+  const { getPaginatedData } = usePagination();
+  const { showMessage, messageType, message, showToast } = useToast();
+  const {
+    showEditModal,
+    setShowEditModal,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedJob,
+    setSelectedJob,
+    jobToDelete,
+    setJobToDelete
+  } = useJobModals();
+  
+  const [activeTab, setActiveTab] = useState('view');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const { currentItems: currentJobs, totalPages, currentPage, handlePageChange } = 
+    getPaginatedData(jobs.filter(job => activeTab === 'archived' ? 
+      job.status === 'archived' : 
+      job.status !== 'archived'
+    ));
 
   useEffect(() => {
     fetchJobs();
   }, []);
 
-  const fetchJobs = async () => {
-    try {
-      const jobPosts = await api.getAllJobPostings();
-      setJobs(jobPosts);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Set active tab based on URL query parameter
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['view', 'create', 'archived'].includes(tabParam)) {
+      setActiveTab(tabParam);
     }
-  };
+  }, [searchParams]);
 
   const handleJobCreated = async (jobData) => {
     try {
       await api.createJobPost(jobData);
       await fetchJobs(); // Refresh the job list
-      setShowCreateModal(false); // Close the modal after successful creation
+      showToast('success', 'Job post created successfully!');
     } catch (error) {
-      console.error("Error creating job:", error);
+      showToast('error', error.message || 'Error creating job post');
+    }
+  };
+
+  const handleEditJob = async (jobId) => {
+    try {
+      const jobDetails = await api.getJobPostingDetails(jobId);
+      console.log('Raw Job Details:', jobDetails); // For debugging
+
+      // Map API response to form data structure with proper array handling
+      const mappedJobDetails = {
+        title: jobDetails.job_title || '',
+        companyName: jobDetails.company_name || '',
+        companyLogo: jobDetails.company_logo_url || null,
+        location: jobDetails.location || '',
+        employmentType: jobDetails.employment_type || 'Full-time',
+        salaryRange: jobDetails.salary_range || '',
+        applicantsNeeded: jobDetails.applicants_needed || '',
+        companyDescription: jobDetails.company_description || '',
+        // Ensure we're accessing the nested arrays correctly
+        responsibilities: Array.isArray(jobDetails.job_responsibility) 
+          ? jobDetails.job_responsibility.map(r => r.responsibility)
+          : [''],
+        qualifications: Array.isArray(jobDetails.job_qualification)
+          ? jobDetails.job_qualification.map(q => q.qualification)
+          : [''],
+        skills: Array.isArray(jobDetails.job_skill)
+          ? jobDetails.job_skill.map(s => s.skill)
+          : [''],
+        aboutCompany: jobDetails.about_company || '',
+        id: jobDetails.id
+      };
+
+      console.log('Mapped Job Details:', mappedJobDetails); // For debugging
+      setSelectedJob(mappedJobDetails);
+      setShowEditModal(true);
+    } catch (error) {
+      console.error('Error fetching job details:', error);
+      showToast('error', 'Error fetching job details');
+    }
+  };
+
+  const handleJobEdited = async (updatedJobData) => {
+    try {
+      if (!selectedJob?.id) {
+        throw new Error('No job ID found for updating');
+      }
+
+      // Map form data to API format
+      const mappedData = {
+        id: selectedJob.id,
+        job_title: updatedJobData.title,
+        company_name: updatedJobData.companyName,
+        company_logo_url: updatedJobData.companyLogo,
+        oldLogoUrl: selectedJob.companyLogo,
+        location: updatedJobData.location,
+        employment_type: updatedJobData.employmentType,
+        salary_range: updatedJobData.salaryRange,
+        applicants_needed: updatedJobData.applicantsNeeded,
+        company_description: updatedJobData.companyDescription,
+        responsibilities: updatedJobData.responsibilities.filter(r => r.trim() !== ''),
+        qualifications: updatedJobData.qualifications.filter(q => q.trim() !== ''),
+        about_company: updatedJobData.aboutCompany,
+        skills: updatedJobData.skills.filter(s => s.trim() !== '')
+      };
+
+      await api.updateJobPost(selectedJob.id, mappedData);
+      setShowEditModal(false);
+      setSelectedJob(null);
+      
+      // Fetch fresh data after update
+      await fetchJobs();
+      
+      showToast('success', 'Job post updated successfully!');
+    } catch (error) {
+      console.error('Error updating job:', error);
+      showToast('error', error.message || 'Error updating job post');
+    }
+  };
+
+  // Rename handleDeleteJob to handleArchiveJob
+  const handleArchiveJob = async (jobId, e) => {
+    e?.stopPropagation();
+    setJobToDelete(jobId); // We can keep this state name for now
+    setShowDeleteModal(true);
+  };
+
+  // Rename handleConfirmDelete to handleConfirmArchive
+  const handleConfirmArchive = async () => {
+    try {
+      await api.archiveJobPost(jobToDelete);
+      await fetchJobs();
+      
+      showToast('success', 'Job post archived successfully!');
+    } catch (error) {
+      console.error('Error archiving job:', error);
+      showToast('error', error.message || 'Error archiving job post');
+    } finally {
+      setShowDeleteModal(false);
+      setJobToDelete(null);
+    }
+  };
+
+  // Add restore functionality
+  const handleRestore = async (jobId) => {
+    try {
+      await api.restoreJobPost(jobId);
+      await fetchJobs();
+      
+      showToast('success', 'Job post restored successfully!');
+    } catch (error) {
+      console.error('Error restoring job:', error);
+      showToast('error', error.message || 'Error restoring job post');
     }
   };
 
@@ -38,96 +177,94 @@ const Jobs = () => {
       <HRNavbar />
       <div className="pt-16 px-4">
         <div className="max-w-7xl mx-auto py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900">Job Management</h1>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              Create New Job
-            </button>
+          {/* Tabs */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('view')}
+                className={`${
+                  activeTab === 'view'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                View Jobs
+              </button>
+              <button
+                onClick={() => setActiveTab('create')}
+                className={`${
+                  activeTab === 'create'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Create Job
+              </button>
+              <button
+                onClick={() => setActiveTab('archived')}
+                className={`${
+                  activeTab === 'archived'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Archived Jobs
+              </button>
+            </nav>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {jobs.map((job) => (
-                <div
-                  key={job._id}
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-                >
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                    {job.title}
-                  </h2>
-                  <p className="text-gray-600 mb-4">{job.company}</p>
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <svg
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {job.location}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <svg
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {job.employmentType}
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-sm font-medium text-blue-600">
-                      {job.status}
-                    </span>
-                    <div className="flex space-x-2">
-                      <button
-                        className="text-gray-600 hover:text-blue-600"
-                        onClick={() => handleEditJob(job._id)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="text-gray-600 hover:text-red-600"
-                        onClick={() => handleDeleteJob(job._id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Tab Content */}
+          {activeTab === 'view' && (
+            <ViewJobs
+              jobs={jobs.filter(job => job.status !== 'archived')}
+              loading={loading}
+              currentJobs={currentJobs.filter(job => job.status !== 'archived')}
+              handleEditJob={handleEditJob}
+              handleDeleteJob={handleArchiveJob} // Update the prop name in ViewJobs component
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={handlePageChange}
+            />
+          )}
+
+          {activeTab === 'create' && (
+            <CreateJob onJobCreated={handleJobCreated} />
+          )}
+
+          {activeTab === 'archived' && (
+            <ArchivedJobs
+              archivedJobs={jobs.filter(job => job.status === 'archived')}
+              handleRestore={handleRestore}
+            />
           )}
         </div>
       </div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CreateJobPost
-              onClose={() => setShowCreateModal(false)}
-              onJobCreated={handleJobCreated}
-            />
-          </div>
-        </div>
-      )}
+      {/* Keep the modals */}
+      <Toast show={showMessage} type={messageType} message={message} />
+
+      <JobFormModal 
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedJob(null);
+        }}
+        onSubmit={handleJobEdited}
+        isEditing={true}
+        initialData={selectedJob}
+      />
+
+      {/* Update the confirmation modal text */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setJobToDelete(null);
+        }}
+        onConfirm={handleConfirmArchive}
+        title="Archive Job Posting"
+        message="Are you sure you want to archive this job posting? It will be moved to the archived jobs section."
+      />
     </div>
   );
 };

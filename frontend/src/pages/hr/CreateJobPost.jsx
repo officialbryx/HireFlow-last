@@ -1,32 +1,30 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   MapPinIcon,
   BriefcaseIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../../services/api";
 
-const CreateJobPost = ({ onClose, onJobCreated }) => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: "",
-    companyName: "",
-    companyLogo: null,
-    location: "",
-    employmentType: "Full-time",
-    salaryRange: "",
-    applicantsNeeded: "",
-    companyDescription: "",
-    responsibilities: [""],
-    qualifications: [""],
-    aboutCompany: "",
-    skills: [""],
-  });
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
+  const [formData, setFormData] = useState(
+    initialData || {
+      title: "",
+      companyName: "",
+      companyLogo: null,
+      location: "",
+      employmentType: "Full-time",
+      salaryRange: "",
+      applicantsNeeded: "",
+      companyDescription: "",
+      responsibilities: [""],
+      qualifications: [""],
+      aboutCompany: "",
+      skills: [""],
+    }
+  );
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
@@ -37,25 +35,13 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type and size
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-
-      if (!validTypes.includes(file.type)) {
-        setModalMessage("Please upload a valid image file (JPEG, PNG, or GIF)");
-        setModalVisible(true);
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('File size must be less than 5MB');
         return;
       }
-
-      if (file.size > maxSize) {
-        setModalMessage("File size should be less than 5MB");
-        setModalVisible(true);
-        return;
-      }
-
       setFormData(prev => ({
         ...prev,
         companyLogo: file
@@ -89,26 +75,24 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
     setIsSubmitting(true);
 
     try {
-      // Validate form data
+      const submitData = { ...formData };
+      
+      // Validate required fields
       if (formData.responsibilities.some(r => !r.trim()) ||
           formData.qualifications.some(q => !q.trim()) ||
           formData.skills.some(s => !s.trim())) {
         throw new Error("Please fill in all fields");
       }
 
-      await onJobCreated(formData);
-      setModalMessage("Job post created successfully!");
-      setModalVisible(true);
-      
-      // Close modal after showing success message
-      setTimeout(() => {
-        setModalVisible(false);
-        onClose(); // Close the create job modal
-      }, 1500);
+      // Clean up arrays
+      submitData.responsibilities = formData.responsibilities.filter(r => r.trim());
+      submitData.qualifications = formData.qualifications.filter(q => q.trim());
+      submitData.skills = formData.skills.filter(s => s.trim());
 
+      await onJobCreated(submitData);
     } catch (error) {
-      setModalMessage(error.message || "Error creating job post. Please try again.");
-      setModalVisible(true);
+      console.error('Error submitting job:', error);
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -119,7 +103,7 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Create Job Post
+            {isEditing ? 'Edit Job Post' : 'Create Job Post'}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -242,7 +226,7 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
                 <label className="block text-sm font-medium text-gray-700">
                   Company Logo
                 </label>
-                <div className="mt-2 flex items-center">
+                <div className="mt-2 space-y-2">
                   <input
                     type="file"
                     name="companyLogo"
@@ -250,12 +234,20 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
                     accept="image/jpeg,image/png,image/gif"
                     className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
                   />
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-xs text-gray-500">
+                      Accepted file types: JPEG, PNG, GIF
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Maximum file size: 5MB
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Company Description
+                  Job Description
                 </label>
                 <textarea
                   name="companyDescription"
@@ -414,42 +406,30 @@ const CreateJobPost = ({ onClose, onJobCreated }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-1/2 px-6 py-3 rounded-md text-white transition-colors ${
+                className={`${
+                  isEditing ? 'w-1/2' : 'w-full'
+                } px-6 py-3 rounded-md text-white transition-colors ${
                   isSubmitting 
                     ? 'bg-blue-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
-                {isSubmitting ? 'Creating...' : 'Create Job Post'}
+                {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Job Post'}
               </button>
-              <button
-                type="button"
-                onClick={onClose} // Use the onClose prop
-                className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
-              >
-                Cancel
-              </button>
+              
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>
       </div>
-
-      {/* Modal */}
-      {modalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow p-8">
-            <p className="text-lg font-semibold text-gray-900">
-              {modalMessage}
-            </p>
-            <button
-              onClick={() => setModalVisible(false)}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
