@@ -2,12 +2,25 @@ import { Link } from "react-router-dom";
 import {
   HomeIcon,
   BriefcaseIcon,
-  BellIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import NotificationsDropdown from "./notifications/NotificationsDropdown";
 
 const HRNavbar = () => {
+  // This would typically come from your notifications state/context
+  const notifications = [
+    {
+      id: 1,
+      jobId: '123',
+      jobTitle: 'Frontend Developer',
+      message: 'New candidate shortlisted for review',
+      createdAt: new Date(),
+      read: false
+    },
+    // Add more notifications as needed
+  ];
+
   return (
     <nav className="fixed top-0 w-full bg-white border-b border-gray-200 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -35,11 +48,7 @@ const HRNavbar = () => {
               text="Jobs"
               to="/hr/jobs"
             />
-            <NavItem
-              icon={<BellIcon className="h-5 w-5" />}
-              text="Notifications"
-              to="/hr/notifications"
-            />
+            <NotificationsDropdown notifications={notifications} />
             <div className="border-l border-gray-200 h-8" />
             <NavItem
               icon={<Cog6ToothIcon className="h-5 w-5" />}
