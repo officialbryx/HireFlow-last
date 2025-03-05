@@ -188,9 +188,25 @@ const FormField = ({ label, required, children, className = "" }) => (
 const MyInformation = ({ formData, setFormData }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const finalValue = type === "checkbox" ? checked : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: finalValue,
+      // Update personal_info.phone when phone-related fields change
+      ...(name === "phoneType" || name === "phoneCode" || name === "phoneNumber"
+        ? {
+            personal_info: {
+              ...prev.personal_info,
+              phone: {
+                ...prev.personal_info?.phone,
+                type: name === "phoneType" ? finalValue : prev.phoneType,
+                code: name === "phoneCode" ? finalValue : prev.phoneCode,
+                number: name === "phoneNumber" ? finalValue : prev.phoneNumber,
+              },
+            },
+          }
+        : {}),
     }));
   };
 

@@ -41,6 +41,10 @@ const MyExperience = ({ formData, setFormData }) => {
 
   const handleWorkExperienceChange = (index, field, value) => {
     const newWorkExperience = [...formData.workExperience];
+    // Ensure dates are properly formatted
+    if (field === "fromDate" || field === "toDate") {
+      value = value ? value : null;
+    }
     newWorkExperience[index] = { ...newWorkExperience[index], [field]: value };
     setFormData((prev) => ({ ...prev, workExperience: newWorkExperience }));
   };
@@ -117,13 +121,13 @@ const MyExperience = ({ formData, setFormData }) => {
   const addWebsite = () => {
     setFormData((prev) => ({
       ...prev,
-      websites: [...(prev.websites || []), { url: "" }],
+      websites: [...(prev.websites || []), ""], // Store as string array
     }));
   };
 
   const handleWebsiteChange = (index, value) => {
     const newWebsites = [...(formData.websites || [])];
-    newWebsites[index].url = value;
+    newWebsites[index] = value; // Store direct URL string
     setFormData((prev) => ({ ...prev, websites: newWebsites }));
   };
 
@@ -556,12 +560,22 @@ const MyExperience = ({ formData, setFormData }) => {
       >
         <div className="space-y-6">
           <div className="space-y-4">
-            <h4 className="font-medium text-gray-700">Websites</h4>
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium text-gray-700">Websites</h4>
+              <button
+                type="button"
+                onClick={addWebsite}
+                className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <PlusCircleIcon className="h-5 w-5 mr-2" />
+                Add Website
+              </button>
+            </div>
             {(formData.websites || []).map((website, index) => (
               <div key={index} className="flex items-center gap-2">
                 <input
                   type="url"
-                  value={website.url}
+                  value={website}
                   onChange={(e) => handleWebsiteChange(index, e.target.value)}
                   placeholder="https://example.com"
                   className={inputStyles}
@@ -574,14 +588,6 @@ const MyExperience = ({ formData, setFormData }) => {
                 </button>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addWebsite}
-              className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
-            >
-              <PlusCircleIcon className="h-5 w-5 mr-2" />
-              Add Website
-            </button>
           </div>
 
           <div className="space-y-2">

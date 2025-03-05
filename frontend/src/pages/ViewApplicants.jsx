@@ -27,7 +27,7 @@ const ViewApplicants = () => {
           .select(
             `
           *,
-          profiles!applications_user_id_fkey (
+          profiles:profiles(
             first_name,
             middle_name,
             last_name,
@@ -42,8 +42,14 @@ const ViewApplicants = () => {
         throw applicationsError;
       }
 
-      console.log("Fetched applications:", applicationsData);
-      setApplicants(applicationsData);
+      // Debug log to check the data
+      console.log("Raw applications data:", applicationsData);
+
+      if (applicationsData) {
+        setApplicants(applicationsData);
+      } else {
+        console.log("No applications data received");
+      }
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -215,12 +221,14 @@ const ViewApplicants = () => {
   const renderApplicantsList = () => (
     <div className="w-1/3 bg-white rounded-lg shadow">
       <div className="p-4 border-b">
-        <h2 className="font-semibold">Applicants ({applicants.length})</h2>
+        <h2 className="font-semibold">
+          Applicants ({applicants ? applicants.length : 0})
+        </h2>
       </div>
       <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
         {loading ? (
           <div className="p-4">Loading applicants...</div>
-        ) : applicants.length === 0 ? (
+        ) : !applicants || applicants.length === 0 ? (
           <div className="p-4 text-gray-500">No applicants found</div>
         ) : (
           applicants.map((applicant) => (
@@ -234,14 +242,16 @@ const ViewApplicants = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-medium">
-                    {applicant.personal_info.given_name}{" "}
-                    {applicant.personal_info.family_name}
+                    {applicant.personal_info?.given_name || "N/A"}{" "}
+                    {applicant.personal_info?.family_name || ""}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Applied to: {applicant.company}
+                    Applied to: {applicant.company || "N/A"}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(applicant.created_at).toLocaleDateString()}
+                    {applicant.created_at
+                      ? new Date(applicant.created_at).toLocaleDateString()
+                      : "N/A"}
                   </p>
                 </div>
                 <span
@@ -253,8 +263,8 @@ const ViewApplicants = () => {
                       : "bg-red-100 text-red-800"
                   }`}
                 >
-                  {applicant.status.charAt(0).toUpperCase() +
-                    applicant.status.slice(1)}
+                  {applicant.status?.charAt(0).toUpperCase() +
+                    applicant.status?.slice(1) || "Pending"}
                 </span>
               </div>
             </div>
@@ -280,12 +290,14 @@ const ViewApplicants = () => {
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-bold">
-                {selectedApplicant.profile?.first_name}{" "}
-                {selectedApplicant.profile?.middle_name}{" "}
-                {selectedApplicant.profile?.last_name}
+                {selectedApplicant.personal_info.given_name}{" "}
+                {selectedApplicant.personal_info.middle_name}{" "}
+                {selectedApplicant.personal_info.family_name}
+                {selectedApplicant.personal_info.suffix &&
+                  ` ${selectedApplicant.personal_info.suffix}`}
               </h2>
               <p className="text-gray-600">
-                Applied for: {selectedApplicant.position}
+                Applied to: {selectedApplicant.company}
               </p>
               <p className="text-sm text-gray-500">
                 Applied on: {formatDate(selectedApplicant.created_at)}
@@ -310,58 +322,117 @@ const ViewApplicants = () => {
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-4">Contact Information</h3>
             <div className="grid grid-cols-2 gap-4">
-              <InfoItem label="Email" value={selectedApplicant.user?.email} />
+              <InfoItem
+                label="Email"
+                value={selectedApplicant.contact_info.email}
+              />
               <InfoItem
                 label="Phone"
-                value={selectedApplicant.profile?.phone}
+                value={`${selectedApplicant.contact_info.phone_code} ${selectedApplicant.contact_info.phone_number}`}
               />
               <InfoItem
-                label="Address"
-                value={`${selectedApplicant.profile?.street}${
-                  selectedApplicant.profile?.additional_address
-                    ? `, ${selectedApplicant.profile.additional_address}`
-                    : ""
-                }, ${selectedApplicant.profile?.city}, ${
-                  selectedApplicant.profile?.province
-                }`}
-              />
-              <InfoItem
-                label="Country"
-                value={selectedApplicant.profile?.country}
+                label="Phone Type"
+                value={selectedApplicant.contact_info.phone_type}
               />
             </div>
           </div>
 
+          {/* Address */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Address</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <InfoItem
+                label="Street"
+                value={selectedApplicant.address.street}
+              />
+              {selectedApplicant.address.additional_address && (
+                <InfoItem
+                  label="Additional Address"
+                  value={selectedApplicant.address.additional_address}
+                />
+              )}
+              <InfoItem label="City" value={selectedApplicant.address.city} />
+              <InfoItem
+                label="Province"
+                value={selectedApplicant.address.province}
+              />
+              <InfoItem
+                label="Postal Code"
+                value={selectedApplicant.address.postal_code}
+              />
+              <InfoItem
+                label="Country"
+                value={selectedApplicant.address.country}
+              />
+            </div>
+          </div>
+
+          {/* Previous Employment */}
+          {selectedApplicant.previous_employment && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold mb-4">Previous Employment</h3>
+              <div className="space-y-2">
+                <InfoItem
+                  label={`Previously employed at ${selectedApplicant.company}`}
+                  value={
+                    selectedApplicant.previous_employment.previously_employed
+                      ? "Yes"
+                      : "No"
+                  }
+                />
+                {selectedApplicant.previous_employment.employee_id && (
+                  <InfoItem
+                    label="Employee ID"
+                    value={selectedApplicant.previous_employment.employee_id}
+                  />
+                )}
+                {selectedApplicant.previous_employment.manager && (
+                  <InfoItem
+                    label="Previous Manager"
+                    value={selectedApplicant.previous_employment.manager}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Work Experience */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-4">Work Experience</h3>
-            {selectedApplicant.experience?.map((exp, index) => (
-              <div
-                key={index}
-                className="mb-4 border-b border-gray-200 pb-4 last:border-0 last:pb-0"
-              >
-                <h4 className="font-medium">{exp.position}</h4>
-                <p className="text-gray-600">{exp.company}</p>
-                <p className="text-sm text-gray-500">
-                  {formatDate(exp.start_date)} -{" "}
-                  {exp.current_work ? "Present" : formatDate(exp.end_date)}
-                </p>
-                <p className="mt-2 text-gray-600">{exp.description}</p>
+            {selectedApplicant.no_work_experience ? (
+              <p className="text-gray-500">No work experience</p>
+            ) : (
+              <div className="space-y-6">
+                {selectedApplicant.work_experience.map((exp, index) => (
+                  <div
+                    key={index}
+                    className="border-b border-gray-200 pb-4 last:border-0 last:pb-0"
+                  >
+                    <h4 className="font-medium">{exp.jobTitle}</h4>
+                    <p className="text-gray-600">{exp.company}</p>
+                    <p className="text-gray-600">{exp.location}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatDate(exp.fromDate)} -{" "}
+                      {exp.currentWork ? "Present" : formatDate(exp.toDate)}
+                    </p>
+                    <p className="mt-2 text-gray-600">{exp.description}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
           {/* Education */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-4">Education</h3>
-            {selectedApplicant.education?.map((edu, index) => (
+            {selectedApplicant.education.map((edu, index) => (
               <div key={index} className="mb-4 last:mb-0">
                 <h4 className="font-medium">{edu.school}</h4>
                 <p className="text-gray-600">
-                  {edu.degree} in {edu.field_of_study}
+                  {edu.degree} in {edu.fieldOfStudy}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {edu.from_year} - {edu.to_year}
+                  {edu.fromYear} - {edu.toYear}
                 </p>
                 {edu.gpa && (
                   <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
@@ -374,14 +445,56 @@ const ViewApplicants = () => {
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="font-semibold mb-4">Skills</h3>
             <div className="flex flex-wrap gap-2">
-              {selectedApplicant.skills?.map((skill, index) => (
+              {selectedApplicant.skills.map((skill, index) => (
                 <span
                   key={index}
                   className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
                 >
-                  {skill.name}
+                  {skill}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Online Presence */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Online Presence</h3>
+            <div className="space-y-4">
+              {selectedApplicant.websites &&
+                selectedApplicant.websites.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-2">Websites</h4>
+                    <div className="space-y-2">
+                      {selectedApplicant.websites.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-blue-600 hover:text-blue-800"
+                        >
+                          {url}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {selectedApplicant.linkedin_url && (
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    LinkedIn Profile
+                  </h4>
+                  <a
+                    href={selectedApplicant.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    {selectedApplicant.linkedin_url}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

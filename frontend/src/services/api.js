@@ -106,27 +106,51 @@ export const api = {
           middle_name: applicationData.middleName,
           family_name: applicationData.familyName,
           suffix: applicationData.suffix,
-          address: applicationData.givenAddress,
-          email: applicationData.givenEmail,
           phone: {
-            type: applicationData.givenPhoneDeviceType,
-            code: applicationData.givenCountryPhoneCode,
-            number: applicationData.givenPhoneNumber,
-            extension: applicationData.givenPhoneExtension,
+            type: applicationData.phoneType,
+            code: applicationData.phoneCode,
+            number: applicationData.phoneNumber,
           },
+        },
+        contact_info: {
+          email: applicationData.email,
+          phone_type: applicationData.phoneType,
+          phone_code: applicationData.phoneCode,
+          phone_number: applicationData.phoneNumber,
+        },
+        address: {
+          street: applicationData.street,
+          additional_address: applicationData.additionalAddress,
+          city: applicationData.city,
+          province: applicationData.province,
+          postal_code: applicationData.postalCode,
+          country: applicationData.country,
+        },
+        previous_employment: {
+          previously_employed: applicationData.previouslyEmployed === "yes",
+          employee_id: applicationData.employeeID,
+          manager: applicationData.givenManager,
         },
         work_experience: applicationData.noWorkExperience
           ? []
-          : applicationData.workExperience,
+          : applicationData.workExperience.map((exp) => ({
+              ...exp,
+              fromDate: exp.fromDate || null,
+              toDate: exp.currentWork ? null : exp.toDate || null,
+            })),
         education: applicationData.education,
         skills: applicationData.skills,
         resume_url: resumeUrl,
-        websites: applicationData.websites
-          .filter((w) => w.url)
-          .map((w) => w.url),
+        websites: (applicationData.websites || []).filter(
+          (url) => url && url.trim()
+        ),
         linkedin_url: applicationData.linkedinUrl,
         application_questions: applicationData.applicationQuestions,
         terms_accepted: applicationData.termsAccepted,
+        email: applicationData.email,
+        phone_type: applicationData.phoneType,
+        phone_code: applicationData.phoneCode,
+        phone_number: applicationData.phoneNumber,
         user_id: user.id,
       };
 
