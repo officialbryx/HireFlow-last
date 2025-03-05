@@ -21,41 +21,31 @@ const ViewApplicants = () => {
 
   const fetchApplicants = async () => {
     try {
-      console.log("Fetching applicants...");
-
-      // Check if user is authenticated
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (userError) {
-        console.error("Auth error:", userError);
-        throw userError;
-      }
-      console.log("Current user:", user);
-
-      // Fetch applications with more detailed error logging
       const { data: applicationsData, error: applicationsError } =
         await supabase
           .from("applications")
-          .select("*")
+          .select(
+            `
+          *,
+          profiles!applications_user_id_fkey (
+            first_name,
+            middle_name,
+            last_name,
+            user_type
+          )
+        `
+          )
           .order("created_at", { ascending: false });
 
       if (applicationsError) {
-        console.error("Applications fetch error:", applicationsError);
+        console.error("Error fetching applications:", applicationsError);
         throw applicationsError;
       }
 
       console.log("Fetched applications:", applicationsData);
-
-      if (applicationsData && applicationsData.length > 0) {
-        setApplicants(applicationsData);
-      } else {
-        console.log("No applications found");
-        setApplicants([]);
-      }
+      setApplicants(applicationsData);
     } catch (error) {
-      console.error("Error in fetchApplicants:", error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -285,23 +275,22 @@ const ViewApplicants = () => {
 
     return (
       <div className="w-2/3 bg-white rounded-lg shadow">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
+        <div className="p-6 space-y-8">
+          {/* Header Section */}
+          <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-bold">
-                {selectedApplicant.personal_info.given_name}{" "}
-                {selectedApplicant.personal_info.family_name}
+                {selectedApplicant.profile?.first_name}{" "}
+                {selectedApplicant.profile?.middle_name}{" "}
+                {selectedApplicant.profile?.last_name}
               </h2>
               <p className="text-gray-600">
-                Applied for: {selectedApplicant.company}
+                Applied for: {selectedApplicant.position}
               </p>
               <p className="text-sm text-gray-500">
-                Applied on:{" "}
-                {new Date(selectedApplicant.created_at).toLocaleDateString()}
+                Applied on: {formatDate(selectedApplicant.created_at)}
               </p>
             </div>
-            {/* Resume and LinkedIn links */}
             <div className="flex gap-4">
               {selectedApplicant.resume_url && (
                 <a
@@ -314,110 +303,125 @@ const ViewApplicants = () => {
                   View Resume
                 </a>
               )}
-              {selectedApplicant.linkedin_url && (
-                <a
-                  href={selectedApplicant.linkedin_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  LinkedIn Profile
-                </a>
-              )}
             </div>
           </div>
 
-          {/* Tabbed content */}
-          <div className="mt-6 space-y-6">
-            {/* Personal Information */}
-            <div>
-              <h3 className="font-semibold mb-4">Personal Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-gray-600">Email</label>
-                  <p>{selectedApplicant.personal_info.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">Phone</label>
-                  <p>
-                    {selectedApplicant.personal_info.phone.code}{" "}
-                    {selectedApplicant.personal_info.phone.number}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600">Address</label>
-                  <p>{selectedApplicant.personal_info.address}</p>
-                </div>
+          {/* Contact Information */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Contact Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <InfoItem label="Email" value={selectedApplicant.user?.email} />
+              <InfoItem
+                label="Phone"
+                value={selectedApplicant.profile?.phone}
+              />
+              <InfoItem
+                label="Address"
+                value={`${selectedApplicant.profile?.street}${
+                  selectedApplicant.profile?.additional_address
+                    ? `, ${selectedApplicant.profile.additional_address}`
+                    : ""
+                }, ${selectedApplicant.profile?.city}, ${
+                  selectedApplicant.profile?.province
+                }`}
+              />
+              <InfoItem
+                label="Country"
+                value={selectedApplicant.profile?.country}
+              />
+            </div>
+          </div>
+
+          {/* Work Experience */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Work Experience</h3>
+            {selectedApplicant.experience?.map((exp, index) => (
+              <div
+                key={index}
+                className="mb-4 border-b border-gray-200 pb-4 last:border-0 last:pb-0"
+              >
+                <h4 className="font-medium">{exp.position}</h4>
+                <p className="text-gray-600">{exp.company}</p>
+                <p className="text-sm text-gray-500">
+                  {formatDate(exp.start_date)} -{" "}
+                  {exp.current_work ? "Present" : formatDate(exp.end_date)}
+                </p>
+                <p className="mt-2 text-gray-600">{exp.description}</p>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Education */}
-            <div>
-              <h3 className="font-semibold mb-4">Education</h3>
-              {selectedApplicant.education.map((edu, index) => (
-                <div key={index} className="mb-4">
-                  <p className="font-medium">{edu.school}</p>
-                  <p className="text-sm text-gray-600">
-                    {edu.degree} in {edu.fieldOfStudy}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {edu.fromYear} - {edu.toYear}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Skills */}
-            <div>
-              <h3 className="font-semibold mb-4">Skills</h3>
-              <div className="flex flex-wrap gap-2">
-                {selectedApplicant.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Application Questions */}
-            <div>
-              <h3 className="font-semibold mb-4">Screening Questions</h3>
-              <div className="space-y-2">
-                {Object.entries(selectedApplicant.application_questions).map(
-                  ([key, value]) => (
-                    <div key={key} className="flex items-start gap-2">
-                      <div
-                        className={`mt-1 ${
-                          value === "yes" ? "text-green-500" : "text-red-500"
-                        }`}
-                      >
-                        {value === "yes" ? (
-                          <CheckCircleIcon className="h-5 w-5" />
-                        ) : (
-                          <XCircleIcon className="h-5 w-5" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {value.charAt(0).toUpperCase() + value.slice(1)}
-                        </p>
-                      </div>
-                    </div>
-                  )
+          {/* Education */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Education</h3>
+            {selectedApplicant.education?.map((edu, index) => (
+              <div key={index} className="mb-4 last:mb-0">
+                <h4 className="font-medium">{edu.school}</h4>
+                <p className="text-gray-600">
+                  {edu.degree} in {edu.field_of_study}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {edu.from_year} - {edu.to_year}
+                </p>
+                {edu.gpa && (
+                  <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
                 )}
               </div>
+            ))}
+          </div>
+
+          {/* Skills */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {selectedApplicant.skills?.map((skill, index) => (
+                <span
+                  key={index}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Application Questions */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Screening Questions</h3>
+            <div className="space-y-4">
+              {Object.entries(
+                selectedApplicant.application_questions || {}
+              ).map(([key, value]) => (
+                <div key={key} className="flex items-start gap-2">
+                  {value === "yes" ? (
+                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <XCircleIcon className="h-5 w-5 text-red-500" />
+                  )}
+                  <div>
+                    <p className="text-sm text-gray-900">
+                      {key.replace(/([A-Z])/g, " $1").trim()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {value === "yes" ? "Yes" : "No"}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
     );
   };
+
+  // Add this helper component
+  const InfoItem = ({ label, value }) => (
+    <div>
+      <label className="text-sm text-gray-600">{label}</label>
+      <p className="text-gray-900">{value || "Not provided"}</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -40,7 +40,6 @@ const Login = () => {
     e.preventDefault();
     setIsSubmitted(true);
 
-    // Check if any required fields are empty
     if (!formData.email || !formData.password) {
       setError("Please fill in all required fields");
       return;
@@ -50,7 +49,6 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Sign in with Supabase auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -77,7 +75,12 @@ const Login = () => {
             .insert([
               {
                 id: data.user.id,
-                email: data.user.email,
+                first_name: "",
+                middle_name: "",
+                last_name: "",
+                user_type: "jobseeker",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
               },
             ]);
 
