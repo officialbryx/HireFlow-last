@@ -12,11 +12,11 @@ const HRNavbar = () => {
   const notifications = [
     {
       id: 1,
-      jobId: '123',
-      jobTitle: 'Frontend Developer',
-      message: 'New candidate shortlisted for review',
+      jobId: "123",
+      jobTitle: "Frontend Developer",
+      message: "New candidate shortlisted for review",
       createdAt: new Date(),
-      read: false
+      read: false,
     },
     // Add more notifications as needed
   ];

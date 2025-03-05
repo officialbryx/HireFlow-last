@@ -81,7 +81,7 @@ const App = () => {
 
       {/* Forgot Password Page */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      
+
       {/* HR Routes */}
       <Route path="/hr/dashboard" element={<Dashboard />} />
       <Route path="/hr/jobs" element={<Jobs />} />
