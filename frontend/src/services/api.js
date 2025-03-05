@@ -245,8 +245,9 @@ export const api = {
   async getJobPostingDetails(jobId) {
     try {
       const { data: jobPost, error } = await supabase
-        .from('job_posting')
-        .select(`
+        .from("job_posting")
+        .select(
+          `
           *,
           job_responsibility (
             responsibility
@@ -257,16 +258,17 @@ export const api = {
           job_skill (
             skill
           )
-        `)
-        .eq('id', jobId)
+        `
+        )
+        .eq("id", jobId)
         .single();
 
       if (error) throw error;
 
-      console.log('API Response:', jobPost); // For debugging
+      console.log("API Response:", jobPost); // For debugging
       return jobPost;
     } catch (error) {
-      console.error('Error fetching job posting details:', error);
+      console.error("Error fetching job posting details:", error);
       throw error;
     }
   },
@@ -303,22 +305,52 @@ export const api = {
     }
   },
 
-  // Add these new methods
   getUserProfile: async () => {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError) throw userError;
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-    if (profileError) throw profileError;
-    return { user, profile };
+      if (profileError && profileError.code !== "PGRST116") {
+        throw profileError;
+      }
+
+      // If profile doesn't exist, create an empty one
+      if (!profile) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: user.id,
+              email: user.email,
+              personal_summary: "",
+              career_history: [],
+              education: [],
+              certifications: [],
+              skills: [],
+              languages: [],
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return { user, profile: newProfile };
+      }
+
+      return { user, profile };
+    } catch (error) {
+      console.error("Error in getUserProfile:", error);
+      throw error;
+    }
   },
 
   updateUserProfile: async (profileData) => {
@@ -366,20 +398,24 @@ export const api = {
       // Handle file upload if new logo is provided
       if (jobData.company_logo_url instanceof File) {
         const file = jobData.company_logo_url;
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(7)}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('company-logos')
+          .from("company-logos")
           .upload(`logos/${fileName}`, file, {
-            cacheControl: '3600',
-            upsert: true
+            cacheControl: "3600",
+            upsert: true,
           });
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('company-logos')
+        const {
+          data: { publicUrl },
+        } = supabase.storage
+          .from("company-logos")
           .getPublicUrl(`logos/${fileName}`);
 
         logoUrl = publicUrl;
@@ -387,7 +423,7 @@ export const api = {
 
       // First, update the main job posting
       const { error: updateError } = await supabase
-        .from('job_posting')
+        .from("job_posting")
         .update({
           job_title: jobData.job_title,
           company_name: jobData.company_name,
@@ -398,51 +434,58 @@ export const api = {
           applicants_needed: jobData.applicants_needed,
           company_description: jobData.company_description,
           about_company: jobData.about_company,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', jobId);
+        .eq("id", jobId);
 
       if (updateError) throw updateError;
 
       // Use a transaction-like approach for related data
       await Promise.all([
         // Delete all existing related data
-        supabase.from('job_responsibility').delete().eq('job_posting_id', jobId),
-        supabase.from('job_qualification').delete().eq('job_posting_id', jobId),
-        supabase.from('job_skill').delete().eq('job_posting_id', jobId)
+        supabase
+          .from("job_responsibility")
+          .delete()
+          .eq("job_posting_id", jobId),
+        supabase.from("job_qualification").delete().eq("job_posting_id", jobId),
+        supabase.from("job_skill").delete().eq("job_posting_id", jobId),
       ]);
 
       // Insert new related data
       await Promise.all([
         // Insert responsibilities
-        jobData.responsibilities?.length > 0 && supabase
-          .from('job_responsibility')
-          .insert(jobData.responsibilities.map(r => ({
-            job_posting_id: jobId,
-            responsibility: r
-          }))),
+        jobData.responsibilities?.length > 0 &&
+          supabase.from("job_responsibility").insert(
+            jobData.responsibilities.map((r) => ({
+              job_posting_id: jobId,
+              responsibility: r,
+            }))
+          ),
 
         // Insert qualifications
-        jobData.qualifications?.length > 0 && supabase
-          .from('job_qualification')
-          .insert(jobData.qualifications.map(q => ({
-            job_posting_id: jobId,
-            qualification: q
-          }))),
+        jobData.qualifications?.length > 0 &&
+          supabase.from("job_qualification").insert(
+            jobData.qualifications.map((q) => ({
+              job_posting_id: jobId,
+              qualification: q,
+            }))
+          ),
 
         // Insert skills
-        jobData.skills?.length > 0 && supabase
-          .from('job_skill')
-          .insert(jobData.skills.map(s => ({
-            job_posting_id: jobId,
-            skill: s
-          })))
+        jobData.skills?.length > 0 &&
+          supabase.from("job_skill").insert(
+            jobData.skills.map((s) => ({
+              job_posting_id: jobId,
+              skill: s,
+            }))
+          ),
       ]);
 
       // Fetch and return updated data
       const { data: updatedJob, error: fetchError } = await supabase
-        .from('job_posting')
-        .select(`
+        .from("job_posting")
+        .select(
+          `
           *,
           job_responsibility (
             responsibility
@@ -453,21 +496,23 @@ export const api = {
           job_skill (
             skill
           )
-        `)
-        .eq('id', jobId)
+        `
+        )
+        .eq("id", jobId)
         .single();
 
       if (fetchError) throw fetchError;
 
       return {
         ...updatedJob,
-        responsibilities: updatedJob.job_responsibility?.map(r => r.responsibility) || [],
-        qualifications: updatedJob.job_qualification?.map(q => q.qualification) || [],
-        skills: updatedJob.job_skill?.map(s => s.skill) || []
+        responsibilities:
+          updatedJob.job_responsibility?.map((r) => r.responsibility) || [],
+        qualifications:
+          updatedJob.job_qualification?.map((q) => q.qualification) || [],
+        skills: updatedJob.job_skill?.map((s) => s.skill) || [],
       };
-
     } catch (error) {
-      console.error('Error updating job post:', error);
+      console.error("Error updating job post:", error);
       throw error;
     }
   },
@@ -477,38 +522,164 @@ export const api = {
     try {
       // First, delete related data
       await Promise.all([
-        supabase.from('job_responsibility').delete().eq('job_posting_id', jobId),
-        supabase.from('job_qualification').delete().eq('job_posting_id', jobId),
-        supabase.from('job_skill').delete().eq('job_posting_id', jobId)
+        supabase
+          .from("job_responsibility")
+          .delete()
+          .eq("job_posting_id", jobId),
+        supabase.from("job_qualification").delete().eq("job_posting_id", jobId),
+        supabase.from("job_skill").delete().eq("job_posting_id", jobId),
       ]);
 
       // Get the job details to find the logo URL
       const { data: job } = await supabase
-        .from('job_posting')
-        .select('company_logo_url')
-        .eq('id', jobId)
+        .from("job_posting")
+        .select("company_logo_url")
+        .eq("id", jobId)
         .single();
 
       // Delete the logo file if it exists
       if (job?.company_logo_url) {
-        const fileName = job.company_logo_url.split('/').pop();
+        const fileName = job.company_logo_url.split("/").pop();
         await supabase.storage
-          .from('company-logos')
+          .from("company-logos")
           .remove([`logos/${fileName}`]);
       }
 
       // Finally, delete the job posting
       const { error } = await supabase
-        .from('job_posting')
+        .from("job_posting")
         .delete()
-        .eq('id', jobId);
+        .eq("id", jobId);
 
       if (error) throw error;
 
       return true;
     } catch (error) {
-      console.error('Error deleting job post:', error);
-      throw new Error('Failed to delete job post');
+      console.error("Error deleting job post:", error);
+      throw new Error("Failed to delete job post");
     }
-  }
+  },
+
+  async archiveJobPost(jobId) {
+    try {
+      const { error } = await supabase
+        .from("job_posting")
+        .update({ status: "archived", updated_at: new Date().toISOString() })
+        .eq("id", jobId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error archiving job post:", error);
+      throw new Error("Failed to archive job post");
+    }
+  },
+
+  async restoreJobPost(jobId) {
+    try {
+      const { error } = await supabase
+        .from("job_posting")
+        .update({ status: "active", updated_at: new Date().toISOString() })
+        .eq("id", jobId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error restoring job post:", error);
+      throw new Error("Failed to restore job post");
+    }
+  },
+
+  async getJobStats() {
+    const { data, error } = await supabase
+      .from("job_posting")
+      .select("status")
+      .then((res) => ({
+        active: res.data.filter((job) => job.status === "active").length,
+        archived: res.data.filter((job) => job.status === "archived").length,
+      }));
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getRecentJobs(limit = 5) {
+    try {
+      const { data, error } = await supabase
+        .from("job_posting")
+        .select(
+          `
+          id,
+          job_title,
+          status,
+          created_at,
+          applications:job_applications(count)
+        `
+        )
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+
+      return data.map((job) => ({
+        id: job.id,
+        title: job.job_title,
+        status: job.status,
+        applicants_count: job.applications?.[0]?.count || 0,
+        created_at: job.created_at,
+      }));
+    } catch (error) {
+      console.error("Error fetching recent jobs:", error);
+      return null;
+    }
+  },
+
+  async getApplicantStats() {
+    const { data, error } = await supabase
+      .from("job_applications")
+      .select("created_at")
+      .then((res) => {
+        const total = res.data.length;
+        const lastMonth = res.data.filter(
+          (app) =>
+            new Date(app.created_at) >
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        ).length;
+        return {
+          total,
+          monthlyChange: ((lastMonth / total) * 100).toFixed(1),
+        };
+      });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getShortlistedStats() {
+    const { data, error } = await supabase
+      .from("job_applications")
+      .select("count")
+      .eq("status", "shortlisted")
+      .single();
+
+    if (error) throw error;
+    return { total: data.count };
+  },
+
+  async getPopularJobRoles() {
+    const { data, error } = await supabase
+      .from("job_posting")
+      .select(
+        `
+        id,
+        job_title,
+        applications:job_applications(count)
+      `
+      )
+      .order("applications.count", { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    return data;
+  },
 };
