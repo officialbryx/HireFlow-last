@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import { api } from "../services/api";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
-  BriefcaseIcon,
-  CurrencyDollarIcon,
   ShareIcon,
   UserGroupIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
@@ -15,63 +15,86 @@ const JobPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
-  const [filteredJobs, setFilteredJobs] = useState(jobListings);
+  const [jobListings, setJobListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Add search and filter functionality
+  // Fetch jobs from database
   useEffect(() => {
-    let results = [...jobListings];
+    const fetchJobs = async () => {
+      try {
+        const data = await api.getAllJobPostings();
+        // Filter out archived jobs and map the remaining jobs data
+        const mappedJobs = data
+          .filter(job => job.status !== 'archived')
+          .map(job => ({
+            id: job.id,
+            title: job.job_title,
+            company: job.company_name,
+            companyLogo: job.company_logo_url,
+            location: job.location,
+            type: job.employment_type,
+            salary: job.salary_range,
+            applicantsNeeded: job.applicants_needed,
+            companyDetails: job.company_description,
+            responsibilities: job.job_responsibility?.map(r => r.responsibility) || [],
+            qualifications: job.job_qualification?.map(q => q.qualification) || [],
+            aboutCompany: job.about_company,
+            skills: job.job_skill?.map(s => s.skill) || [],
+            postedDate: `Posted ${new Date(job.created_at).toLocaleDateString()}`
+          }));
+        setJobListings(mappedJobs);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError("Failed to fetch job postings");
+        setIsLoading(false);
+      }
+    };
 
-    // Apply search query filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(
-        (job) =>
-          job.title.toLowerCase().includes(query) ||
-          job.company.toLowerCase().includes(query) ||
-          job.skills.some((skill) => skill.toLowerCase().includes(query))
-      );
-    }
+    fetchJobs();
+  }, []);
 
-    // Apply job type filter
-    switch (selectedFilter) {
-      case "fulltime":
-        results = results.filter((job) =>
-          job.type.toLowerCase().includes("full-time")
-        );
-        break;
-      case "parttime":
-        results = results.filter((job) =>
-          job.type.toLowerCase().includes("part-time")
-        );
-        break;
-      case "remote":
-        results = results.filter((job) =>
-          job.type.toLowerCase().includes("remote")
-        );
-        break;
-      case "recent":
-        results.sort((a, b) => {
-          const dateA = new Date(a.postedDate.replace("Posted ", ""));
-          const dateB = new Date(b.postedDate.replace("Posted ", ""));
-          return dateB - dateA;
-        });
-        break;
-      default:
-        // 'all' - no additional filtering needed
-        break;
-    }
+  // Filter jobs based on search and filter
+  const filteredJobs = jobListings.filter(job => {
+    const matchesSearch = 
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    setFilteredJobs(results);
-    // Reset selected job if it's not in filtered results
-    if (selectedJob && !results.find((job) => job.id === selectedJob.id)) {
-      setSelectedJob(null);
+    if (selectedFilter === "all") return matchesSearch;
+    if (selectedFilter === "recent") {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return matchesSearch && new Date(job.postedDate) >= oneWeekAgo;
     }
-  }, [searchQuery, selectedFilter]);
+    if (selectedFilter === "remote") return matchesSearch && job.type.toLowerCase().includes("remote");
+    if (selectedFilter === "fulltime") return matchesSearch && job.type.toLowerCase().includes("full-time");
+    if (selectedFilter === "parttime") return matchesSearch && job.type.toLowerCase().includes("part-time");
+    
+    return matchesSearch;
+  });
 
   const handleApply = (company) => {
     navigate(`/apply/${company}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -270,394 +293,5 @@ const JobPosts = () => {
     </>
   );
 };
-
-const jobListings = [
-  {
-    id: 1,
-    title: "Junior Python Software Engineering",
-    company: "PDAX",
-    companyLogo: "/pdaxph_logo.jpg",
-    location: "Pasig, National Capital Region, Philippines",
-    type: "Hybrid/Full-time",
-    salary: "₱20,000-₱30,000",
-    applicantsNeeded: 10,
-    companyDetails:
-      "At PDAX, we believe that the future of money is digital, and our mission is to empower all Filipinos to grow their wealth through blockchain technology. " +
-      "As one of the first crypto firms in the Philippine market, we feel a sense of duty to our users and to the ecosystem to set the standard for safety, ease of access, and reliability. " +
-      "We expect our team to share in this responsibility and cherish our vision of a more open and equitable financial system. " +
-      "We are looking for new team members that are passionate about cryptocurrency, want to work in a disruptive, fast-growing industry, and thrive in a start-up environment. " +
-      "If this sounds like you, then we'd love to talk!",
-    responsibilities: [
-      "Design and maintain scalable, secure, and high-performance APIs.",
-      "Optimize and manage relational and non-relational databases.",
-      "Build and maintain reliable ETL pipelines for data processing and ingestion.",
-      "Deploy and manage backend systems and data pipelines on cloud platforms.",
-      "Ensure backend and data processes are scalable, efficient, and secure.",
-      "Work cross-functionally with teams and communicate technical concepts effectively.",
-      "Implement CI/CD workflows and automate testing, deployment, and monitoring.",
-    ],
-    qualifications: [
-      "Bachelor’s degree in Computer Science, Engineering, or related field (or equivalent experience).",
-      "Strong understanding of backend architecture, algorithms, and data structures.",
-      "Proficiency with Python, Redshift, DynamoDB, and ETL pipeline development.",
-      "Experience in architecture design for scalable, high-performance systems.",
-      "Knowledge of AWS services (e.g., S3, Lambda, EC2, RDS, Redshift).",
-      "Familiarity with data modeling, warehousing, and visualization tools like Metabase.",
-      "Experience deploying and managing systems on AWS and other cloud platforms.",
-      "Strong problem-solving, communication, and collaboration abilities.",
-      "Team player with the ability to work effectively in cross-functional teams.",
-      "Nice to haves: Familiarity with CI/CD, data governance, and advanced data processing frameworks.",
-    ],
-    aboutCompany:
-      "Founded in 2018, Philippine Digital Asset Exchange (PDAX) is empowering Filipinos by simplifying access to investment opportunities in the digital economy. " +
-      "PDAX offers a user-friendly interface that allows everyone, from beginners to seasoned investors, to participate confidently in the financial markets. " +
-      "At PDAX, we believe in democratizing finance and making investing accessible to all Filipinos. " +
-      "Our platform ensures simplicity, safety, and security, enabling users to trade a variety of digital assets effortlessly. " +
-      "Whether you're starting your investment journey or expanding your portfolio, PDAX equips you with the tools and resources to build wealth and achieve your financial goals. " +
-      "Learn more about how PDAX is redefining the future of finance at www.pdax.ph.",
-    skills: ["React", "TypeScript", "Tailwind CSS", "Redux", "Jest"],
-    postedDate: "Posted 2 days ago",
-  },
-  {
-    id: 2,
-    title: "Technical Architect - Software Dev",
-    company: "InnovateTech",
-    companyLogo: "/concentrix_catalyst_logo.jpg",
-    location: "Makati, National Capital Region, Philippines (Onsite/Full-time)",
-    type: "Onsite/Full-time",
-    salary: "₱30,000- ₱45,000",
-    applicantsNeeded: 16,
-    companyDetails:
-      "The Technical Architect is a subject matter expert in one of our key practice areas (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). " +
-      "In this role, you will be responsible for ensuring technical design integrity, approving configuration checklists prior to implementation, and managing escalations during project execution. " +
-      "Additionally, you will serve as an instructor in our internal Academy, providing training and sharing best practices.",
-    responsibilities: [
-      "Own the architectural vision and technical strategy for your specific practice area.",
-      "Approve configuration checklists and design documents to ensure all solutions meet best practices and business requirements.",
-      "Conduct architecture reviews to confirm quality, scalability, and maintainability of the proposed solutions. ",
-      "Provide technical oversight during project implementations, ensuring alignment with approved designs and configurations. ",
-      "Serve as the final point of escalation for complex technical challenges, coordinating with cross-functional teams to resolve issues efficiently. ",
-      "Perform root-cause analysis on major incidents or issues, implementing long-term fixes and improvements. ",
-      "Act as an instructor and subject matter expert (SME) within the Academy, delivering specialized training sessions and workshops. ",
-      "Develop and update training materials, best practice guides, and documentation. ",
-      "Mentor and coach project teams, junior architects, and other stakeholders to continuously improve technical competencies within the organization. ",
-      "Work closely with Pre-Sales, Project Managers, and CX Consultants to propose effective, scalable solutions for new and existing clients. ",
-      "Engage with clients and senior leadership to gather technical requirements, clarify solution feasibility, and present architecture recommendations. ",
-      "Stay current on industry trends, emerging technologies, and best practices to maintain a forward-thinking approach. ",
-    ],
-    qualifications: [
-      "Bachelor’s or Master’s degree in Computer Science, Information Technology, Engineering, or a related field. ",
-      "Proven experience (5+ years preferred) in solution architecture or a similar technical leadership role within the relevant domain (e.g., Zendesk, Salesforce, Genesys, Software Development, or Data Analytics). ",
-      "Strong track record of successfully designing and implementing complex solutions in enterprise environments. ",
-      "Exceptional problem-solving skills and the ability to handle high-stakes escalations under pressure. ",
-      "Experience delivering technical training or workshops; a passion for mentoring others is a plus. ",
-      "Excellent communication skills (verbal and written), with the ability to convey complex ideas to both technical and non-technical audiences. ",
-      "Relevant certifications (e.g., Zendesk Certified Administrator, Salesforce Architect, Genesys Certification, or equivalent) are highly desirable. ",
-    ],
-    aboutCompany:
-      "We're Concentrix Catalyst, the experience transformation and technology team at Concentrix - a global technology and services leader that powers the world's best brands, today and into the future. " +
-      "We're solution-focused, tech-powered, intelligence-fueled. Every day, we design, build, and run fully integrated, end-to-end solutions at speed and scale across the entire enterprise, " +
-      "helping more than 2,000 clients solve their toughest business challenges. With unique data and insights, deep industry expertise, and advanced technology solutions, " +
-      "we're the intelligent transformation partner that powers a world that works, helping companies become refreshingly simple to work, interact, and transact with.",
-    skills: [
-      "Technical Expertise",
-      "Leadership & Influence",
-      "Adaptability",
-      "Collaboration",
-      "Continuous Learning",
-    ],
-    postedDate: "Posted 3 weeks ago",
-  },
-  {
-    id: 3,
-    title:
-      "Regulatory Affairs Software Development Specialist (Hybrid/Full-time)",
-    company: "Medtronic",
-    companyLogo: "/medtronic_logo.jpg",
-    location: "Taguig, National Capital Region, Philippines",
-    type: "Hybrid/Full-time",
-    salary: "₱50,000 - ₱100,000",
-    applicantsNeeded: 12,
-    companyDetails: `
-At Medtronic you can begin a life-long career of exploration and innovation, while helping champion healthcare access and equity for all. You’ll lead with purpose, breaking down barriers to innovation in a more connected, compassionate world. 
-`,
-    responsibilities: [
-      "Design, develop, test and deploy software solutions that meet business and technical requirement and/or enhance business operations.",
-      "Collaborate with stakeholders and/or cross-functional teams to gather and analyze user requirements and provide recommendations.",
-      "Write clean, maintainable, and efficient code following industry standards and best practices.",
-      "Ensure compliance with company and industry standards.",
-      "Troubleshoot, debug, and resolve software defects and performance issues in a timely and efficient manner.",
-      "Maintain and update existing software systems to improve functionality and performance.",
-      "Provide technical support and training to users and stakeholders",
-      "Document software specifications, development processes, and user guides",
-      "Ensures integrity and accuracy.",
-      "Raises issues to appropriate level of visibility in a timely manner.",
-      "Effectively communicates progress and status.",
-      "Stay up to date with emerging trends and technologies in software development.",
-    ],
-    qualifications: [
-      "Bachelor’s degree in computer science, Software Engineering or a related field",
-      "3-5 years related experience in software development or related areas",
-      "Proven experience as a Software Development Specialist or similar role.",
-      "Experience with software development methodologies such as Agile or Scrum",
-      "Excellent problem-solving skills and attention to detail",
-      "Strong communication and interpersonal skills",
-      "Demonstrated ability to communicate professionally, both written and orally, to a wide variety of audiences",
-      "Experience in requirement gathering and documentation of the requirement.",
-      "Good presentation and training skills.",
-      "Ability to work independently and as part of a team",
-      "Proficiency in programming languages such as Python, JavaScript or C++",
-      "Proficiency in application such as Power Platform, AWS/Cloud services equivalent (Azure or Google Cloud), Smartsheet",
-      "Understanding of non-relational or relational databases",
-      "Well organized, quick thinker, and creative",
-      "Response to deadlines and priorities",
-    ],
-    aboutCompany: `
-We’re Concentrix Catalyst, the experience transformation and technology team at Concentrix -a global technology and services leader that powers the world’s best brands, today and into the future. We’re solution-focused, tech-powered, intelligence-fueled. Every day, we design, build, and run fully integrated, end-to-end solutions at speed and scale across the entire enterprise, helping more than 2,000 clients solve their toughest business challenges. With unique data and insights, deep industry expertise, and advanced technology solutions, we’re the intelligent transformation partner that powers a world that works, helping companies become refreshingly simple to work, interact, and transact with. 
-`,
-
-    skills: ["AWS", "Kubernetes", "Terraform", "Docker", "CI/CD"],
-    postedDate: "Posted 1 week ago",
-  },
-  {
-    id: 4,
-    title: "Android Developers (Open to all levels - 2025 Cohort)",
-    company: "Dyson",
-    companyLogo: "/dyson_logo.jpg",
-    location: "Metro Manila",
-    type: "Full-time",
-    salary: "₱20,000 - ₱70,000",
-    applicantsNeeded: 7,
-    companyDetails: `
-We own and develop the MyDyson smart home app, which is at the forefront of Dyson's IoT experience. We are proud of what we have built so far; we have an App Store and Google Play rating of 4.5 and 4.3 stars respectively, we have more than 1 million active users worldwide and our IoT platform has over 3 million connected Dyson machines. We have huge ambition to grow this platform and as we connect more machines from more categories the challenge is significant.
-`,
-    responsibilities: [
-      "Working with your fellow developers to contribute to features and improvements to our MyDyson app, ensuring they are tested, robust and scalable",
-      "Working with colleagues from other disciplines, including test engineers, product owners, Scrum Masters, UX/UI designers, and software engineers in our cloud and embedded teams",
-      "Sharing knowledge within the app team to develop your skills and competencies and those of your teammates",
-      "Identifying new technologies, tools and approaches to help continually improve standards and quality",
-    ],
-    qualifications: [
-      "You’re interested in how technology can improve the environments people live in",
-      "You’re a collaborative person that believes in the Agile principles and how they can help empowered teams deliver the best software",
-      "You’ve contributed quality code to Android apps that have delighted their users",
-      "You’re passionate about learning new things and sharing those things with others",
-      "You get satisfaction from solving real-world problems with well-crafted software",
-    ],
-    aboutCompany: `
-    At Dyson we are focused on solving the problems that others have ignored; solving them first using our technology and ingenuity. In order to achieve this we need to pioneer technologies that are different and authentic. This is the core of what we do and who we are. We must strive to create the future, every single day by developing new things, different things, things that go against the grain with a diverse and global team of ingenious minds.`,
-    skills: ["Figma", "UI Design", "User Research", "Prototyping"],
-    postedDate: "Posted 5 days ago",
-  },
-  {
-    id: 5,
-    title: "Machine Learning Researcher",
-    company: "WebStack Solutions",
-    companyLogo: "gcash_logo.jpg",
-    location: "National Capital Region, Philippines",
-    type: "Full-time",
-    salary: "$110,000 - $140,000",
-    applicantsNeeded: 3,
-    companyDetails: `Do you want to take the first step in making Filipinos’ lives better everyday? Here in GCash we want to stay at the forefront of the FinTech industry by creating innovative, meaningful, and convenient financial solutions for the nation! G ka ba? Join the G Nation today!
-`,
-    responsibilities: [
-      "Research and develop machine learning models tackling problem domains such as credit scoring, personalization, fraud detection, entity resolution, etc.",
-      "Discover new applications of machine learning and AI to solve emerging business needs",
-      "Collaborate with data strategists and machine learning engineers to deliver end-to-end AI solutions to business teams",
-      "Publish and share research internally within the Advanced Analytics team and to the broader business teams",
-    ],
-    qualifications: [
-      "2+ years experience in an equivalent or functionally similar data role.",
-      "An undergraduate degree preferably in Statistics, Computer Science, Physical Science, Economics, or a related technical field. A graduate degree is a plus.",
-      "A strong and demonstrable understanding of SQL and Python or R for advanced analysis.",
-      "A strong and demonstrable understanding of machine learning with big data. Expertise in one or more areas among recommender systems, forecasting, NLP, network science, and reinforcement learning is a big plus.",
-      "Familiarity with data cloud services surrounding analytical and automation functions.",
-      "Familiarity with version control software such as git.",
-      "A talent for research and the presentation of interpretable insight.",
-    ],
-    aboutCompany: `Mynt is the first and only duacorn in the Philippines. It's a leader in mobile financial services focused on accelerating financial inclusion through mobile money, financial services, and technology. Mynt operates two fintech companies: GXI, the mobile wallet operator of GCash — the #1 Finance App in the Philippines, and Fuse Lending, a tech-based lending company that gives Filipinos access to microloans and business loans.`,
-    skills: ["Machine Learning", "TensorFlow", "Python", "SQL", "NLP"],
-    postedDate: "Posted 4 days ago",
-  },
-  {
-    id: 6,
-    title: "Site Civil Engineer",
-    company: "AboitizPower",
-    companyLogo: "aboitizpower_logo.jpg",
-    location: "Toledo, Central Visayas, Philippines",
-    type: "Contract",
-    salary: "₱80,000 - ₱100,000",
-    applicantsNeeded: 5,
-    companyDetails:
-      "DataMinds AI is at the forefront of applying artificial intelligence to solve real-world business challenges.",
-    responsibilities: [
-      "Knowledge of design and visualizations software such as AutoCAD",
-      "Knowledge of Structural and Geotechnical Principles",
-      "Understanding construction sequencing, logistics planning, scheduling techniques",
-      "Thorough understanding of Structural design basis and standards",
-      "Ability to interpret technical drawings and manuals",
-      "Oral and Written Communication and collaboration skills to work with diverse teams",
-      "Interpersonal multi-cultural skills",
-      "Ability to share knowledge and coach site staff",
-      "Administrative and Coordinating Skills",
-      "Computer Skills and Proficiency in MS Office or similar software",
-    ],
-    qualifications: [
-      "Bachelor’s Degree in Civil/Structural Engineering or equivalent experience",
-      "At least 10 years of proven working experience as a Structural Project Engineer",
-      "At least 5 years as discipline leader in field",
-      "At least 1 coal-fired construction project",
-      "Professional Institution Membership / Evidence of Professional Competence essential",
-    ],
-    aboutCompany: `AboitizPower is a major Philippine energy provider focused on building a balanced fleet of generation capacities. We also manage the second and third largest electric power distribution networks across the country, providing Filipinos energy they need to prosper.`,
-    skills: [
-      "Site Civil Engineering",
-      "AutoCAD",
-      "Structural Design",
-      "Geotechnical Principles",
-    ],
-    postedDate: "Posted 1 week ago",
-  },
-  {
-    id: 7,
-    title: "Marketing Manager",
-    company: "GrowthBase",
-    companyLogo: "/company-logos/growthbase.png",
-    location: "Chicago, IL (Hybrid)",
-    type: "Full-time",
-    salary: "$90,000 - $120,000",
-    applicantsNeeded: 1,
-    companyDetails:
-      "GrowthBase is a rapidly growing marketing technology company helping businesses scale their digital presence.",
-    responsibilities: [
-      "Develop and execute marketing strategies",
-      "Manage digital marketing campaigns",
-      "Lead content marketing initiatives",
-      "Analyze marketing metrics and ROI",
-      "Manage social media presence",
-      "Coordinate with sales team",
-    ],
-    qualifications: [
-      "5+ years of digital marketing experience",
-      "Proven track record of successful campaigns",
-      "Experience with marketing analytics tools",
-      "Strong project management skills",
-      "Content strategy expertise",
-      "B2B marketing experience preferred",
-    ],
-    aboutCompany:
-      "GrowthBase is transforming how companies approach digital marketing. We offer a dynamic work environment and opportunities for professional development.",
-    skills: [
-      "Digital Marketing",
-      "Analytics",
-      "Content Strategy",
-      "SEO",
-      "Social Media",
-    ],
-    postedDate: "Posted 2 days ago",
-  },
-  {
-    id: 8,
-    title: "Software Architect",
-    company: "TechFoundry",
-    companyLogo: "/company-logos/techfoundry.png",
-    location: "Denver, CO (Hybrid)",
-    type: "Full-time",
-    salary: "$150,000 - $190,000",
-    applicantsNeeded: 1,
-    companyDetails:
-      "TechFoundry specializes in building scalable, enterprise-grade software solutions for various industries.",
-    responsibilities: [
-      "Design system architecture for large-scale applications",
-      "Lead technical decision-making processes",
-      "Mentor senior developers and tech leads",
-      "Establish technical standards and best practices",
-      "Evaluate new technologies and tools",
-      "Drive technical innovation initiatives",
-    ],
-    qualifications: [
-      "10+ years of software development experience",
-      "Strong experience in distributed systems",
-      "Track record of leading large technical projects",
-      "Deep knowledge of cloud architecture",
-      "Experience with microservices architecture",
-      "Strong system design skills",
-    ],
-    aboutCompany:
-      "TechFoundry is where innovation meets enterprise excellence. We offer competitive compensation, including equity, and the opportunity to shape the future of technology.",
-    skills: [
-      "System Design",
-      "Cloud Architecture",
-      "Microservices",
-      "Leadership",
-      "AWS",
-    ],
-    postedDate: "Posted 6 days ago",
-  },
-  {
-    id: 9,
-    title: "Business Analyst",
-    company: "ConsultTech",
-    companyLogo: "/company-logos/consulttech.png",
-    location: "Miami, FL (On-site)",
-    type: "Full-time",
-    salary: "$80,000 - $110,000",
-    applicantsNeeded: 2,
-    companyDetails:
-      "ConsultTech provides strategic business and technology consulting services to Fortune 500 companies.",
-    responsibilities: [
-      "Gather and analyze business requirements",
-      "Create detailed business analysis documents",
-      "Facilitate meetings with stakeholders",
-      "Map business processes and workflows",
-      "Support user acceptance testing",
-      "Create training documentation",
-    ],
-    qualifications: [
-      "3+ years of business analysis experience",
-      "Strong analytical and problem-solving skills",
-      "Experience with requirements gathering",
-      "Knowledge of Agile methodologies",
-      "Excellent documentation skills",
-      "CBAP certification is a plus",
-    ],
-    aboutCompany:
-      "ConsultTech is known for its exceptional consulting services and commitment to client success. We offer comprehensive benefits and professional certification support.",
-    skills: ["Business Analysis", "Agile", "JIRA", "SQL", "Process Mapping"],
-    postedDate: "Posted 3 days ago",
-  },
-  {
-    id: 10,
-    title: "Technical Project Manager",
-    company: "AgileForce",
-    companyLogo: "/company-logos/agileforce.png",
-    location: "Washington, DC (Hybrid)",
-    type: "Full-time",
-    salary: "$120,000 - $150,000",
-    applicantsNeeded: 2,
-    companyDetails:
-      "AgileForce delivers high-impact technology projects through effective project management and agile methodologies.",
-    responsibilities: [
-      "Lead complex technical projects end-to-end",
-      "Manage project scope, timeline, and resources",
-      "Coordinate with cross-functional teams",
-      "Track project risks and issues",
-      "Report project status to stakeholders",
-      "Drive process improvements",
-    ],
-    qualifications: [
-      "5+ years of technical project management",
-      "PMP certification required",
-      "Strong understanding of software development",
-      "Experience with Agile/Scrum",
-      "Excellent communication skills",
-      "Budget management experience",
-    ],
-    aboutCompany:
-      "AgileForce is a leading project management consulting firm known for delivering results. We offer competitive benefits and a culture of continuous learning.",
-    skills: ["Project Management", "Agile", "JIRA", "Risk Management", "Scrum"],
-    postedDate: "Posted 1 day ago",
-  },
-];
 
 export default JobPosts;
