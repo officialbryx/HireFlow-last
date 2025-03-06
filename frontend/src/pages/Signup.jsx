@@ -481,7 +481,7 @@ const Signup = () => {
                     Creating account...
                   </span>
                 ) : (
-                  "Agree & Join"
+                  "Join HireFlow"
                 )}
               </button>
             </div>
