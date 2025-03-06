@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { api } from "../services/api";
 import {
@@ -6,7 +6,6 @@ import {
   MapPinIcon,
   ShareIcon,
   UserGroupIcon,
-  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
