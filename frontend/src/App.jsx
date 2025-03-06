@@ -8,7 +8,7 @@ import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
-import ViewApplicants from "./pages/ViewApplicants";
+import ViewApplicants from "./pages/hr/ViewApplicants";
 import JobPostTest from "./pages/JobPostTest";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
@@ -70,8 +70,8 @@ const App = () => {
       {/* Messages Page */}
       <Route path="/messages" element={<Messages />} />
 
-      {/* View Applicants Page */}
-      <Route path="/viewapplicants" element={<ViewApplicants />} />
+      {/* View Applicants */}
+      <Route path="/hr/applicants" element={<ViewApplicants />} />
 
       {/* Settings Page */}
       <Route path="/settings" element={<Settings />} />

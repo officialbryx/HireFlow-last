@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import {
   HomeIcon,
   BriefcaseIcon,
+  UserGroupIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
@@ -47,6 +48,11 @@ const HRNavbar = () => {
               icon={<BriefcaseIcon className="h-5 w-5" />}
               text="Jobs"
               to="/hr/jobs"
+            />
+            <NavItem
+              icon={<UserGroupIcon className="h-5 w-5" />}
+              text="Applicants"
+              to="/hr/applicants"
             />
             <NotificationsDropdown notifications={notifications} />
             <div className="border-l border-gray-200 h-8" />
