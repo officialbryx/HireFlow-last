@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from 'date-fns';
 
 const JobPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,7 +42,7 @@ const JobPosts = () => {
             qualifications: job.job_qualification?.map(q => q.qualification) || [],
             aboutCompany: job.about_company,
             skills: job.job_skill?.map(s => s.skill) || [],
-            postedDate: `Posted ${new Date(job.created_at).toLocaleDateString()}`
+            postedDate: `Posted ${formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}`
           }));
         setJobListings(mappedJobs);
         setIsLoading(false);

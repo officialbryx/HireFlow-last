@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "@tailwindcss/vite": "^4.0.7",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
