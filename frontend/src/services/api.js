@@ -445,8 +445,8 @@ export const api = {
         logoUrl = publicUrl;
       }
 
-      // First, update the main job posting
-      const { error: updateError } = await supabase
+      // Update main job posting
+      const { error: jobError } = await supabase
         .from("job_posting")
         .update({
           job_title: jobData.job_title,
@@ -462,79 +462,54 @@ export const api = {
         })
         .eq("id", jobId);
 
-      if (updateError) throw updateError;
+      if (jobError) throw jobError;
 
-      // Use a transaction-like approach for related data
+      // Delete existing related data
       await Promise.all([
-        // Delete all existing related data
-        supabase
-          .from("job_responsibility")
-          .delete()
-          .eq("job_posting_id", jobId),
+        supabase.from("job_responsibility").delete().eq("job_posting_id", jobId),
         supabase.from("job_qualification").delete().eq("job_posting_id", jobId),
         supabase.from("job_skill").delete().eq("job_posting_id", jobId),
       ]);
 
       // Insert new related data
       await Promise.all([
-        // Insert responsibilities
-        jobData.responsibilities?.length > 0 &&
-          supabase.from("job_responsibility").insert(
-            jobData.responsibilities.map((r) => ({
-              job_posting_id: jobId,
-              responsibility: r,
-            }))
-          ),
-
-        // Insert qualifications
-        jobData.qualifications?.length > 0 &&
-          supabase.from("job_qualification").insert(
-            jobData.qualifications.map((q) => ({
-              job_posting_id: jobId,
-              qualification: q,
-            }))
-          ),
-
-        // Insert skills
-        jobData.skills?.length > 0 &&
-          supabase.from("job_skill").insert(
-            jobData.skills.map((s) => ({
-              job_posting_id: jobId,
-              skill: s,
-            }))
-          ),
+        supabase.from("job_responsibility").insert(
+          jobData.responsibilities.map((r) => ({
+            job_posting_id: jobId,
+            responsibility: r,
+          }))
+        ),
+        supabase.from("job_qualification").insert(
+          jobData.qualifications.map((q) => ({
+            job_posting_id: jobId,
+            qualification: q,
+          }))
+        ),
+        supabase.from("job_skill").insert(
+          jobData.skills.map((s) => ({
+            job_posting_id: jobId,
+            skill: s,
+          }))
+        ),
       ]);
 
-      // Fetch and return updated data
+      // Return updated job data
       const { data: updatedJob, error: fetchError } = await supabase
         .from("job_posting")
         .select(
           `
-          *,
-          job_responsibility (
-            responsibility
-          ),
-          job_qualification (
-            qualification
-          ),
-          job_skill (
-            skill
-          )
-        `
+        *,
+        job_responsibility (responsibility),
+        job_qualification (qualification),
+        job_skill (skill)
+      `
         )
         .eq("id", jobId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      return {
-        ...updatedJob,
-        responsibilities:
-          updatedJob.job_responsibility?.map((r) => r.responsibility) || [],
-        qualifications:
-          updatedJob.job_qualification?.map((q) => q.qualification) || [],
-        skills: updatedJob.job_skill?.map((s) => s.skill) || [],
-      };
+      return updatedJob;
     } catch (error) {
       console.error("Error updating job post:", error);
       throw error;

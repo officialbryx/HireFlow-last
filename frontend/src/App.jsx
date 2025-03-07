@@ -15,6 +15,17 @@ import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
 import Profile from "./pages/Profile";
 import "./index.css";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      cacheTime: 30 * 60 * 1000, // Cache is kept for 30 minutes
+    },
+  },
+});
 
 const App = () => {
   const location = useLocation();
@@ -48,47 +59,51 @@ const App = () => {
   }, [location]);
 
   return (
-    <Routes>
-      {/* Landing Page */}
-      <Route path="/" element={<LandingPage />} />
+    <QueryClientProvider client={queryClient}>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
 
-      {/* Sign Up Page */}
-      <Route path="/signup" element={<Signup />} />
+        {/* Sign Up Page */}
+        <Route path="/signup" element={<Signup />} />
 
-      {/* Sign In Page */}
-      <Route path="/login" element={<Login />} />
+        {/* Sign In Page */}
+        <Route path="/login" element={<Login />} />
 
-      {/* Job Posts Page */}
-      <Route path="/jobposts" element={<JobPosts />} />
+        {/* Job Posts Page */}
+        <Route path="/jobposts" element={<JobPosts />} />
 
-      {/* Create Job Post Page */}
-      <Route path="/createjobpost" element={<CreateJobPost />} />
+        {/* Create Job Post Page */}
+        <Route path="/createjobpost" element={<CreateJobPost />} />
 
-      {/* Application Page */}
-      <Route path="/apply/:company" element={<Apply />} />
+        {/* Application Page */}
+        <Route path="/apply/:company" element={<Apply />} />
 
-      {/* Messages Page */}
-      <Route path="/messages" element={<Messages />} />
+        {/* Messages Page */}
+        <Route path="/messages" element={<Messages />} />
 
-      {/* View Applicants */}
-      <Route path="/hr/applicants" element={<ViewApplicants />} />
+        {/* View Applicants */}
+        <Route path="/hr/applicants" element={<ViewApplicants />} />
 
-      {/* Settings Page */}
-      <Route path="/settings" element={<Settings />} />
+        {/* Settings Page */}
+        <Route path="/settings" element={<Settings />} />
 
-      {/* Test Page */}
-      <Route path="/jobs-test" element={<JobPostTest />} />
+        {/* Test Page */}
+        <Route path="/jobs-test" element={<JobPostTest />} />
 
-      {/* Forgot Password Page */}
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* Forgot Password Page */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* HR Routes */}
-      <Route path="/hr/dashboard" element={<Dashboard />} />
-      <Route path="/hr/jobs" element={<Jobs />} />
+        {/* HR Routes */}
+        <Route path="/hr/dashboard" element={<Dashboard />} />
+        <Route path="/hr/jobs" element={<Jobs />} />
 
-      {/* Profile Page */}
-      <Route path="/profile" element={<Profile />} />
-    </Routes>
+        {/* Profile Page */}
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+      {/* Remove the debugging tool later for checking if the caching works */}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 };
 

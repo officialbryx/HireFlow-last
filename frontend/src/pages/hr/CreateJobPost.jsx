@@ -6,24 +6,23 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
+const initialFormState = {
+  title: "",
+  companyName: "",
+  companyLogo: null,
+  location: "",
+  employmentType: "Full-time",
+  salaryRange: "",
+  applicantsNeeded: "",
+  companyDescription: "",
+  responsibilities: [""],
+  qualifications: [""],
+  aboutCompany: "",
+  skills: [""],
+};
 
 const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
-  const [formData, setFormData] = useState(
-    initialData || {
-      title: "",
-      companyName: "",
-      companyLogo: null,
-      location: "",
-      employmentType: "Full-time",
-      salaryRange: "",
-      applicantsNeeded: "",
-      companyDescription: "",
-      responsibilities: [""],
-      qualifications: [""],
-      aboutCompany: "",
-      skills: [""],
-    }
-  );
+  const [formData, setFormData] = useState(initialData || initialFormState);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,6 +89,16 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
       submitData.skills = formData.skills.filter(s => s.trim());
 
       await onJobCreated(submitData);
+      
+      // Reset form only if not in editing mode
+      if (!isEditing) {
+        setFormData(initialFormState);
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      }
     } catch (error) {
       console.error('Error submitting job:', error);
       throw error;

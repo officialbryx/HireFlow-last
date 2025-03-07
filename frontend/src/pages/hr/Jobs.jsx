@@ -15,7 +15,14 @@ import { useJobModals } from '../../hooks/useJobModals';
 import { useSearchParams } from 'react-router-dom';
 
 const Jobs = () => {
-  const { jobs, loading, fetchJobs } = useJobs();
+  const { 
+    jobs, 
+    isLoading: loading, 
+    createJob,
+    updateJob,
+    archiveJob,
+    restoreJob 
+  } = useJobs();
   const { getPaginatedData } = usePagination();
   const { showMessage, messageType, message, showToast } = useToast();
   const {
@@ -70,10 +77,6 @@ const Jobs = () => {
     )));
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  useEffect(() => {
     // Set active tab based on URL query parameter
     const tabParam = searchParams.get('tab');
     if (tabParam && ['view', 'create', 'archived'].includes(tabParam)) {
@@ -83,8 +86,7 @@ const Jobs = () => {
 
   const handleJobCreated = async (jobData) => {
     try {
-      await api.createJobPost(jobData);
-      await fetchJobs(); // Refresh the job list
+      await createJob(jobData);
       showToast('success', 'Job post created successfully!');
     } catch (error) {
       showToast('error', error.message || 'Error creating job post');
@@ -131,35 +133,28 @@ const Jobs = () => {
 
   const handleJobEdited = async (updatedJobData) => {
     try {
-      if (!selectedJob?.id) {
-        throw new Error('No job ID found for updating');
-      }
-
-      // Map form data to API format
-      const mappedData = {
-        id: selectedJob.id,
+      // Format the data to match the API expectations
+      const formattedData = {
         job_title: updatedJobData.title,
         company_name: updatedJobData.companyName,
         company_logo_url: updatedJobData.companyLogo,
-        oldLogoUrl: selectedJob.companyLogo,
         location: updatedJobData.location,
         employment_type: updatedJobData.employmentType,
         salary_range: updatedJobData.salaryRange,
         applicants_needed: updatedJobData.applicantsNeeded,
         company_description: updatedJobData.companyDescription,
-        responsibilities: updatedJobData.responsibilities.filter(r => r.trim() !== ''),
-        qualifications: updatedJobData.qualifications.filter(q => q.trim() !== ''),
         about_company: updatedJobData.aboutCompany,
-        skills: updatedJobData.skills.filter(s => s.trim() !== '')
+        responsibilities: updatedJobData.responsibilities,
+        qualifications: updatedJobData.qualifications,
+        skills: updatedJobData.skills,
       };
 
-      await api.updateJobPost(selectedJob.id, mappedData);
+      await updateJob({ 
+        id: selectedJob.id, 
+        data: formattedData 
+      });
       setShowEditModal(false);
       setSelectedJob(null);
-      
-      // Fetch fresh data after update
-      await fetchJobs();
-      
       showToast('success', 'Job post updated successfully!');
     } catch (error) {
       console.error('Error updating job:', error);
@@ -177,9 +172,7 @@ const Jobs = () => {
   // Rename handleConfirmDelete to handleConfirmArchive
   const handleConfirmArchive = async () => {
     try {
-      await api.archiveJobPost(jobToDelete);
-      await fetchJobs();
-      
+      await archiveJob(jobToDelete);
       showToast('success', 'Job post archived successfully!');
     } catch (error) {
       console.error('Error archiving job:', error);
@@ -193,9 +186,7 @@ const Jobs = () => {
   // Add restore functionality
   const handleRestore = async (jobId) => {
     try {
-      await api.restoreJobPost(jobId);
-      await fetchJobs();
-      
+      await restoreJob(jobId);
       showToast('success', 'Job post restored successfully!');
     } catch (error) {
       console.error('Error restoring job:', error);
