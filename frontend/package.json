@@ -14,7 +14,7 @@
     "@react-pdf/renderer": "^4.3.0",
     "@supabase/supabase-js": "^2.48.1",
     "@tailwindcss/vite": "^4.0.7",
-    "@tanstack/react-query": "^5.67.1",
+    "@tanstack/react-query": "^5.67.2",
     "@tanstack/react-query-devtools": "^5.67.2",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
