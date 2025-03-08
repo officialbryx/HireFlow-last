@@ -4,7 +4,6 @@ import HRNavbar from "../../components/HRNavbar";
 import ViewJobs from "../../components/jobs/ViewJobs";
 import CreateJob from "../../components/jobs/CreateJob";
 import ArchivedJobs from "../../components/jobs/ArchivedJobs";
-import { api } from "../../services/api";
 import JobFormModal from '../../components/modals/JobFormModal';
 import Toast from '../../components/notifications/Toast';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
@@ -13,6 +12,7 @@ import { usePagination } from '../../hooks/usePagination';
 import { useToast } from '../../hooks/useToast';
 import { useJobModals } from '../../hooks/useJobModals';
 import { useSearchParams } from 'react-router-dom';
+import { jobsApi } from '../../services/api/jobsApi';
 
 const Jobs = () => {
   const { 
@@ -95,8 +95,8 @@ const Jobs = () => {
 
   const handleEditJob = async (jobId) => {
     try {
-      const jobDetails = await api.getJobPostingDetails(jobId);
-      console.log('Raw Job Details:', jobDetails); // For debugging
+      const jobDetails = await jobsApi.getJobPostingDetails(jobId);
+      console.log('Raw Job Details:', jobDetails);
 
       // Map API response to form data structure with proper array handling
       const mappedJobDetails = {
@@ -108,7 +108,6 @@ const Jobs = () => {
         salaryRange: jobDetails.salary_range || '',
         applicantsNeeded: jobDetails.applicants_needed || '',
         companyDescription: jobDetails.company_description || '',
-        // Ensure we're accessing the nested arrays correctly
         responsibilities: Array.isArray(jobDetails.job_responsibility) 
           ? jobDetails.job_responsibility.map(r => r.responsibility)
           : [''],
@@ -122,7 +121,7 @@ const Jobs = () => {
         id: jobDetails.id
       };
 
-      console.log('Mapped Job Details:', mappedJobDetails); // For debugging
+      console.log('Mapped Job Details:', mappedJobDetails);
       setSelectedJob(mappedJobDetails);
       setShowEditModal(true);
     } catch (error) {
