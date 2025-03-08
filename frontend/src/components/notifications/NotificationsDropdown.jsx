@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { mockNotifications } from '../../data/mockNotifications';
 
-const NotificationsDropdown = ({ notifications = [] }) => {
+const NotificationsDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const displayedNotifications = mockNotifications.slice(0, 7); // Limit to 7 items
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,9 +27,9 @@ const NotificationsDropdown = ({ notifications = [] }) => {
       >
         <div className="flex items-center justify-center">
           <BellIcon className="h-5 w-5" />
-          {notifications.length > 0 && (
+          {mockNotifications.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              {notifications.length}
+              {mockNotifications.length}
             </span>
           )}
         </div>
@@ -41,8 +43,8 @@ const NotificationsDropdown = ({ notifications = [] }) => {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
+            {displayedNotifications.length > 0 ? (
+              displayedNotifications.map((notification) => (
                 <Link
                   key={notification.id}
                   to={`/hr/jobs/${notification.jobId}`}
@@ -73,16 +75,14 @@ const NotificationsDropdown = ({ notifications = [] }) => {
             )}
           </div>
 
-          {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200">
-              <Link
-                to="/hr/notifications"
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                View all notifications
-              </Link>
-            </div>
-          )}
+          <div className="px-4 py-2 border-t border-gray-200">
+            <Link
+              to="/hr/notifications"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              View all notifications ({mockNotifications.length})
+            </Link>
+          </div>
         </div>
       )}
     </div>

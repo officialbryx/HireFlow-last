@@ -9,11 +9,12 @@ import Apply from "./pages/Apply";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ViewApplicants from "./pages/hr/ViewApplicants";
-import JobPostTest from "./pages/JobPostTest";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
 import Profile from "./pages/Profile";
+import FAQ from './pages/hr/FAQ';
+import Notifications from './pages/hr/Notifications';
 import "./index.css";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -21,8 +22,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
-      cacheTime: 30 * 60 * 1000, // Cache is kept for 30 minutes
+      staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
+      cacheTime: 30 * 60 * 1000, // Cache kept for 30 minutes
+      retry: 2, // Number of retries on failure
+      refetchOnWindowFocus: false, // Prevent unnecessary refetches
     },
   },
 });
@@ -88,15 +91,14 @@ const App = () => {
         {/* Settings Page */}
         <Route path="/settings" element={<Settings />} />
 
-        {/* Test Page */}
-        <Route path="/jobs-test" element={<JobPostTest />} />
-
         {/* Forgot Password Page */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* HR Routes */}
         <Route path="/hr/dashboard" element={<Dashboard />} />
         <Route path="/hr/jobs" element={<Jobs />} />
+        <Route path="/hr/faq" element={<FAQ />} />
+        <Route path="/hr/notifications" element={<Notifications />} />
 
         {/* Profile Page */}
         <Route path="/profile" element={<Profile />} />
