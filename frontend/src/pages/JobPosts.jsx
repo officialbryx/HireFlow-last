@@ -1,60 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { api } from "../services/api";
+import { useJobListings } from "../hooks/useJobListings";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
   ShareIcon,
   UserGroupIcon,
+  HeartIcon,
 } from "@heroicons/react/24/outline";
-import { HeartIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from 'date-fns';
 
 const JobPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
-  const [jobListings, setJobListings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  // Fetch jobs from database
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const data = await api.getAllJobPostings();
-        // Filter out archived jobs and map the remaining jobs data
-        const mappedJobs = data
-          .filter(job => job.status !== 'archived')
-          .map(job => ({
-            id: job.id,
-            title: job.job_title,
-            company: job.company_name,
-            companyLogo: job.company_logo_url,
-            location: job.location,
-            type: job.employment_type,
-            salary: job.salary_range,
-            applicantsNeeded: job.applicants_needed,
-            companyDetails: job.company_description,
-            responsibilities: job.job_responsibility?.map(r => r.responsibility) || [],
-            qualifications: job.job_qualification?.map(q => q.qualification) || [],
-            aboutCompany: job.about_company,
-            skills: job.job_skill?.map(s => s.skill) || [],
-            postedDate: `Posted ${formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}`
-          }));
-        setJobListings(mappedJobs);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching jobs:', err);
-        setError("Failed to fetch job postings");
-        setIsLoading(false);
-      }
-    };
-
-    fetchJobs();
-  }, []);
+  
+  const { jobs: jobListings, isLoading, error } = useJobListings();
 
   // Filter jobs based on search and filter
   const filteredJobs = jobListings.filter(job => {
