@@ -5,6 +5,7 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
 
@@ -60,6 +61,11 @@ const HRNavbar = () => {
               icon={<Cog6ToothIcon className="h-5 w-5" />}
               text="Settings"
               to="/hr/settings"
+            />
+            <NavItem
+              icon={<QuestionMarkCircleIcon className="h-5 w-5" />}
+              text="FAQ"
+              to="/hr/faq"
             />
             <NavItem
               icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}

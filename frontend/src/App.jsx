@@ -14,6 +14,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
 import Profile from "./pages/Profile";
+import FAQ from './pages/hr/FAQ';
 import "./index.css";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -99,6 +100,7 @@ const App = () => {
         {/* HR Routes */}
         <Route path="/hr/dashboard" element={<Dashboard />} />
         <Route path="/hr/jobs" element={<Jobs />} />
+        <Route path="/hr/faq" element={<FAQ />} />
 
         {/* Profile Page */}
         <Route path="/profile" element={<Profile />} />
