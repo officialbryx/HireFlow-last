@@ -18,6 +18,7 @@ import Notifications from "./pages/hr/Notifications";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,52 +59,107 @@ const App = () => {
       document.title = "Forgot Password | HireFlow";
     } else if (location.pathname === "/profile") {
       document.title = "My Profile | HireFlow";
+    } else if (location.pathname === "/hr/dashboard") {
+      document.title = "Dashboard | HireFlow";
+    } else if (location.pathname === "/hr/jobs") {
+      document.title = "Jobs | HireFlow";
+    } else if (location.pathname === "/hr/faq") {
+      document.title = "FAQ | HireFlow";
+    } else if (location.pathname === "/hr/notifications") {
+      document.title = "Notifications | HireFlow";
     }
   }, [location]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
-        {/* Landing Page */}
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-
-        {/* Sign Up Page */}
         <Route path="/signup" element={<Signup />} />
-
-        {/* Sign In Page */}
         <Route path="/login" element={<Login />} />
-
-        {/* Job Posts Page */}
-        <Route path="/jobposts" element={<JobPosts />} />
-
-        {/* Create Job Post Page */}
-        <Route path="/createjobpost" element={<CreateJobPost />} />
-
-        {/* Application Page */}
-        <Route path="/apply/:company" element={<Apply />} />
-
-        {/* Messages Page */}
-        <Route path="/messages" element={<Messages />} />
-
-        {/* View Applicants */}
-        <Route path="/hr/applicants" element={<ViewApplicants />} />
-
-        {/* Settings Page */}
-        <Route path="/settings" element={<Settings />} />
-
-        {/* Forgot Password Page */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* HR Routes */}
-        <Route path="/hr/dashboard" element={<Dashboard />} />
-        <Route path="/hr/jobs" element={<Jobs />} />
-        <Route path="/hr/faq" element={<FAQ />} />
-        <Route path="/hr/notifications" element={<Notifications />} />
-
-        {/* Profile Page */}
+        {/* Routes accessible by both roles */}
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+
+        {/* JobSeeker only routes */}
+        <Route
+          path="/apply/:company"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker"]}>
+              <Apply />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobposts"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker"]}>
+              <JobPosts />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Employer only routes */}
+        <Route
+          path="/createjobpost"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <CreateJobPost />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <Jobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/applicants"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <ViewApplicants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <Jobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/faq"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <FAQ />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/notifications"
+          element={
+            <ProtectedRoute allowedRoles={["employer"]}>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-      {/* Remove the debugging tool later for checking if the caching works */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

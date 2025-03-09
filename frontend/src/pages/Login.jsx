@@ -56,37 +56,12 @@ const Login = () => {
 
       if (error) throw error;
 
-      if (data.user) {
-        // Check if profile exists
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
+      const userType = data.user.user_metadata.user_type;
 
-        if (profileError && profileError.code !== "PGRST116") {
-          throw profileError;
-        }
-
-        // If profile doesn't exist, create it
-        if (!profileData) {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                id: data.user.id,
-                first_name: "",
-                middle_name: "",
-                last_name: "",
-                user_type: "jobseeker",
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            ]);
-
-          if (insertError) throw insertError;
-        }
-
+      // Redirect based on user type
+      if (userType === "employer") {
+        navigate("/hr/dashboard");
+      } else {
         navigate("/jobposts");
       }
     } catch (err) {

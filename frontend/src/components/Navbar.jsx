@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../services/supabaseClient";
 import {
   UserGroupIcon,
   BriefcaseIcon,
@@ -13,6 +14,17 @@ import {
 
 const Navbar = () => {
   const [searchFocused, setSearchFocused] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/"); // Redirect to landing page instead of login
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-white border-b border-gray-200 shadow-sm z-50">
@@ -84,11 +96,12 @@ const Navbar = () => {
                 text="Settings"
                 to="/settings"
               />
-              <NavItem
-                icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
-                text="Sign Out"
-                to="/login"
-              />
+              <div onClick={handleSignOut} className="cursor-pointer">
+                <NavItem
+                  icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
+                  text="Sign Out"
+                />
+              </div>
             </div>
 
             {/* Mobile menu button */}

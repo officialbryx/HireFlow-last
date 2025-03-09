@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HomeIcon,
   BriefcaseIcon,
@@ -8,8 +8,21 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
+import { supabase } from "../services/supabaseClient";
 
 const HRNavbar = () => {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/"); // Redirect to landing page instead of login
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   // This would typically come from your notifications state/context
   const notifications = [
     {
@@ -67,11 +80,12 @@ const HRNavbar = () => {
               text="FAQ"
               to="/hr/faq"
             />
-            <NavItem
-              icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
-              text="Sign Out"
-              to="/login"
-            />
+            <div onClick={handleSignOut} className="cursor-pointer">
+              <NavItem
+                icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
+                text="Sign Out"
+              />
+            </div>
           </div>
         </div>
       </div>
