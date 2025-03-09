@@ -84,20 +84,24 @@ const App = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
 
-        {/* JobSeeker only routes */}
+        {/* JobSeeker Routes */}
+        <Route
+          path="/jobposts"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker", "employer"]}>
+              {" "}
+              {/* Allow both roles */}
+              <JobPosts />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* JobSeeker specific routes */}
         <Route
           path="/apply/:company"
           element={
             <ProtectedRoute allowedRoles={["jobseeker"]}>
               <Apply />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/jobposts"
-          element={
-            <ProtectedRoute allowedRoles={["jobseeker"]}>
-              <JobPosts />
             </ProtectedRoute>
           }
         />

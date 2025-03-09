@@ -20,7 +20,7 @@ const Navbar = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/"); // Redirect to landing page instead of login
+      navigate("/login", { replace: true }); // Changed to /login and added replace
     } catch (error) {
       console.error("Error signing out:", error);
     }

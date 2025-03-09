@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 // import { api } from "../services/api";
 import { supabase } from "../services/supabaseClient";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -58,16 +59,15 @@ const Login = () => {
 
       const userType = data.user.user_metadata.user_type;
 
-      // Redirect based on user type
+      // Direct navigation based on user type, without considering previous location
       if (userType === "employer") {
-        navigate("/hr/dashboard");
+        navigate("/hr/dashboard", { replace: true });
       } else {
-        navigate("/jobposts");
+        navigate("/jobposts", { replace: true });
       }
     } catch (err) {
       setError(
-        err.message ||
-          "Failed to login. Please check your credentials and try again."
+        err.message || "Failed to login. Please check your credentials."
       );
       console.error("Login error:", err);
     } finally {

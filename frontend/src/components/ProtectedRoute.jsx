@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 import { useState, useEffect } from "react";
 
@@ -6,11 +6,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     const getSession = async () => {
       try {
-        // Get current session
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -20,7 +20,9 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
           const {
             data: { user },
           } = await supabase.auth.getUser();
-          setUserRole(user?.user_metadata?.user_type);
+          const userRole = user?.user_metadata?.user_type;
+          console.log("User role:", userRole); // Debug log
+          setUserRole(userRole);
         }
       } catch (error) {
         console.error("Auth error:", error);
@@ -31,16 +33,19 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
     getSession();
 
-    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event); // Debug log
       setSession(session);
+
       if (session) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        setUserRole(user?.user_metadata?.user_type);
+        const userRole = user?.user_metadata?.user_type;
+        console.log("Updated user role:", userRole); // Debug log
+        setUserRole(userRole);
       } else {
         setUserRole(null);
       }
@@ -57,14 +62,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  // If no session, redirect to login
   if (!session) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace />;
   }
 
-  // If user doesn't have required role, redirect to landing page
+  console.log("Checking role access:", { userRole, allowedRoles }); // Debug log
+
   if (!allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
+    console.log("Access denied - redirecting"); // Debug log
+    return <Navigate to="/login" replace />;
   }
 
   return children;
