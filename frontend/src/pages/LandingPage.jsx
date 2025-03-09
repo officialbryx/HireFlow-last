@@ -366,44 +366,65 @@ const LandingPage = () => {
                 Connecting talent with opportunity in the modern workforce.
               </p>
               <div className="flex space-x-4">
-                {["facebook", "twitter", "instagram", "linkedin"].map(
-                  (social) => (
-                    <a
-                      key={social}
-                      href={`#${social}`}
-                      className="text-gray-400 hover:text-white transition-colors"
+                {[
+                  {
+                    name: "facebook",
+                    url: "https://facebook.com/hireflow",
+                    icon: (
+                      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+                    ),
+                  },
+                  {
+                    name: "twitter",
+                    url: "https://twitter.com/hireflow",
+                    icon: (
+                      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                    ),
+                  },
+                  {
+                    name: "instagram",
+                    url: "https://instagram.com/hireflow",
+                    icon: (
+                      <path d="M16 4H8C5.79086 4 4 5.79086 4 8V16C4 18.2091 5.79086 20 8 20H16C18.2091 20 20 18.2091 20 16V8C20 5.79086 18.2091 4 16 4Z M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z M16.5 7.5C16.5 8.05228 16.0523 8.5 15.5 8.5C14.9477 8.5 14.5 8.05228 14.5 7.5C14.5 6.94772 14.9477 6.5 15.5 6.5C16.0523 6.5 16.5 6.94772 16.5 7.5Z" />
+                    ),
+                  },
+                  {
+                    name: "linkedin",
+                    url: "https://linkedin.com/company/hireflow",
+                    icon: (
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    ),
+                  },
+                ].map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <span className="sr-only">{social.name}</span>
+                    <svg
+                      className="h-6 w-6"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
-                      <span className="sr-only">{social}</span>
-                      <svg
-                        className="h-6 w-6"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </a>
-                  )
-                )}
+                      {social.icon}
+                    </svg>
+                  </a>
+                ))}
               </div>
             </div>
 
             {[
               {
                 title: "Company",
-                links: ["About", "Careers", "Press", "News"],
-              },
-              {
-                title: "Resources",
-                links: ["Blog", "Guides", "Events", "Help Center"],
+                links: ["About", "Careers"],
               },
               {
                 title: "Legal",
-                links: ["Terms", "Privacy", "Cookies", "Settings"],
+                links: ["Terms", "Privacy", "Cookies"],
               },
             ].map((column, index) => (
               <div key={index}>
@@ -411,12 +432,13 @@ const LandingPage = () => {
                 <ul className="space-y-2">
                   {column.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <a
-                        href={`#${link.toLowerCase()}`}
+                      <Link
+                        to={`/${link.toLowerCase()}`}
                         className="text-gray-400 hover:text-white transition-colors"
+                        onClick={() => window.scrollTo(0, 0)} // Add this to scroll to top on navigation
                       >
                         {link}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -431,8 +453,6 @@ const LandingPage = () => {
             <div className="mt-4 md:mt-0">
               <select className="bg-gray-800 text-gray-400 py-2 px-4 rounded-lg text-sm">
                 <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
               </select>
             </div>
           </div>

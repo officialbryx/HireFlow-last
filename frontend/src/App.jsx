@@ -15,6 +15,11 @@ import Jobs from "./pages/hr/Jobs";
 import Profile from "./pages/Profile";
 import FAQ from "./pages/hr/FAQ";
 import Notifications from "./pages/hr/Notifications";
+import About from "./pages/About";
+import Careers from "./pages/Careers";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Cookies from "./pages/Cookies";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -67,6 +72,16 @@ const App = () => {
       document.title = "FAQ | HireFlow";
     } else if (location.pathname === "/hr/notifications") {
       document.title = "Notifications | HireFlow";
+    } else if (location.pathname === "/about") {
+      document.title = "About Us | HireFlow";
+    } else if (location.pathname === "/careers") {
+      document.title = "Careers | HireFlow";
+    } else if (location.pathname === "/terms") {
+      document.title = "Terms of Service | HireFlow";
+    } else if (location.pathname === "/privacy") {
+      document.title = "Privacy Policy | HireFlow";
+    } else if (location.pathname === "/cookies") {
+      document.title = "Cookie Policy | HireFlow";
     }
   }, [location]);
 
@@ -78,6 +93,11 @@ const App = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/cookies" element={<Cookies />} />
 
         {/* Routes accessible by both roles */}
         <Route path="/messages" element={<Messages />} />

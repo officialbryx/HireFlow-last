@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useJobListings } from "../hooks/useJobListings";
@@ -15,15 +15,21 @@ const JobPosts = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
   const navigate = useNavigate();
-  
+
   const { jobs: jobListings, isLoading, error } = useJobListings();
 
+  useEffect(() => {
+    console.log("JobPosts component mounted"); // Debug log
+  }, []);
+
   // Filter jobs based on search and filter
-  const filteredJobs = jobListings.filter(job => {
-    const matchesSearch = 
+  const filteredJobs = jobListings.filter((job) => {
+    const matchesSearch =
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+      job.skills.some((skill) =>
+        skill.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
     if (selectedFilter === "all") return matchesSearch;
     if (selectedFilter === "recent") {
@@ -31,10 +37,13 @@ const JobPosts = () => {
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       return matchesSearch && new Date(job.postedDate) >= oneWeekAgo;
     }
-    if (selectedFilter === "remote") return matchesSearch && job.type.toLowerCase().includes("remote");
-    if (selectedFilter === "fulltime") return matchesSearch && job.type.toLowerCase().includes("full-time");
-    if (selectedFilter === "parttime") return matchesSearch && job.type.toLowerCase().includes("part-time");
-    
+    if (selectedFilter === "remote")
+      return matchesSearch && job.type.toLowerCase().includes("remote");
+    if (selectedFilter === "fulltime")
+      return matchesSearch && job.type.toLowerCase().includes("full-time");
+    if (selectedFilter === "parttime")
+      return matchesSearch && job.type.toLowerCase().includes("part-time");
+
     return matchesSearch;
   });
 

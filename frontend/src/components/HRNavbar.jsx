@@ -73,7 +73,7 @@ const HRNavbar = () => {
             <NavItem
               icon={<Cog6ToothIcon className="h-5 w-5" />}
               text="Settings"
-              to="/hr/settings"
+              to="/settings"
             />
             <NavItem
               icon={<QuestionMarkCircleIcon className="h-5 w-5" />}
