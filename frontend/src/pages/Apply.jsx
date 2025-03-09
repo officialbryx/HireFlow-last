@@ -72,21 +72,24 @@ const Apply = () => {
     websites: [""],
     linkedin: "",
 
-    // Application Questions
+    // Application Questions - Initialize all as empty strings to trigger validation
     applicationQuestions: {
-      previouslyProcessed: false,
-      directlyEmployed: false,
-      relativesInCompany: false,
-      relativesInIndustry: false,
-      currentEmployerBond: false,
-      nonCompete: false,
-      filipinoCitizen: false,
-      internationalStudies: false,
+      previouslyProcessed: "",
+      previouslyProcessedWithCompany: "",
+      directlyEmployed: "",
+      relativesInCompany: "",
+      relativesInIndustry: "",
+      currentEmployerBond: "",
+      nonCompete: "",
+      filipinoCitizen: "",
+      internationalStudies: "",
+      applyVisa: "", // Changed from false to empty string
     },
 
     // Terms
     termsAccepted: false,
   });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const renderStageIndicator = () => (
     <div className="mb-12">
@@ -143,10 +146,28 @@ const Apply = () => {
   );
 
   const handleSaveAndContinue = () => {
-    // Validate current stage
-    // Save data
+    // Clear previous errors
+    setFieldErrors({});
+
+    let isValid = true;
+
+    // Validate depending on current stage
+    if (currentStage === 4) {
+      const validation = VoluntaryDisclosures.validator.validate(
+        formData,
+        setFieldErrors
+      );
+      isValid = validation.isValid;
+
+      if (!isValid) {
+        // Show an alert or notification
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
+    // Continue with stage progression if validation passes
     setCurrentStage((prev) => Math.min(prev + 1, stages.length));
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -185,16 +206,40 @@ const Apply = () => {
   const renderCurrentStage = () => {
     switch (currentStage) {
       case 1:
-        return <MyInformation formData={formData} setFormData={setFormData} />;
+        return (
+          <MyInformation
+            formData={formData}
+            setFormData={setFormData}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
+          />
+        );
       case 2:
-        return <MyExperience formData={formData} setFormData={setFormData} />;
+        return (
+          <MyExperience
+            formData={formData}
+            setFormData={setFormData}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
+          />
+        );
       case 3:
         return (
-          <ApplicationQuestions formData={formData} setFormData={setFormData} />
+          <ApplicationQuestions
+            formData={formData}
+            setFormData={setFormData}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
+          />
         );
       case 4:
         return (
-          <VoluntaryDisclosures formData={formData} setFormData={setFormData} />
+          <VoluntaryDisclosures
+            formData={formData}
+            setFormData={setFormData}
+            fieldErrors={fieldErrors}
+            setFieldErrors={setFieldErrors}
+          />
         );
       case 5:
         return <Review formData={formData} />;

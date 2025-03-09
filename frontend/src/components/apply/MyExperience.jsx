@@ -36,10 +36,86 @@ const FormSection = ({ icon, title, description, children }) => (
   </div>
 );
 
-const MyExperience = ({ formData, setFormData }) => {
+const MyExperienceValidator = {
+  validate: (formData, setFieldErrors) => {
+    const errors = {};
+
+    // Skip validation if no work experience checkbox is checked
+    if (!formData.noWorkExperience) {
+      // Validate work experience
+      formData.workExperience.forEach((exp, index) => {
+        if (!exp.jobTitle?.trim()) {
+          errors[`workExperience.${index}.jobTitle`] = "Job title is required";
+        }
+        if (!exp.company?.trim()) {
+          errors[`workExperience.${index}.company`] =
+            "Company name is required";
+        }
+        if (!exp.location?.trim()) {
+          errors[`workExperience.${index}.location`] = "Location is required";
+        }
+        if (!exp.fromDate) {
+          errors[`workExperience.${index}.fromDate`] = "Start date is required";
+        }
+        if (!exp.currentWork && !exp.toDate) {
+          errors[`workExperience.${index}.toDate`] = "End date is required";
+        }
+        if (!exp.description?.trim()) {
+          errors[`workExperience.${index}.description`] =
+            "Description is required";
+        }
+      });
+    }
+
+    // Validate education
+    formData.education.forEach((edu, index) => {
+      if (!edu.school?.trim()) {
+        errors[`education.${index}.school`] = "School name is required";
+      }
+      if (!edu.degree) {
+        errors[`education.${index}.degree`] = "Degree is required";
+      }
+      if (!edu.fieldOfStudy?.trim()) {
+        errors[`education.${index}.fieldOfStudy`] =
+          "Field of study is required";
+      }
+      if (!edu.fromYear) {
+        errors[`education.${index}.fromYear`] = "Start date is required";
+      }
+      if (!edu.toYear) {
+        errors[`education.${index}.toYear`] = "End date is required";
+      }
+    });
+
+    // Update the field errors state
+    if (setFieldErrors) {
+      setFieldErrors(errors);
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  },
+};
+
+const MyExperience = ({
+  formData,
+  setFormData,
+  fieldErrors,
+  setFieldErrors,
+}) => {
   const [skillInput, setSkillInput] = useState("");
 
   const handleWorkExperienceChange = (index, field, value) => {
+    // Clear error when field changes
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`workExperience.${index}.${field}`]: undefined,
+      }));
+    }
+
     const newWorkExperience = [...formData.workExperience];
     // Ensure dates are properly formatted
     if (field === "fromDate" || field === "toDate") {
@@ -50,6 +126,14 @@ const MyExperience = ({ formData, setFormData }) => {
   };
 
   const handleEducationChange = (index, field, value) => {
+    // Clear error when field changes
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`education.${index}.${field}`]: undefined,
+      }));
+    }
+
     const newEducation = [...formData.education];
     newEducation[index] = { ...newEducation[index], [field]: value };
     setFormData((prev) => ({ ...prev, education: newEducation }));
@@ -138,10 +222,19 @@ const MyExperience = ({ formData, setFormData }) => {
     }));
   };
 
-  const inputStyles =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
-  const selectStyles =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white appearance-none";
+  const inputStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500 focus:ring-red-500 focus:border-red-500"
+        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+    }`;
+
+  const selectStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 bg-white appearance-none ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500 focus:ring-red-500 focus:border-red-500"
+        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+    }`;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -220,9 +313,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className={inputStyles}
+                      className={inputStyles(
+                        `workExperience.${index}.jobTitle`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.jobTitle`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.jobTitle`]}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -239,9 +340,15 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className={inputStyles}
+                      className={inputStyles(`workExperience.${index}.company`)}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.company`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.company`]}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -258,9 +365,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className={inputStyles}
+                      className={inputStyles(
+                        `workExperience.${index}.location`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.location`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.location`]}
+                        </p>
+                      )}
                   </div>
 
                   <div className="md:col-span-2">
@@ -295,9 +410,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className={inputStyles}
+                      className={inputStyles(
+                        `workExperience.${index}.fromDate`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.fromDate`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.fromDate`]}
+                        </p>
+                      )}
                   </div>
 
                   {!exp.currentWork && (
@@ -315,9 +438,17 @@ const MyExperience = ({ formData, setFormData }) => {
                             e.target.value
                           )
                         }
-                        className={inputStyles}
+                        className={inputStyles(
+                          `workExperience.${index}.toDate`
+                        )}
                         required
                       />
+                      {fieldErrors &&
+                        fieldErrors[`workExperience.${index}.toDate`] && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {fieldErrors[`workExperience.${index}.toDate`]}
+                          </p>
+                        )}
                     </div>
                   )}
 
@@ -335,9 +466,17 @@ const MyExperience = ({ formData, setFormData }) => {
                         )
                       }
                       rows={4}
-                      className={inputStyles}
+                      className={inputStyles(
+                        `workExperience.${index}.description`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.description`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.description`]}
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>
@@ -398,9 +537,14 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "school", e.target.value)
                   }
-                  className={inputStyles}
+                  className={inputStyles(`education.${index}.school`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.school`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.school`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -412,7 +556,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "degree", e.target.value)
                   }
-                  className={selectStyles}
+                  className={selectStyles(`education.${index}.degree`)}
                   required
                 >
                   <option value="">Select Degree</option>
@@ -422,6 +566,11 @@ const MyExperience = ({ formData, setFormData }) => {
                     </option>
                   ))}
                 </select>
+                {fieldErrors && fieldErrors[`education.${index}.degree`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.degree`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -434,9 +583,15 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "fieldOfStudy", e.target.value)
                   }
-                  className={inputStyles}
+                  className={inputStyles(`education.${index}.fieldOfStudy`)}
                   required
                 />
+                {fieldErrors &&
+                  fieldErrors[`education.${index}.fieldOfStudy`] && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors[`education.${index}.fieldOfStudy`]}
+                    </p>
+                  )}
               </div>
 
               <div>
@@ -449,7 +604,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "gpa", e.target.value)
                   }
-                  className={inputStyles}
+                  className={inputStyles(`education.${index}.gpa`)}
                 />
               </div>
 
@@ -463,9 +618,14 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "fromYear", e.target.value)
                   }
-                  className={inputStyles}
+                  className={inputStyles(`education.${index}.fromYear`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.fromYear`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.fromYear`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -479,9 +639,14 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "toYear", e.target.value)
                   }
-                  className={inputStyles}
+                  className={inputStyles(`education.${index}.toYear`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.toYear`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.toYear`]}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -612,4 +777,5 @@ const MyExperience = ({ formData, setFormData }) => {
   );
 };
 
+MyExperience.validator = MyExperienceValidator;
 export default MyExperience;

@@ -1,8 +1,39 @@
 import React from "react";
 import { DocumentTextIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
-const VoluntaryDisclosures = ({ formData, setFormData }) => {
+const VoluntaryDisclosuresValidator = {
+  validate: (formData, setFieldErrors) => {
+    const errors = {};
+    if (!formData.termsAccepted) {
+      errors.termsAccepted =
+        "You must accept the terms and conditions to proceed";
+    }
+
+    if (setFieldErrors) {
+      setFieldErrors(errors);
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  },
+};
+
+const VoluntaryDisclosures = ({
+  formData,
+  setFormData,
+  fieldErrors,
+  setFieldErrors,
+}) => {
   const handleAcceptTerms = () => {
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        termsAccepted: undefined,
+      }));
+    }
+
     setFormData((prev) => ({
       ...prev,
       termsAccepted: !prev.termsAccepted,
@@ -181,17 +212,29 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
         </div>
 
         {/* Terms Acceptance */}
-        <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div
+          className={`mt-6 bg-gray-50 p-4 rounded-lg border ${
+            fieldErrors?.termsAccepted ? "border-red-300" : "border-gray-200"
+          }`}
+        >
           <label className="flex items-start space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.termsAccepted}
               onChange={handleAcceptTerms}
-              className="mt-1 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors cursor-pointer"
+              className={`mt-1 h-5 w-5 rounded cursor-pointer ${
+                fieldErrors?.termsAccepted
+                  ? "border-red-500 text-red-600 focus:ring-red-500"
+                  : "border-gray-300 text-blue-600 focus:ring-blue-500"
+              }`}
               required
             />
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-900 group-hover:text-gray-700 transition-colors">
+              <p
+                className={`text-sm font-medium ${
+                  fieldErrors?.termsAccepted ? "text-red-700" : "text-gray-900"
+                } group-hover:text-gray-700 transition-colors`}
+              >
                 I have read and understood the foregoing
                 <span className="text-red-500 ml-1">*</span>
               </p>
@@ -199,6 +242,11 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
                 By checking this box, you agree to our privacy notice and
                 consent to the processing of your information.
               </p>
+              {fieldErrors?.termsAccepted && (
+                <p className="text-sm text-red-500 mt-1">
+                  ⚠ {fieldErrors.termsAccepted}
+                </p>
+              )}
             </div>
           </label>
         </div>
@@ -249,4 +297,5 @@ const VoluntaryDisclosures = ({ formData, setFormData }) => {
   );
 };
 
+VoluntaryDisclosures.validator = VoluntaryDisclosuresValidator;
 export default VoluntaryDisclosures;

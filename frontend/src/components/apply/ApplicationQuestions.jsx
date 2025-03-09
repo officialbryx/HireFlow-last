@@ -17,34 +17,110 @@ const FormSection = ({ title, children }) => (
   </div>
 );
 
-const QuestionItem = ({ question, value, onChange, required }) => (
-  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors duration-200">
+const ApplicationQuestionsValidator = {
+  validate: (formData, setFieldErrors) => {
+    const errors = {};
+
+    // Check all questions are answered
+    Object.entries(formData.applicationQuestions).forEach(([key, value]) => {
+      if (value !== "yes" && value !== "no") {
+        errors[`applicationQuestions.${key}`] = "Please select Yes or No";
+      }
+    });
+
+    if (setFieldErrors) {
+      setFieldErrors(errors);
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  },
+};
+
+const QuestionItem = ({ question, value, onChange, required, error }) => (
+  <div
+    className={`p-4 bg-gray-50 rounded-lg border ${
+      error ? "border-red-300" : "border-gray-200"
+    } hover:border-gray-300 transition-colors duration-200`}
+  >
     <div className="flex items-start space-x-3">
-      <QuestionMarkCircleIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+      <QuestionMarkCircleIcon
+        className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
+          error ? "text-red-500" : "text-blue-500"
+        }`}
+      />
       <div className="flex-1 space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
+        <label
+          className={`block text-sm font-medium ${
+            error ? "text-red-700" : "text-gray-700"
+          }`}
+        >
           {question}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
         <select
           value={value || ""}
           onChange={onChange}
-          className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white shadow-sm"
+          className={`w-full px-3 py-2 rounded-lg border transition-colors duration-200 bg-white shadow-sm ${
+            error
+              ? "border-red-500 ring-1 ring-red-500 focus:ring-red-500 focus:border-red-500"
+              : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          }`}
           required={required}
         >
-          <option value="" disabled>
-            Select your answer
-          </option>
+          <option value="">Select your answer</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
+        {error && (
+          <p className="text-sm text-red-500 mt-1 flex items-center">
+            <span className="mr-1">⚠</span>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   </div>
 );
 
-const ApplicationQuestions = ({ formData, setFormData }) => {
+const ApplicationQuestions = ({
+  formData,
+  setFormData,
+  fieldErrors,
+  setFieldErrors,
+}) => {
+  // Initialize application questions if they don't exist
+  React.useEffect(() => {
+    if (!formData.applicationQuestions) {
+      setFormData((prev) => ({
+        ...prev,
+        applicationQuestions: {
+          previouslyProcessed: "",
+          previouslyProcessedWithCompany: "",
+          directlyEmployed: "",
+          relativesInCompany: "",
+          relativesInIndustry: "",
+          currentEmployerBond: "",
+          nonCompete: "",
+          filipinoCitizen: "",
+          internationalStudies: "",
+          applyVisa: "",
+        },
+      }));
+    }
+  }, []);
+
   const handleChange = (field, value) => {
+    // Clear error when field changes
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`applicationQuestions.${field}`]: undefined,
+      }));
+    }
+
     setFormData((prev) => ({
       ...prev,
       applicationQuestions: {
@@ -69,31 +145,31 @@ const ApplicationQuestions = ({ formData, setFormData }) => {
     },
     {
       id: "relativesInCompany",
-      text: "Do you have relatives working with {company}, any of the {company} subsidiaries, or other companies?",
+      text: "Do you have relatives working with {company}, any of the {company} subsidiaries, or other companies?*",
     },
     {
       id: "relativesInIndustry",
-      text: "Do you have any relatives working with other related industry companies?",
+      text: "Do you have any relatives working with other related industry companies?*",
     },
     {
       id: "currentEmployerBond",
-      text: "Do you have a bond with your current employer?",
+      text: "Do you have a bond with your current employer?*",
     },
     {
       id: "nonCompete",
-      text: "Do you have a non-compete clause?",
+      text: "Do you have a non-compete clause?*",
     },
     {
       id: "filipinoCitizen",
-      text: "Are you a Filipino / dual Filipino citizen?",
+      text: "Are you a Filipino / dual Filipino citizen?*",
     },
     {
       id: "internationalStudies",
-      text: "Are you / will you be undergoing international studies?",
+      text: "Are you / will you be undergoing international studies?*",
     },
     {
       id: "applyVisa",
-      text: "Are you applying for a VISA?",
+      text: "Are you applying for a VISA?*",
     },
   ];
 
@@ -124,6 +200,7 @@ const ApplicationQuestions = ({ formData, setFormData }) => {
               value={formData.applicationQuestions[id]}
               onChange={(e) => handleChange(id, e.target.value)}
               required={text.includes("*")}
+              error={fieldErrors && fieldErrors[`applicationQuestions.${id}`]}
             />
           ))}
         </div>
@@ -147,4 +224,5 @@ const ApplicationQuestions = ({ formData, setFormData }) => {
   );
 };
 
+ApplicationQuestions.validator = ApplicationQuestionsValidator;
 export default ApplicationQuestions;

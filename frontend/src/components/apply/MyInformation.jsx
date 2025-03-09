@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   UserCircleIcon,
   PhoneIcon,
@@ -185,10 +185,86 @@ const FormField = ({ label, required, children, className = "" }) => (
   </div>
 );
 
-const MyInformation = ({ formData, setFormData }) => {
+const isEmailValid = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isPhoneValid = (number) => {
+  const phoneRegex = /^\d{10}$/;
+  return phoneRegex.test(number.replace(/\D/g, ""));
+};
+
+const MyInformationValidator = {
+  validate: (formData, setFieldErrors) => {
+    const errors = {};
+
+    // Previous Employment validation
+    if (!formData.previouslyEmployed) {
+      errors.previouslyEmployed =
+        "Please select whether you were previously employed";
+    }
+    if (formData.previouslyEmployed === "yes") {
+      if (!formData.employeeID) errors.employeeID = "Employee ID is required";
+      if (!formData.givenManager)
+        errors.givenManager = "Previous manager is required";
+    }
+
+    // Personal Information validation
+    if (!formData.givenName?.trim())
+      errors.givenName = "Given name is required";
+    if (!formData.familyName?.trim())
+      errors.familyName = "Family name is required";
+
+    // Address validation
+    if (!formData.country) errors.country = "Country is required";
+    if (!formData.street?.trim()) errors.street = "Street address is required";
+    if (!formData.city?.trim()) errors.city = "City is required";
+    if (!formData.province?.trim())
+      errors.province = "State/Province is required";
+    if (!formData.postalCode?.trim())
+      errors.postalCode = "Postal code is required";
+
+    // Contact Information validation
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!isEmailValid(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.phoneType) errors.phoneType = "Phone type is required";
+    if (!formData.phoneCode) errors.phoneCode = "Country code is required";
+    if (!formData.phoneNumber) {
+      errors.phoneNumber = "Phone number is required";
+    } else if (!isPhoneValid(formData.phoneNumber)) {
+      errors.phoneNumber = "Please enter a valid phone number";
+    }
+
+    // Update the field errors state
+    setFieldErrors(errors);
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  },
+};
+
+const MyInformation = ({
+  formData,
+  setFormData,
+  fieldErrors,
+  setFieldErrors,
+}) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const finalValue = type === "checkbox" ? checked : value;
+
+    // Clear error for this field when user starts typing
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: undefined,
+    }));
 
     setFormData((prev) => ({
       ...prev,
@@ -210,10 +286,19 @@ const MyInformation = ({ formData, setFormData }) => {
     }));
   };
 
-  const inputStyles =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
-  const selectStyles =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white appearance-none";
+  const inputStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500"
+        : "border-gray-300"
+    }`;
+
+  const selectStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 bg-white appearance-none ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500"
+        : "border-gray-300"
+    }`;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -293,9 +378,21 @@ const MyInformation = ({ formData, setFormData }) => {
                 name="employeeID"
                 value={formData.employeeID}
                 onChange={handleChange}
-                className={inputStyles}
+                className={inputStyles("employeeID")}
                 placeholder="Enter your previous employee ID"
+                aria-invalid={!!fieldErrors["employeeID"]}
+                {...(fieldErrors["employeeID"] && {
+                  "aria-describedby": `error-employeeID`,
+                })}
               />
+              {fieldErrors["employeeID"] && (
+                <p
+                  id={`error-employeeID`}
+                  className="mt-1 text-sm text-red-500"
+                >
+                  {fieldErrors["employeeID"]}
+                </p>
+              )}
             </FormField>
 
             <FormField label="Previous Manager" required>
@@ -304,9 +401,21 @@ const MyInformation = ({ formData, setFormData }) => {
                 name="givenManager"
                 value={formData.givenManager}
                 onChange={handleChange}
-                className={inputStyles}
+                className={inputStyles("givenManager")}
                 placeholder="Enter your previous manager's name"
+                aria-invalid={!!fieldErrors["givenManager"]}
+                {...(fieldErrors["givenManager"] && {
+                  "aria-describedby": `error-givenManager`,
+                })}
               />
+              {fieldErrors["givenManager"] && (
+                <p
+                  id={`error-givenManager`}
+                  className="mt-1 text-sm text-red-500"
+                >
+                  {fieldErrors["givenManager"]}
+                </p>
+              )}
             </FormField>
           </>
         )}
@@ -324,10 +433,19 @@ const MyInformation = ({ formData, setFormData }) => {
               name="givenName"
               value={formData.givenName}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("givenName")}
               placeholder="Enter your given name"
               required
+              aria-invalid={!!fieldErrors["givenName"]}
+              {...(fieldErrors["givenName"] && {
+                "aria-describedby": `error-givenName`,
+              })}
             />
+            {fieldErrors["givenName"] && (
+              <p id={`error-givenName`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["givenName"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Middle Name">
@@ -336,9 +454,18 @@ const MyInformation = ({ formData, setFormData }) => {
               name="middleName"
               value={formData.middleName}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("middleName")}
               placeholder="Enter your middle name"
+              aria-invalid={!!fieldErrors["middleName"]}
+              {...(fieldErrors["middleName"] && {
+                "aria-describedby": `error-middleName`,
+              })}
             />
+            {fieldErrors["middleName"] && (
+              <p id={`error-middleName`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["middleName"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Family Name" required>
@@ -347,10 +474,19 @@ const MyInformation = ({ formData, setFormData }) => {
               name="familyName"
               value={formData.familyName}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("familyName")}
               placeholder="Enter your family name"
               required
+              aria-invalid={!!fieldErrors["familyName"]}
+              {...(fieldErrors["familyName"] && {
+                "aria-describedby": `error-familyName`,
+              })}
             />
+            {fieldErrors["familyName"] && (
+              <p id={`error-familyName`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["familyName"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Suffix">
@@ -358,7 +494,11 @@ const MyInformation = ({ formData, setFormData }) => {
               name="suffix"
               value={formData.suffix}
               onChange={handleChange}
-              className={selectStyles}
+              className={selectStyles("suffix")}
+              aria-invalid={!!fieldErrors["suffix"]}
+              {...(fieldErrors["suffix"] && {
+                "aria-describedby": `error-suffix`,
+              })}
             >
               <option value="">Select suffix</option>
               {suffixOptions.map((suffix) => (
@@ -367,6 +507,11 @@ const MyInformation = ({ formData, setFormData }) => {
                 </option>
               ))}
             </select>
+            {fieldErrors["suffix"] && (
+              <p id={`error-suffix`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["suffix"]}
+              </p>
+            )}
           </FormField>
         </div>
       </FormSection>
@@ -381,8 +526,12 @@ const MyInformation = ({ formData, setFormData }) => {
             name="country"
             value={formData.country}
             onChange={handleChange}
-            className={selectStyles}
+            className={selectStyles("country")}
             required
+            aria-invalid={!!fieldErrors["country"]}
+            {...(fieldErrors["country"] && {
+              "aria-describedby": `error-country`,
+            })}
           >
             <option value="">Select your country</option>
             {countries.map(({ code, name }) => (
@@ -391,6 +540,11 @@ const MyInformation = ({ formData, setFormData }) => {
               </option>
             ))}
           </select>
+          {fieldErrors["country"] && (
+            <p id={`error-country`} className="mt-1 text-sm text-red-500">
+              {fieldErrors["country"]}
+            </p>
+          )}
         </FormField>
 
         <div className="grid grid-cols-1 gap-6">
@@ -400,10 +554,19 @@ const MyInformation = ({ formData, setFormData }) => {
               name="street"
               value={formData.street}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("street")}
               placeholder="Enter your street address"
               required
+              aria-invalid={!!fieldErrors["street"]}
+              {...(fieldErrors["street"] && {
+                "aria-describedby": `error-street`,
+              })}
             />
+            {fieldErrors["street"] && (
+              <p id={`error-street`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["street"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Additional Address">
@@ -412,9 +575,21 @@ const MyInformation = ({ formData, setFormData }) => {
               name="additionalAddress"
               value={formData.additionalAddress}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("additionalAddress")}
               placeholder="Apartment, suite, unit, building, floor, etc."
+              aria-invalid={!!fieldErrors["additionalAddress"]}
+              {...(fieldErrors["additionalAddress"] && {
+                "aria-describedby": `error-additionalAddress`,
+              })}
             />
+            {fieldErrors["additionalAddress"] && (
+              <p
+                id={`error-additionalAddress`}
+                className="mt-1 text-sm text-red-500"
+              >
+                {fieldErrors["additionalAddress"]}
+              </p>
+            )}
           </FormField>
         </div>
 
@@ -425,9 +600,18 @@ const MyInformation = ({ formData, setFormData }) => {
               name="city"
               value={formData.city}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("city")}
               required
+              aria-invalid={!!fieldErrors["city"]}
+              {...(fieldErrors["city"] && {
+                "aria-describedby": `error-city`,
+              })}
             />
+            {fieldErrors["city"] && (
+              <p id={`error-city`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["city"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="State/Province" required>
@@ -436,9 +620,18 @@ const MyInformation = ({ formData, setFormData }) => {
               name="province"
               value={formData.province}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("province")}
               required
+              aria-invalid={!!fieldErrors["province"]}
+              {...(fieldErrors["province"] && {
+                "aria-describedby": `error-province`,
+              })}
             />
+            {fieldErrors["province"] && (
+              <p id={`error-province`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["province"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Postal Code" required>
@@ -447,9 +640,18 @@ const MyInformation = ({ formData, setFormData }) => {
               name="postalCode"
               value={formData.postalCode}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("postalCode")}
               required
+              aria-invalid={!!fieldErrors["postalCode"]}
+              {...(fieldErrors["postalCode"] && {
+                "aria-describedby": `error-postalCode`,
+              })}
             />
+            {fieldErrors["postalCode"] && (
+              <p id={`error-postalCode`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["postalCode"]}
+              </p>
+            )}
           </FormField>
         </div>
       </FormSection>
@@ -467,10 +669,19 @@ const MyInformation = ({ formData, setFormData }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`${inputStyles} pl-10`}
+              className={`${inputStyles("email")} pl-10`}
               placeholder="you@example.com"
               required
+              aria-invalid={!!fieldErrors["email"]}
+              {...(fieldErrors["email"] && {
+                "aria-describedby": `error-email`,
+              })}
             />
+            {fieldErrors["email"] && (
+              <p id={`error-email`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["email"]}
+              </p>
+            )}
           </div>
         </FormField>
 
@@ -480,14 +691,23 @@ const MyInformation = ({ formData, setFormData }) => {
               name="phoneType"
               value={formData.phoneType}
               onChange={handleChange}
-              className={selectStyles}
+              className={selectStyles("phoneType")}
               required
+              aria-invalid={!!fieldErrors["phoneType"]}
+              {...(fieldErrors["phoneType"] && {
+                "aria-describedby": `error-phoneType`,
+              })}
             >
               <option value="">Select type</option>
               <option value="mobile">Mobile</option>
               <option value="home">Home</option>
               <option value="work">Work</option>
             </select>
+            {fieldErrors["phoneType"] && (
+              <p id={`error-phoneType`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["phoneType"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Country Code" required>
@@ -495,14 +715,23 @@ const MyInformation = ({ formData, setFormData }) => {
               name="phoneCode"
               value={formData.phoneCode}
               onChange={handleChange}
-              className={selectStyles}
+              className={selectStyles("phoneCode")}
               required
+              aria-invalid={!!fieldErrors["phoneCode"]}
+              {...(fieldErrors["phoneCode"] && {
+                "aria-describedby": `error-phoneCode`,
+              })}
             >
               <option value="">Select code</option>
               <option value="+1">+1 (US/Canada)</option>
               <option value="+44">+44 (UK)</option>
               <option value="+63">+63 (Philippines)</option>
             </select>
+            {fieldErrors["phoneCode"] && (
+              <p id={`error-phoneCode`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["phoneCode"]}
+              </p>
+            )}
           </FormField>
 
           <FormField label="Phone Number" required>
@@ -511,10 +740,19 @@ const MyInformation = ({ formData, setFormData }) => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              className={inputStyles}
+              className={inputStyles("phoneNumber")}
               placeholder="Enter phone number"
               required
+              aria-invalid={!!fieldErrors["phoneNumber"]}
+              {...(fieldErrors["phoneNumber"] && {
+                "aria-describedby": `error-phoneNumber`,
+              })}
             />
+            {fieldErrors["phoneNumber"] && (
+              <p id={`error-phoneNumber`} className="mt-1 text-sm text-red-500">
+                {fieldErrors["phoneNumber"]}
+              </p>
+            )}
           </FormField>
         </div>
       </FormSection>
@@ -522,4 +760,5 @@ const MyInformation = ({ formData, setFormData }) => {
   );
 };
 
+MyInformation.validator = MyInformationValidator;
 export default MyInformation;
