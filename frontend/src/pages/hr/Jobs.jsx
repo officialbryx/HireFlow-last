@@ -132,11 +132,10 @@ const Jobs = () => {
 
   const handleJobEdited = async (updatedJobData) => {
     try {
-      // Format the data to match the API expectations
       const formattedData = {
         job_title: updatedJobData.title,
         company_name: updatedJobData.companyName,
-        company_logo_url: updatedJobData.companyLogo,
+        company_logo_url: updatedJobData.companyLogo, // This can be either a File or URL string
         location: updatedJobData.location,
         employment_type: updatedJobData.employmentType,
         salary_range: updatedJobData.salaryRange,
@@ -152,6 +151,7 @@ const Jobs = () => {
         id: selectedJob.id, 
         data: formattedData 
       });
+
       setShowEditModal(false);
       setSelectedJob(null);
       showToast('success', 'Job post updated successfully!');
