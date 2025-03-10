@@ -36,54 +36,44 @@ const queryClient = new QueryClient({
   },
 });
 
+const titleMap = {
+  "/": "HireFlow",
+  "/signup": "Sign Up | HireFlow",
+  "/login": "Sign In | HireFlow",
+  "/jobposts": "Job Posts | HireFlow",
+  "/createjobpost": "Create Job Post | HireFlow",
+  "/messages": "Messaging | HireFlow",
+  "/viewapplicants": "View Applicants | HireFlow",
+  "/settings": "Settings | HireFlow",
+  "/forgot-password": "Forgot Password | HireFlow",
+  "/profile": "My Profile | HireFlow",
+  "/hr/dashboard": "Dashboard | HireFlow",
+  "/hr/jobs": "Jobs | HireFlow",
+  "/hr/faq": "FAQ | HireFlow",
+  "/hr/notifications": "Notifications | HireFlow",
+  "/about": "About Us | HireFlow",
+  "/careers": "Careers | HireFlow",
+  "/terms": "Terms of Service | HireFlow",
+  "/privacy": "Privacy Policy | HireFlow",
+  "/cookies": "Cookie Policy | HireFlow",
+};
+
 const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Dynamically set the title based on the current route
-    if (location.pathname === "/") {
-      document.title = "HireFlow";
-    } else if (location.pathname === "/signup") {
-      document.title = "Sign Up | HireFlow";
-    } else if (location.pathname === "/login") {
-      document.title = "Sign In | HireFlow";
-    } else if (location.pathname === "/jobposts") {
-      document.title = "Job Posts | HireFlow";
-    } else if (location.pathname === "/createjobpost") {
-      document.title = "Create Job Post | HireFlow";
-    } else if (location.pathname.startsWith("/apply/")) {
-      const company = decodeURIComponent(location.pathname.split("/")[2]);
-      document.title = `Apply Job for ${company} | HireFlow`;
-    } else if (location.pathname === "/messages") {
-      document.title = "Messaging | HireFlow";
-    } else if (location.pathname === "/viewapplicants") {
-      document.title = "View Applicants | HireFlow";
-    } else if (location.pathname === "/settings") {
-      document.title = "Settings | HireFlow";
-    } else if (location.pathname === "/forgot-password") {
-      document.title = "Forgot Password | HireFlow";
-    } else if (location.pathname === "/profile") {
-      document.title = "My Profile | HireFlow";
-    } else if (location.pathname === "/hr/dashboard") {
-      document.title = "Dashboard | HireFlow";
-    } else if (location.pathname === "/hr/jobs") {
-      document.title = "Jobs | HireFlow";
-    } else if (location.pathname === "/hr/faq") {
-      document.title = "FAQ | HireFlow";
-    } else if (location.pathname === "/hr/notifications") {
-      document.title = "Notifications | HireFlow";
-    } else if (location.pathname === "/about") {
-      document.title = "About Us | HireFlow";
-    } else if (location.pathname === "/careers") {
-      document.title = "Careers | HireFlow";
-    } else if (location.pathname === "/terms") {
-      document.title = "Terms of Service | HireFlow";
-    } else if (location.pathname === "/privacy") {
-      document.title = "Privacy Policy | HireFlow";
-    } else if (location.pathname === "/cookies") {
-      document.title = "Cookie Policy | HireFlow";
-    }
-  }, [location]);
+    const updateTitle = () => {
+      if (location.pathname.startsWith("/apply/")) {
+        const company = decodeURIComponent(location.pathname.split("/")[2]);
+        document.title = `Apply Job for ${company} | HireFlow`;
+        return;
+      }
+
+      document.title = titleMap[location.pathname] || "HireFlow";
+    };
+
+    updateTitle();
+  }, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
