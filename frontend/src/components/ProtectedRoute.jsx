@@ -3,58 +3,74 @@ import { supabase } from "../services/supabaseClient";
 import { useState, useEffect } from "react";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState(null);
-  const location = useLocation();
+  const [authState, setAuthState] = useState({
+    session: null,
+    userRole: null,
+    loading: true,
+  });
 
   useEffect(() => {
-    const getSession = async () => {
+    let mounted = true;
+
+    const initAuth = async () => {
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        setSession(session);
 
-        if (session) {
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          const userRole = user?.user_metadata?.user_type;
-          console.log("User role:", userRole); // Debug log
-          setUserRole(userRole);
+        if (!mounted) return;
+
+        if (session?.user) {
+          const userRole = session.user.user_metadata?.user_type;
+          setAuthState({
+            session,
+            userRole,
+            loading: false,
+          });
+        } else {
+          setAuthState({
+            session: null,
+            userRole: null,
+            loading: false,
+          });
         }
       } catch (error) {
         console.error("Auth error:", error);
-      } finally {
-        setLoading(false);
+        if (mounted) {
+          setAuthState((prev) => ({ ...prev, loading: false }));
+        }
       }
     };
 
-    getSession();
+    initAuth();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event); // Debug log
-      setSession(session);
+      if (!mounted) return;
 
-      if (session) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        const userRole = user?.user_metadata?.user_type;
-        console.log("Updated user role:", userRole); // Debug log
-        setUserRole(userRole);
+      if (session?.user) {
+        setAuthState({
+          session,
+          userRole: session.user.user_metadata?.user_type,
+          loading: false,
+        });
       } else {
-        setUserRole(null);
+        setAuthState({
+          session: null,
+          userRole: null,
+          loading: false,
+        });
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  if (loading) {
+  if (authState.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
@@ -62,15 +78,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
+  if (!authState.session) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  console.log("Checking role access:", { userRole, allowedRoles }); // Debug log
-
-  if (!allowedRoles.includes(userRole)) {
-    console.log("Access denied - redirecting"); // Debug log
-    return <Navigate to="/login" replace />;
+  if (!allowedRoles.includes(authState.userRole)) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
