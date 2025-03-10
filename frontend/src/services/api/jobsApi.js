@@ -3,42 +3,39 @@ import { supabase } from "../supabaseClient";
 export const jobsApi = {
   async createJobPost(jobPostData) {
     try {
-      // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      // Get user profile to verify role
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-      if (profile.user_type !== 'employer') {
-        throw new Error('Only employers can create job posts');
-      }
-
+      // Handle logo upload if it's a File object
       let logoUrl = null;
       if (jobPostData.companyLogo instanceof File) {
         const file = jobPostData.companyLogo;
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        const { error: uploadError, data } = await supabase.storage
+        
+        // Upload the file
+        const { error: uploadError } = await supabase.storage
           .from('company-logos')
-          .upload(`logos/${fileName}`, file);
+          .upload(`logos/${fileName}`, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type // Add content type
+          });
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        // Get the public URL
+        const { data } = supabase.storage
           .from('company-logos')
           .getPublicUrl(`logos/${fileName}`);
 
-        logoUrl = publicUrl;
+        logoUrl = data.publicUrl;
+      } else if (typeof jobPostData.companyLogo === 'string') {
+        // If it's already a URL string, use it directly
+        logoUrl = jobPostData.companyLogo;
       }
 
-      // Insert main job post with creator_id
+      // Create job post with correct logo URL
       const { data: jobPost, error: jobError } = await supabase
         .from('job_posting')
         .insert({
@@ -52,7 +49,7 @@ export const jobsApi = {
           company_description: jobPostData.companyDescription,
           about_company: jobPostData.aboutCompany,
           status: 'active',
-          creator_id: user.id  // Add creator_id
+          creator_id: user.id
         })
         .select()
         .single();
@@ -60,28 +57,53 @@ export const jobsApi = {
       if (jobError) throw jobError;
 
       // Insert related data
-      await Promise.all([
-        supabase.from('job_responsibility').insert(
-          jobPostData.responsibilities.map(r => ({
-            job_posting_id: jobPost.id,
-            responsibility: r
-          }))
-        ),
-        supabase.from('job_qualification').insert(
-          jobPostData.qualifications.map(q => ({
-            job_posting_id: jobPost.id,
-            qualification: q
-          }))
-        ),
-        supabase.from('job_skill').insert(
-          jobPostData.skills.map(s => ({
-            job_posting_id: jobPost.id,
-            skill: s
-          }))
-        )
-      ]);
+      const promises = [
+        // Insert responsibilities
+        jobPostData.responsibilities?.length > 0 &&
+          supabase.from('job_responsibility').insert(
+            jobPostData.responsibilities.map(r => ({
+              job_posting_id: jobPost.id,
+              responsibility: r
+            }))
+          ),
 
-      return jobPost;
+        // Insert qualifications
+        jobPostData.qualifications?.length > 0 &&
+          supabase.from('job_qualification').insert(
+            jobPostData.qualifications.map(q => ({
+              job_posting_id: jobPost.id,
+              qualification: q
+            }))
+          ),
+
+        // Insert skills
+        jobPostData.skills?.length > 0 &&
+          supabase.from('job_skill').insert(
+            jobPostData.skills.map(s => ({
+              job_posting_id: jobPost.id,
+              skill: s
+            }))
+          )
+      ].filter(Boolean);
+
+      // Wait for all related data to be inserted
+      await Promise.all(promises);
+
+      // Fetch the complete job post with related data
+      const { data: completeJob, error: fetchError } = await supabase
+        .from('job_posting')
+        .select(`
+          *,
+          job_responsibility (responsibility),
+          job_qualification (qualification),
+          job_skill (skill)
+        `)
+        .eq('id', jobPost.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      return completeJob;
+
     } catch (error) {
       console.error("Error creating job post:", error);
       throw error;
@@ -90,34 +112,16 @@ export const jobsApi = {
 
   async updateJobPost(jobId, jobData) {
     try {
-      // Get current user and verify ownership
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-
-      const { data: jobPost, error: checkError } = await supabase
-        .from('job_posting')
-        .select('creator_id')
-        .eq('id', jobId)
-        .single();
-
-      if (checkError) throw checkError;
-      if (jobPost.creator_id !== user.id) {
-        throw new Error('You can only edit your own job posts');
-      }
-
+      // Handle logo upload if it's a File object
       let logoUrl = jobData.company_logo_url;
-
       if (jobData.company_logo_url instanceof File) {
         const file = jobData.company_logo_url;
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
+        
         const { error: uploadError } = await supabase.storage
           .from('company-logos')
-          .upload(`logos/${fileName}`, file, {
-            cacheControl: '3600',
-            upsert: true
-          });
+          .upload(`logos/${fileName}`, file);
 
         if (uploadError) throw uploadError;
 
@@ -128,57 +132,96 @@ export const jobsApi = {
         logoUrl = publicUrl;
       }
 
-      // Update main job posting
-      const { error: jobError } = await supabase
+      // Update job post with correct logo URL
+      const { data: jobPost, error: jobError } = await supabase
         .from('job_posting')
         .update({
           job_title: jobData.job_title,
           company_name: jobData.company_name,
-          company_logo_url: logoUrl,
+          company_logo_url: logoUrl, // Use the processed logo URL
           location: jobData.location,
           employment_type: jobData.employment_type,
           salary_range: jobData.salary_range,
           applicants_needed: jobData.applicants_needed,
           company_description: jobData.company_description,
           about_company: jobData.about_company,
-          updated_at: new Date().toISOString()
         })
-        .eq('id', jobId);
+        .eq('id', jobId)
+        .select()
+        .single();
 
       if (jobError) throw jobError;
 
-      // Delete existing related data
-      await Promise.all([
+      // Delete existing related data first
+      const deletePromises = [
         supabase.from('job_responsibility').delete().eq('job_posting_id', jobId),
         supabase.from('job_qualification').delete().eq('job_posting_id', jobId),
         supabase.from('job_skill').delete().eq('job_posting_id', jobId)
-      ]);
+      ];
+
+      await Promise.all(deletePromises);
 
       // Insert new related data
-      await Promise.all([
-        supabase.from('job_responsibility').insert(
-          jobData.responsibilities.map(r => ({
-            job_posting_id: jobId,
-            responsibility: r
-          }))
-        ),
-        supabase.from('job_qualification').insert(
-          jobData.qualifications.map(q => ({
-            job_posting_id: jobId,
-            qualification: q
-          }))
-        ),
-        supabase.from('job_skill').insert(
-          jobData.skills.map(s => ({
-            job_posting_id: jobId,
-            skill: s
-          }))
-        )
-      ]);
+      const insertPromises = [];
 
-      return await this.getJobPostingDetails(jobId);
+      if (jobData.responsibilities?.length) {
+        insertPromises.push(
+          supabase.from('job_responsibility').insert(
+            jobData.responsibilities.map(r => ({
+              job_posting_id: jobId,
+              responsibility: r
+            }))
+          )
+        );
+      }
+
+      if (jobData.qualifications?.length) {
+        insertPromises.push(
+          supabase.from('job_qualification').insert(
+            jobData.qualifications.map(q => ({
+              job_posting_id: jobId,
+              qualification: q
+            }))
+          )
+        );
+      }
+
+      if (jobData.skills?.length) {
+        insertPromises.push(
+          supabase.from('job_skill').insert(
+            jobData.skills.map(s => ({
+              job_posting_id: jobId,
+              skill: s
+            }))
+          )
+        );
+      }
+
+      if (insertPromises.length) {
+        const results = await Promise.all(insertPromises);
+        const errors = results.filter(r => r.error);
+        if (errors.length) {
+          throw new Error('Failed to update related data');
+        }
+      }
+
+      // Fetch complete updated job
+      const { data: updatedJob, error: fetchError } = await supabase
+        .from('job_posting')
+        .select(`
+          *,
+          job_responsibility (responsibility),
+          job_qualification (qualification),
+          job_skill (skill)
+        `)
+        .eq('id', jobId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      return updatedJob;
+
     } catch (error) {
-      console.error('Error updating job post:', error);
+      console.error("Error updating job post:", error);
       throw error;
     }
   },
@@ -257,12 +300,15 @@ export const jobsApi = {
 
   async restoreJobPost(jobId) {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_posting')
         .update({ status: 'active' })
-        .eq('id', jobId);
+        .eq('id', jobId)
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Error restoring job:', error);
       throw error;
