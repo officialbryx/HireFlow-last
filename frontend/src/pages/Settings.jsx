@@ -2,8 +2,13 @@ import { useState, useEffect } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 import { validatePassword } from "../utils/passwordValidation";
+import Navbar from "../components/Navbar";
+import HRNavbar from "../components/HRNavbar";
 
 const Settings = () => {
+  // Add userType state
+  const [userType, setUserType] = useState(null);
+  
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -43,6 +48,9 @@ const Settings = () => {
     const fetchUserData = async () => {
       try {
         const { user, profile } = await api.getUserProfile();
+
+        // Set user type
+        setUserType(profile.user_type);
 
         const userData = {
           firstName: profile.first_name || user.user_metadata?.first_name || "",
@@ -272,265 +280,268 @@ const Settings = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 md:mb-0">
-            Account Settings
-          </h1>
-          <div className="text-sm text-gray-500">
-            Last updated: {new Date().toLocaleDateString()}
-          </div>
-        </div>
-
-        {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-start">
-            <svg
-              className="h-5 w-5 mr-2 mt-0.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{success}</span>
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start">
-            <svg
-              className="h-5 w-5 mr-2 mt-0.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-64 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
-            <nav className="space-y-1">
-              {[
-                { id: "profile", label: "Profile Settings" },
-                { id: "email", label: "Email" },
-                { id: "password", label: "Change Password" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+    <div className="min-h-screen bg-gray-50">
+      {userType === 'jobseeker' ? <Navbar /> : <HRNavbar />}
+      <div className="pt-20 px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 md:mb-0">
+              Account Settings
+            </h1>
+            <div className="text-sm text-gray-500">
+              Last updated: {new Date().toLocaleDateString()}
+            </div>
           </div>
 
-          <div className="flex-1">
-            {activeTab === "profile" && renderProfileForm()}
+          {success && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-start">
+              <svg
+                className="h-5 w-5 mr-2 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{success}</span>
+            </div>
+          )}
 
-            {activeTab === "email" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Email Settings
-                </h2>
-                <form onSubmit={handleEmailUpdate} className="space-y-6">
-                  <InputField
-                    label="Email Address"
-                    type="email"
-                    value={securityData.email}
-                    onChange={(e) =>
-                      setSecurityData({
-                        ...securityData,
-                        email: e.target.value,
-                      })
-                    }
-                  />
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start">
+              <svg
+                className="h-5 w-5 mr-2 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
 
-                  {securityData.email !== profileData.email && (
-                    <div className="text-sm text-indigo-600 flex items-center">
-                      <svg
-                        className="h-4 w-4 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Click Update to confirm your new email address
-                    </div>
-                  )}
-
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="w-full md:w-64 bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+              <nav className="space-y-1">
+                {[
+                  { id: "profile", label: "Profile Settings" },
+                  { id: "email", label: "Email" },
+                  { id: "password", label: "Change Password" },
+                ].map((tab) => (
                   <button
-                    type="submit"
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
-                  >
-                    Update Email
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {activeTab === "password" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Change Password
-                </h2>
-                <form onSubmit={handlePasswordUpdate} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={passwordData.newPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            newPassword: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Password requirements */}
-                    {passwordData.newPassword && (
-                      <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="font-medium text-gray-700 mb-2">
-                          Password requirements:
-                        </p>
-                        <ul className="space-y-2">
-                          {passwordValidation.requirements.map((req) => (
-                            <li key={req.id} className="flex items-start">
-                              <span
-                                className={`mt-0.5 mr-2 ${
-                                  req.isMet ? "text-green-500" : "text-red-500"
-                                }`}
-                              >
-                                {req.isMet ? (
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                ) : (
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                )}
-                              </span>
-                              <span
-                                className={
-                                  req.isMet ? "text-gray-600" : "text-gray-600"
-                                }
-                              >
-                                {req.message}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirm New Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={passwordData.confirmPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                      >
-                        {showConfirmPassword ? (
-                          <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                        ) : (
-                          <EyeIcon className="h-5 w-5 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-
-                    {passwordData.confirmPassword &&
-                      passwordData.newPassword !==
-                        passwordData.confirmPassword && (
-                        <p className="mt-2 text-sm text-red-600">
-                          Passwords do not match
-                        </p>
-                      )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={!passwordValidation.isValid}
-                    className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center ${
-                      passwordValidation.isValid
-                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                      activeTab === tab.id
+                        ? "bg-indigo-50 text-indigo-700 font-medium"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    Update Password
+                    {tab.label}
                   </button>
-                </form>
-              </div>
-            )}
+                ))}
+              </nav>
+            </div>
+
+            <div className="flex-1">
+              {activeTab === "profile" && renderProfileForm()}
+
+              {activeTab === "email" && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    Email Settings
+                  </h2>
+                  <form onSubmit={handleEmailUpdate} className="space-y-6">
+                    <InputField
+                      label="Email Address"
+                      type="email"
+                      value={securityData.email}
+                      onChange={(e) =>
+                        setSecurityData({
+                          ...securityData,
+                          email: e.target.value,
+                        })
+                      }
+                    />
+
+                    {securityData.email !== profileData.email && (
+                      <div className="text-sm text-indigo-600 flex items-center">
+                        <svg
+                          className="h-4 w-4 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Click Update to confirm your new email address
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
+                    >
+                      Update Email
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {activeTab === "password" && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    Change Password
+                  </h2>
+                  <form onSubmit={handlePasswordUpdate} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        New Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={passwordData.newPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              newPassword: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                          ) : (
+                            <EyeIcon className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Password requirements */}
+                      {passwordData.newPassword && (
+                        <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <p className="font-medium text-gray-700 mb-2">
+                            Password requirements:
+                          </p>
+                          <ul className="space-y-2">
+                            {passwordValidation.requirements.map((req) => (
+                              <li key={req.id} className="flex items-start">
+                                <span
+                                  className={`mt-0.5 mr-2 ${
+                                    req.isMet ? "text-green-500" : "text-red-500"
+                                  }`}
+                                >
+                                  {req.isMet ? (
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  ) : (
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  )}
+                                </span>
+                                <span
+                                  className={
+                                    req.isMet ? "text-gray-600" : "text-gray-600"
+                                  }
+                                >
+                                  {req.message}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Confirm New Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={passwordData.confirmPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              confirmPassword: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-lg border border-gray-300 pl-4 pr-10 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                          ) : (
+                            <EyeIcon className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
+                      </div>
+
+                      {passwordData.confirmPassword &&
+                        passwordData.newPassword !==
+                          passwordData.confirmPassword && (
+                          <p className="mt-2 text-sm text-red-600">
+                            Passwords do not match
+                          </p>
+                        )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={!passwordValidation.isValid}
+                      className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center ${
+                        passwordValidation.isValid
+                          ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
+                    >
+                      Update Password
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
