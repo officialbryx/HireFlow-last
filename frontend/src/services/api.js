@@ -67,102 +67,23 @@ export const api = {
 
   async submitApplication(applicationData) {
     try {
-      // First upload resume if exists
-      let resumeUrl = null;
-      if (applicationData.resume instanceof File) {
-        const fileName = `${Date.now()}-${applicationData.resume.name}`;
-        const { data: fileData, error: fileError } = await supabase.storage
-          .from("resumes")
-          .upload(`applications/${fileName}`, applicationData.resume);
-
-        if (fileError) throw fileError;
-
-        // Get public URL for the uploaded file
-        const {
-          data: { publicUrl },
-        } = supabase.storage
-          .from("resumes")
-          .getPublicUrl(`applications/${fileName}`);
-
-        resumeUrl = publicUrl;
-      }
-
-      // Get current user
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      // Format application data
-      const formattedData = {
-        company: applicationData.company,
-        personal_info: {
-          previously_employed: applicationData.previouslyEmployed,
-          employee_id: applicationData.employeeID,
-          manager: applicationData.givenManager,
-          country: applicationData.country,
-          given_name: applicationData.givenName,
-          middle_name: applicationData.middleName,
-          family_name: applicationData.familyName,
-          suffix: applicationData.suffix,
-          phone: {
-            type: applicationData.phoneType,
-            code: applicationData.phoneCode,
-            number: applicationData.phoneNumber,
-          },
-        },
-        contact_info: {
-          email: applicationData.email,
-          phone_type: applicationData.phoneType,
-          phone_code: applicationData.phoneCode,
-          phone_number: applicationData.phoneNumber,
-        },
-        address: {
-          street: applicationData.street,
-          additional_address: applicationData.additionalAddress,
-          city: applicationData.city,
-          province: applicationData.province,
-          postal_code: applicationData.postalCode,
-          country: applicationData.country,
-        },
-        previous_employment: {
-          previously_employed: applicationData.previouslyEmployed === "yes",
-          employee_id: applicationData.employeeID,
-          manager: applicationData.givenManager,
-        },
-        work_experience: applicationData.noWorkExperience
-          ? []
-          : applicationData.workExperience.map((exp) => ({
-              ...exp,
-              fromDate: exp.fromDate || null,
-              toDate: exp.currentWork ? null : exp.toDate || null,
-            })),
-        education: applicationData.education,
-        skills: applicationData.skills,
-        resume_url: resumeUrl,
-        websites: (applicationData.websites || []).filter(
-          (url) => url && url.trim()
-        ),
-        linkedin_url: applicationData.linkedinUrl,
-        application_questions: applicationData.applicationQuestions,
-        terms_accepted: applicationData.termsAccepted,
-        email: applicationData.email,
-        phone_type: applicationData.phoneType,
-        phone_code: applicationData.phoneCode,
-        phone_number: applicationData.phoneNumber,
-        user_id: user.id,
-      };
-
-      // Submit application
       const { data, error } = await supabase
-        .from("applications")
-        .insert([formattedData]);
+        .from('applications')
+        .insert([{
+          ...applicationData,
+          applicant_id: user.id,
+          status: 'pending'
+        }])
+        .select()
+        .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error("Error submitting application:", error);
+      console.error('Error submitting application:', error);
       throw error;
     }
   },

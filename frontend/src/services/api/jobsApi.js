@@ -263,7 +263,8 @@ export const jobsApi = {
           *,
           job_responsibility (responsibility),
           job_qualification (qualification),
-          job_skill (skill)
+          job_skill (skill),
+          applicant_count
         `)
         .order('created_at', { ascending: false });
 
@@ -325,5 +326,21 @@ export const jobsApi = {
 
   async getPopularJobRoles() {
     // ... existing popular roles logic ...
+  },
+
+  async getApplicantCount(jobId) {
+    try {
+      const { data, error } = await supabase
+        .from('job_posting')
+        .select('applicant_count')
+        .eq('id', jobId)
+        .single();
+
+      if (error) throw error;
+      return data.applicant_count;
+    } catch (error) {
+      console.error('Error fetching applicant count:', error);
+      throw error;
+    }
   }
 };

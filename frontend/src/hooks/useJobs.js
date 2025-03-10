@@ -4,7 +4,6 @@ import { jobsApi } from '../services/api/jobsApi';
 export function useJobs(isEmployer = false) {
   const queryClient = useQueryClient();
 
-  // Query for fetching jobs
   const { data: jobs = [], isLoading, error } = useQuery({
     queryKey: ['jobs', isEmployer],
     queryFn: () => jobsApi.getAllJobPostings(isEmployer),

@@ -12,6 +12,7 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
 import { api } from "../services/api";
+import { supabase } from "../services/supabaseClient";
 
 const stages = [
   { id: 1, name: "My Information" },
@@ -22,7 +23,7 @@ const stages = [
 ];
 
 const Apply = () => {
-  const { company } = useParams();
+  const { company, jobId } = useParams(); // Add jobId parameter
   const navigate = useNavigate();
   const [currentStage, setCurrentStage] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,19 +152,29 @@ const Apply = () => {
 
     let isValid = true;
 
-    // Validate depending on current stage
+    // Stage-specific validation
     if (currentStage === 4) {
       const validation = VoluntaryDisclosures.validator.validate(
         formData,
         setFieldErrors
       );
       isValid = validation.isValid;
+    }
 
+    // Final stage validation
+    if (currentStage === stages.length) {
+      isValid = validateApplication();
       if (!isValid) {
-        // Show an alert or notification
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setErrorMessage('Please fill in all required fields');
+        setShowErrorModal(true);
         return;
       }
+    }
+
+    if (!isValid) {
+      // Show an alert or notification
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
     }
 
     // Continue with stage progression if validation passes
@@ -173,29 +184,121 @@ const Apply = () => {
 
   const handleSubmitApplication = async () => {
     try {
-      // Show loading state
       setIsSubmitting(true);
 
+      // Format the application data to match the table structure
+      const applicationData = {
+        job_posting_id: jobId,
+        company: company,
+        personal_info: {
+          given_name: formData.givenName,
+          middle_name: formData.middleName,
+          family_name: formData.familyName,
+          suffix: formData.suffix
+        },
+        contact_info: {
+          email: formData.email,
+          phone_type: formData.phoneType,
+          phone_code: formData.phoneCode,
+          phone_number: formData.phoneNumber
+        },
+        address: {
+          street: formData.street,
+          additional_address: formData.additionalAddress,
+          postal_code: formData.postalCode,
+          city: formData.city,
+          province: formData.province,
+          country: formData.country
+        },
+        previous_employment: {
+          previously_employed: formData.previouslyEmployed
+        },
+        work_experience: formData.noWorkExperience ? [] : formData.workExperience.map(exp => ({
+          job_title: exp.jobTitle,
+          company: exp.company,
+          location: exp.location,
+          current_work: exp.currentWork,
+          from_date: exp.fromDate,
+          to_date: exp.toDate,
+          description: exp.description
+        })),
+        no_work_experience: formData.noWorkExperience,
+        education: formData.education.map(edu => ({
+          school: edu.school,
+          degree: edu.degree,
+          field_of_study: edu.fieldOfStudy,
+          gpa: edu.gpa,
+          from_year: edu.fromYear,
+          to_year: edu.toYear
+        })),
+        skills: formData.skills,
+        resume_url: null, // Will be updated after file upload
+        websites: formData.websites.filter(url => url), // Remove empty strings
+        linkedin_url: formData.linkedin,
+        application_questions: formData.applicationQuestions,
+        terms_accepted: formData.termsAccepted
+      };
+
+      // Handle resume upload if exists
+      if (formData.resume instanceof File) {
+        const fileName = `${Date.now()}-${formData.resume.name}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('resumes')
+          .upload(`applications/${fileName}`, formData.resume);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(`applications/${fileName}`);
+
+        applicationData.resume_url = publicUrl;
+      }
+
       // Submit application
-      await api.submitApplication({
-        company,
-        ...formData,
-      });
+      await api.submitApplication(applicationData);
 
-      // Show success modal instead of alert
       setShowSuccessModal(true);
-
-      // Redirect after delay
       setTimeout(() => {
         navigate("/jobposts");
       }, 3000);
     } catch (error) {
       console.error("Failed to submit application:", error);
-      setErrorMessage("Failed to submit application. Please try again.");
+      setErrorMessage(error.message || "Failed to submit application. Please try again.");
       setShowErrorModal(true);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Add validation before submission
+  const validateApplication = () => {
+    const errors = {};
+
+    // Required fields validation
+    if (!formData.givenName) errors.givenName = 'First name is required';
+    if (!formData.familyName) errors.familyName = 'Last name is required';
+    if (!formData.email) errors.email = 'Email is required';
+    if (!formData.phoneNumber) errors.phoneNumber = 'Phone number is required';
+    if (!formData.country) errors.country = 'Country is required';
+    
+    // Work experience validation
+    if (!formData.noWorkExperience && (!formData.workExperience || formData.workExperience.length === 0)) {
+      errors.workExperience = 'Work experience is required unless marked as no experience';
+    }
+
+    // Education validation
+    if (!formData.education || formData.education.length === 0) {
+      errors.education = 'Education details are required';
+    }
+
+    // Terms acceptance
+    if (!formData.termsAccepted) {
+      errors.terms = 'You must accept the terms to continue';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Add modal states

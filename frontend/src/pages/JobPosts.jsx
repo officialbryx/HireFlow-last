@@ -61,8 +61,13 @@ const JobPosts = () => {
     return matchesSearch;
   });
 
-  const handleApply = (company) => {
-    navigate(`/apply/${company}`);
+  // Update the handleApply function to include jobId
+  const handleApply = (company, jobId) => {
+    if (!company || !jobId) {
+      console.error('Missing company or jobId:', { company, jobId });
+      return;
+    }
+    navigate(`/apply/${encodeURIComponent(company)}/${jobId}`);
   };
 
   const formatPostedDate = (date) => {
@@ -236,7 +241,7 @@ const JobPosts = () => {
                   <div className="mt-6 flex gap-4">
                     <button
                       className="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700"
-                      onClick={() => handleApply(selectedJob.company_name)}
+                      onClick={() => handleApply(selectedJob.company_name, selectedJob.id)}
                     >
                       Apply Now
                     </button>

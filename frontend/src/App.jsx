@@ -125,6 +125,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/apply/:company/:jobId"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker"]}>
+              <Apply />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Employer only routes */}
         <Route
