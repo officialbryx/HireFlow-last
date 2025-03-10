@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobsApi } from '../services/api/jobsApi';
 
-export function useJobs() {
+export function useJobs(isEmployer = false) {
   const queryClient = useQueryClient();
 
   const { data: jobs = [], isLoading, error } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: jobsApi.getAllJobPostings,
+    queryKey: ['jobs', isEmployer], // Add isEmployer to cache key
+    queryFn: () => jobsApi.getAllJobPostings(isEmployer),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { useJobListings } from "../hooks/useJobListings";
+import { useJobs } from "../hooks/useJobs"; // Update this import
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -9,46 +9,73 @@ import {
   UserGroupIcon,
   HeartIcon,
 } from "@heroicons/react/24/outline";
+import { formatDistanceToNow } from 'date-fns';
 
 const JobPosts = () => {
+  const { jobs: jobListings, isLoading, error } = useJobs(false); // Pass false for jobseeker view
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedJob, setSelectedJob] = useState(null);
   const navigate = useNavigate();
 
-  const { jobs: jobListings, isLoading, error } = useJobListings();
-
   useEffect(() => {
     console.log("JobPosts component mounted"); // Debug log
   }, []);
 
+  // Add data normalization helper
+  const normalizeJobData = (job) => {
+    return {
+      ...job,
+      job_skill: job.job_skill || [],
+      responsibilities: (job.job_responsibility || []).map(r => r.responsibility),
+      qualifications: (job.job_qualification || []).map(q => q.qualification),
+      company_description: job.company_description || 'No description available',
+      about_company: job.about_company || 'No company information available',
+      applicants_needed: job.applicants_needed || 'Not specified',
+      location: job.location || 'Location not specified'
+    };
+  };
+
   // Filter jobs based on search and filter
   const filteredJobs = jobListings.filter((job) => {
     const matchesSearch =
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills.some((skill) =>
-        skill.toLowerCase().includes(searchQuery.toLowerCase())
+      job.job_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.job_skill?.some((skill) =>
+        skill.skill.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
     if (selectedFilter === "all") return matchesSearch;
     if (selectedFilter === "recent") {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      return matchesSearch && new Date(job.postedDate) >= oneWeekAgo;
+      return matchesSearch && new Date(job.created_at) >= oneWeekAgo;
     }
     if (selectedFilter === "remote")
-      return matchesSearch && job.type.toLowerCase().includes("remote");
+      return matchesSearch && job.employment_type?.toLowerCase().includes("remote");
     if (selectedFilter === "fulltime")
-      return matchesSearch && job.type.toLowerCase().includes("full-time");
+      return matchesSearch && job.employment_type?.toLowerCase().includes("full-time");
     if (selectedFilter === "parttime")
-      return matchesSearch && job.type.toLowerCase().includes("part-time");
+      return matchesSearch && job.employment_type?.toLowerCase().includes("part-time");
 
     return matchesSearch;
   });
 
   const handleApply = (company) => {
     navigate(`/apply/${company}`);
+  };
+
+  const formatPostedDate = (date) => {
+    try {
+      return `Posted ${formatDistanceToNow(new Date(date), { addSuffix: true })}`;
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
+  // Update selectedJob state to use normalized data
+  const handleJobSelect = (job) => {
+    setSelectedJob(normalizeJobData(job));
   };
 
   if (isLoading) {
@@ -120,28 +147,28 @@ const JobPosts = () => {
                               : "border-l-4 border-transparent hover:border-l-4 hover:border-gray-300"
                           }
                           ${index !== 0 ? "border-t border-black" : ""}`}
-                        onClick={() => setSelectedJob(job)}
+                        onClick={() => handleJobSelect(job)}
                       >
                         <div className="p-4">
                           <div className="flex gap-4">
                             <img
-                              src={job.companyLogo}
-                              alt={job.company}
-                              className="w-12 h-12 rounded"
+                              src={job.company_logo_url || '/default-company-logo.png'}
+                              alt={job.company_name}
+                              className="w-12 h-12 rounded object-contain bg-gray-50"
                             />
                             <div>
                               <h3 className="font-semibold text-gray-900">
-                                {job.title}
+                                {job.job_title}
                               </h3>
                               <p className="text-gray-600 text-sm">
-                                {job.company}
+                                {job.company_name}
                               </p>
                               <div className="flex items-center text-gray-500 text-sm mt-1">
                                 <MapPinIcon className="h-4 w-4 mr-1" />
                                 {job.location}
                               </div>
                               <p className="text-gray-500 text-sm mt-2">
-                                {job.postedDate}
+                                {formatPostedDate(job.created_at)}
                               </p>
                             </div>
                           </div>
@@ -164,16 +191,16 @@ const JobPosts = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex gap-4">
                       <img
-                        src={selectedJob.companyLogo}
-                        alt={selectedJob.company}
+                        src={selectedJob.company_logo_url || '/default-company-logo.png'}
+                        alt={selectedJob.company_name}
                         className="w-16 h-16 rounded"
                       />
                       <div>
                         <h2 className="text-2xl font-bold text-gray-900">
-                          {selectedJob.company}
+                          {selectedJob.company_name}
                         </h2>
                         <h3 className="text-xl text-gray-700">
-                          {selectedJob.title}
+                          {selectedJob.job_title}
                         </h3>
                       </div>
                     </div>
@@ -191,17 +218,17 @@ const JobPosts = () => {
                     </div>
                     <div className="flex items-center text-gray-600">
                       <UserGroupIcon className="h-5 w-5 mr-2" />
-                      {selectedJob.applicantsNeeded} applicants needed
+                      {selectedJob.applicants_needed} applicants needed
                     </div>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {selectedJob.skills.map((skill, index) => (
+                    {selectedJob.job_skill.map((skill, index) => (
                       <span
                         key={index}
                         className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm"
                       >
-                        {skill}
+                        {skill.skill}
                       </span>
                     ))}
                   </div>
@@ -209,7 +236,7 @@ const JobPosts = () => {
                   <div className="mt-6 flex gap-4">
                     <button
                       className="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700"
-                      onClick={() => handleApply(selectedJob.company)}
+                      onClick={() => handleApply(selectedJob.company_name)}
                     >
                       Apply Now
                     </button>
@@ -223,33 +250,39 @@ const JobPosts = () => {
                       About The Job
                     </h4>
                     <p className="text-gray-600 mb-6">
-                      {selectedJob.companyDetails}
+                      {selectedJob.company_description}
                     </p>
 
-                    <h5 className="font-semibold mb-2">
-                      Key Responsibilities:
-                    </h5>
-                    <ul className="list-disc pl-5 mb-6">
-                      {selectedJob.responsibilities.map((item, index) => (
-                        <li key={index} className="text-gray-600 mb-1">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                    {selectedJob.responsibilities.length > 0 && (
+                      <>
+                        <h5 className="font-semibold mb-2">Key Responsibilities:</h5>
+                        <ul className="list-disc pl-5 mb-6">
+                          {selectedJob.responsibilities.map((item, index) => (
+                            <li key={index} className="text-gray-600 mb-1">
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
 
-                    <h5 className="font-semibold mb-2">Qualifications:</h5>
-                    <ul className="list-disc pl-5 mb-6">
-                      {selectedJob.qualifications.map((item, index) => (
-                        <li key={index} className="text-gray-600 mb-1">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                    {selectedJob.qualifications.length > 0 && (
+                      <>
+                        <h5 className="font-semibold mb-2">Qualifications:</h5>
+                        <ul className="list-disc pl-5 mb-6">
+                          {selectedJob.qualifications.map((item, index) => (
+                            <li key={index} className="text-gray-600 mb-1">
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
 
                     <h4 className="text-lg font-semibold mb-4">
                       About the Company
                     </h4>
-                    <p className="text-gray-600">{selectedJob.aboutCompany}</p>
+                    <p className="text-gray-600">{selectedJob.about_company}</p>
                   </div>
                 </div>
               ) : (

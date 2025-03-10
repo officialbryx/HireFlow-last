@@ -22,7 +22,7 @@ const Jobs = () => {
     updateJob,
     archiveJob,
     restoreJob 
-  } = useJobs();
+  } = useJobs(true); // Pass true for employer view
   const { getPaginatedData } = usePagination();
   const { showMessage, messageType, message, showToast } = useToast();
   const {

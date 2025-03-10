@@ -3,6 +3,22 @@ import { supabase } from "../supabaseClient";
 export const jobsApi = {
   async createJobPost(jobPostData) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      // Get user profile to verify role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      if (profile.user_type !== 'employer') {
+        throw new Error('Only employers can create job posts');
+      }
+
       let logoUrl = null;
       if (jobPostData.companyLogo instanceof File) {
         const file = jobPostData.companyLogo;
@@ -22,7 +38,7 @@ export const jobsApi = {
         logoUrl = publicUrl;
       }
 
-      // Insert main job post
+      // Insert main job post with creator_id
       const { data: jobPost, error: jobError } = await supabase
         .from('job_posting')
         .insert({
@@ -35,7 +51,8 @@ export const jobsApi = {
           applicants_needed: jobPostData.applicantsNeeded,
           company_description: jobPostData.companyDescription,
           about_company: jobPostData.aboutCompany,
-          status: 'active'
+          status: 'active',
+          creator_id: user.id  // Add creator_id
         })
         .select()
         .single();
@@ -73,6 +90,21 @@ export const jobsApi = {
 
   async updateJobPost(jobId, jobData) {
     try {
+      // Get current user and verify ownership
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      const { data: jobPost, error: checkError } = await supabase
+        .from('job_posting')
+        .select('creator_id')
+        .eq('id', jobId)
+        .single();
+
+      if (checkError) throw checkError;
+      if (jobPost.creator_id !== user.id) {
+        throw new Error('You can only edit your own job posts');
+      }
+
       let logoUrl = jobData.company_logo_url;
 
       if (jobData.company_logo_url instanceof File) {
@@ -172,9 +204,17 @@ export const jobsApi = {
     }
   },
 
-  async getAllJobPostings() {
+  async getAllJobPostings(isEmployer = false) {
     try {
-      const { data, error } = await supabase
+      // Get current user if employer view
+      let userId = null;
+      if (isEmployer) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        userId = user.id;
+      }
+
+      let query = supabase
         .from('job_posting')
         .select(`
           *,
@@ -184,6 +224,15 @@ export const jobsApi = {
         `)
         .order('created_at', { ascending: false });
 
+      // If employer view, only show their posts
+      if (isEmployer && userId) {
+        query = query.eq('creator_id', userId);
+      } else {
+        // For jobseeker view, only show active posts
+        query = query.eq('status', 'active');
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     } catch (error) {
