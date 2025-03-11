@@ -81,7 +81,8 @@ export const getDashboardMetrics = async () => {
         id: role.id,
         title: role.job_title,
         applicants_count: role.applicant_count || 0
-      }))
+      })),
+      lastUpdated: new Date().toISOString()
     };
   } catch (error) {
     console.error('Error fetching dashboard metrics:', error);
