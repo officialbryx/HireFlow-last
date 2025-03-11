@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { applicationsApi } from "./api/applicationsApi";
 
 export const api = {
   async login({ email, password }) {
@@ -67,23 +68,10 @@ export const api = {
 
   async submitApplication(applicationData) {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-
-      const { data, error } = await supabase
-        .from('applications')
-        .insert([{
-          ...applicationData,
-          applicant_id: user.id,
-          status: 'pending'
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const response = await applicationsApi.submitApplication(applicationData);
+      return response;
     } catch (error) {
-      console.error('Error submitting application:', error);
+      console.error("API Error:", error);
       throw error;
     }
   },

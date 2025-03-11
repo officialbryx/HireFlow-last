@@ -182,13 +182,19 @@ const Apply = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Update the handleSubmitApplication function
   const handleSubmitApplication = async () => {
     try {
       setIsSubmitting(true);
 
-      // Format the application data to match the table structure
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      // Format the application data
       const applicationData = {
         job_posting_id: jobId,
+        applicant_id: user.id, // Add this line
         company: company,
         personal_info: {
           given_name: formData.givenName,
@@ -232,11 +238,12 @@ const Apply = () => {
           to_year: edu.toYear
         })),
         skills: formData.skills,
-        resume_url: null, // Will be updated after file upload
-        websites: formData.websites.filter(url => url), // Remove empty strings
+        resume_url: null,
+        websites: formData.websites.filter(url => url),
         linkedin_url: formData.linkedin,
         application_questions: formData.applicationQuestions,
-        terms_accepted: formData.termsAccepted
+        terms_accepted: formData.termsAccepted,
+        status: 'pending'
       };
 
       // Handle resume upload if exists
@@ -255,9 +262,14 @@ const Apply = () => {
         applicationData.resume_url = publicUrl;
       }
 
-      // Submit application
-      await api.submitApplication(applicationData);
+      // Submit application and get response with job details
+      const response = await api.submitApplication(applicationData);
 
+      if (!response) {
+        throw new Error("Failed to submit application");
+      }
+
+      // Show success modal and redirect
       setShowSuccessModal(true);
       setTimeout(() => {
         navigate("/jobposts");
