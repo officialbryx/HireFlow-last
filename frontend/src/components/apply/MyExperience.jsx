@@ -8,6 +8,7 @@ import {
   DocumentTextIcon,
   GlobeAltIcon,
 } from "@heroicons/react/24/outline";
+import DateMonthPicker from "../DateMonthPicker";
 
 const degreeOptions = [
   "High School",
@@ -400,20 +401,13 @@ const MyExperience = ({
                     <label className="block text-sm font-medium text-gray-700">
                       From Date <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="date"
+                    <DateMonthPicker
                       value={exp.fromDate}
-                      onChange={(e) =>
-                        handleWorkExperienceChange(
-                          index,
-                          "fromDate",
-                          e.target.value
-                        )
+                      onChange={(value) =>
+                        handleWorkExperienceChange(index, "fromDate", value)
                       }
-                      className={inputStyles(
-                        `workExperience.${index}.fromDate`
-                      )}
-                      required
+                      placeholder="Select start date"
+                      id={`work-from-${index}`}
                     />
                     {fieldErrors &&
                       fieldErrors[`workExperience.${index}.fromDate`] && (
@@ -428,20 +422,13 @@ const MyExperience = ({
                       <label className="block text-sm font-medium text-gray-700">
                         To Date <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="date"
+                      <DateMonthPicker
                         value={exp.toDate}
-                        onChange={(e) =>
-                          handleWorkExperienceChange(
-                            index,
-                            "toDate",
-                            e.target.value
-                          )
+                        onChange={(value) =>
+                          handleWorkExperienceChange(index, "toDate", value)
                         }
-                        className={inputStyles(
-                          `workExperience.${index}.toDate`
-                        )}
-                        required
+                        placeholder="Select end date"
+                        id={`work-to-${index}`}
                       />
                       {fieldErrors &&
                         fieldErrors[`workExperience.${index}.toDate`] && (
@@ -612,14 +599,13 @@ const MyExperience = ({
                 <label className="block text-sm font-medium text-gray-700">
                   From Date <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="month"
+                <DateMonthPicker
                   value={edu.fromYear}
-                  onChange={(e) =>
-                    handleEducationChange(index, "fromYear", e.target.value)
+                  onChange={(value) =>
+                    handleEducationChange(index, "fromYear", value)
                   }
-                  className={inputStyles(`education.${index}.fromYear`)}
-                  required
+                  placeholder="Select start date"
+                  id={`edu-from-${index}`}
                 />
                 {fieldErrors && fieldErrors[`education.${index}.fromYear`] && (
                   <p className="text-red-500 text-sm mt-1">
@@ -633,14 +619,13 @@ const MyExperience = ({
                   To Date (Actual or Expected){" "}
                   <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="month"
+                <DateMonthPicker
                   value={edu.toYear}
-                  onChange={(e) =>
-                    handleEducationChange(index, "toYear", e.target.value)
+                  onChange={(value) =>
+                    handleEducationChange(index, "toYear", value)
                   }
-                  className={inputStyles(`education.${index}.toYear`)}
-                  required
+                  placeholder="Select end date"
+                  id={`edu-to-${index}`}
                 />
                 {fieldErrors && fieldErrors[`education.${index}.toYear`] && (
                   <p className="text-red-500 text-sm mt-1">
