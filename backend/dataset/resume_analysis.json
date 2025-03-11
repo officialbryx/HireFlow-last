@@ -1,0 +1,297 @@
+{
+  "resume_analysis": {
+    "personal_info": {
+      "name": "Bryan Dominick A. Tiamzon\u200b",
+      "email": "bryxph@gmail.com",
+      "phone": null,
+      "location": null,
+      "linkedin": "Linkedin: Bryan",
+      "website": null
+    },
+    "summary": "Motivated Computer Science student eager to apply academic knowledge in programming, software development, and \ndata analysis to contribute to an innovative organization during On-the-Job Training.",
+    "skills": {
+      "hard_skills": {
+        "python": 1,
+        "java": 1,
+        "javascript": 1,
+        "sql": 1,
+        "mysql": 1,
+        "firebase": 1,
+        "cloud": 1,
+        "git": 1,
+        "github": 1,
+        "react": 1,
+        "data science": 1,
+        "tableau": 1,
+        "excel": 1,
+        "word": 1,
+        "powerpoint": 1,
+        "ui/ux": 1,
+        "android": 1,
+        "react native": 1,
+        "flutter": 1,
+        "cybersecurity": 1
+      },
+      "soft_skills": {
+        "communication": 2,
+        "collaboration": 2,
+        "organization": 2,
+        "planning": 2,
+        "training": 2,
+        "programming": 2,
+        "adaptability": 1,
+        "time management": 1,
+        "attention to detail": 1,
+        "education": 1
+      },
+      "additional_skills": {
+        "data": 18,
+        "management": 15,
+        "science": 12,
+        "blvd": 12,
+        "computer": 9,
+        "analysis": 9,
+        "python": 9,
+        "aurora": 9,
+        "lister": 9,
+        "inventory": 9
+      }
+    },
+    "education": {
+      "details": [
+        {
+          "text": "Rizal, Taguig \u2022 bryxph@gmail.com \u2022 +639456123481 \nLinkedin: Bryan Tiamzon | GitHub: officialbryx \n \nSummary \nMotivated Computer Science student eager to apply academic knowledge in programming, software development, and \ndata analysis to contribute to an innovative organization during On-the-Job Training.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Excels in Python and SQL with a \nstrong passion for solving real-world problems.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Education \nTECHNOLOGICAL INSTITUTE OF THE PHILIPPINES\u200b\n938 Aurora Blvd, Cubao, Quezon \nBachelor of Science in Computer Science\u200b\nAugust 2021 \u2013 Present  \n\u25cf\u200b President\u2019s Lister: 1st Sem SY 2022-2023 \n\u25cf\u200b VPAA\u2019s Lister: 1st Sem SY 2024-2025, 2nd Sem SY 2023-2024, 2nd Sem SY 2022-2023, 2nd Sem SY 2021-2022 \n\u25cf\u200b Dean\u2019s Lister: 2nd Sem SY 2023-2024 \n\u25cf\u200b Relevant Coursework: Data Science in Python, Software Engineering, Data Structures and Algorithms Analysis,      \nInformation Management \n \nJOSE RIZAL UNIVERSITY\u200b\n        80 Shaw Blvd, Mandaluyong \nSTEM Strand\u200b\nJune 2019 \u2013 June 2021 \n \nDesign Projects Completed/Researches Undertaken \n    POINT OF SALES WITH INVENTORY SYSTEM FOR MOON HEY HOTPOT AND GRILL \nDeveloped a LAN-based POS with inventory system using Python (PyQt) and MySQL, automating order processing, \ninventory management, and reporting to improve efficiency in restaurant operations.",
+          "degree": "2021",
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "GTHR: AN EVENT PLANNING AND MANAGEMENT MOBILE APPLICATION USING FLUTTER \nImplemented a Flutter and Firebase-based event management app to improve announcements, enable real-time \ncommunication, and boost participation in university events.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Affiliations \nJUNIOR PHILIPPINE COMPUTER SCIENCE\u200b\n    938 Aurora Blvd, Cubao \nMember\u200b\n October 2023 \u2013 April 2024 \nDesigned a museum app prototype during a UI/UX competition.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": "2024",
+          "gpa": null
+        },
+        {
+          "text": "Attended \u2018Cybersecurity Buff,\u2019 gaining skills in \nidentifying vulnerabilities and securing systems against SQL injection and brute force attacks.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "JUNIOR DATA SCIENCE AND ARTIFICIAL INTELLIGENCE ASSOCIATION OF THE PHILIPPINES\u200b\n    938 Aurora Blvd, Cubao \nMember\u200b\n October 2023 \u2013 April 2024 \nAttended \u2018Cognitive Cloud Conclave 1.0\u2019 to deepen my understanding of Artificial Intelligence and explore its practical \napplications.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": "2024",
+          "gpa": null
+        },
+        {
+          "text": "Skills \nSoft: Adaptability, Attention to Detail, Problem-solving, Team Collaboration, Time Management \nTechnical Skills \n\u25cf\u200b Programming: Python, SQL (MySQL), React, React Native, Java, JavaScript (ReactJs), Flutter \n\u25cf\u200b Tools: Visual Studio Code, Android Studio, Tableau, Git, GitHub \n\u25cf\u200b Other Skills: Data Analysis, Microsoft Office (Powerpoint, Word, Excel)",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        }
+      ],
+      "levels": [
+        "Bachelor's"
+      ]
+    },
+    "experience": {
+      "years": 6,
+      "positions": [],
+      "date_ranges": [
+        "2022-2023",
+        "2024-2025",
+        "2023-2024",
+        "2022-2023",
+        "2021-2022",
+        "2023-2024",
+        "August 2021",
+        "June 2019",
+        "June 2021",
+        "October 2023",
+        "April 2024",
+        "October 2023",
+        "April 2024"
+      ]
+    },
+    "certifications": [
+      "Microsoft Office"
+    ],
+    "projects": [
+      {
+        "name": "a LAN-based POS with inventory system using Python (PyQt) and MySQL, automating order processing, \ninventory management, and reporting to improve efficiency in restaurant operations",
+        "description": "Education \nTECHNOLOGICAL INSTITUTE OF THE PHILIPPINES\u200b\n938 Aurora Blvd, Cubao, Quezon \nBachelor of Science in Computer Science\u200b\nAugust 2021 \u2013 Present  \n\u25cf\u200b President\u2019s Lister: 1st Sem SY 2022-2023 \n\u25cf\u200b VPAA\u2019s Lister: 1st Sem SY 2024-2025, 2nd Sem SY 2023-2024, 2nd Sem SY 2022-2023, 2nd Sem SY 2021-2022 \n\u25cf\u200b Dean\u2019s Lister: 2nd Sem SY 2023-2024 \n\u25cf\u200b Relevant Coursework: Data Science in Python, Software Engineering, Data Structures and Algorithms Analysis,      \nInformation Management \n \nJOSE RIZAL UNIVERSITY\u200b\n        80 Shaw Blvd, Mandaluyong \nSTEM Strand\u200b\nJune 2019 \u2013 June 2021 \n \nDesign Projects Completed/Researches Undertaken \n    POINT OF SALES WITH INVENTORY SYSTEM FOR MOON HEY HOTPOT AND GRILL \nDeveloped a LAN-based POS with inventory system using Python (PyQt) and MySQL, automating order processing, \ninventory management, and reporting to improve efficiency in restaurant operations."
+      },
+      {
+        "name": "LAN-based POS with inventory system using Python (PyQt) and MySQL, automating order processing, \ninventory management, and reporting to improve efficiency in restaurant operations",
+        "description": "Education \nTECHNOLOGICAL INSTITUTE OF THE PHILIPPINES\u200b\n938 Aurora Blvd, Cubao, Quezon \nBachelor of Science in Computer Science\u200b\nAugust 2021 \u2013 Present  \n\u25cf\u200b President\u2019s Lister: 1st Sem SY 2022-2023 \n\u25cf\u200b VPAA\u2019s Lister: 1st Sem SY 2024-2025, 2nd Sem SY 2023-2024, 2nd Sem SY 2022-2023, 2nd Sem SY 2021-2022 \n\u25cf\u200b Dean\u2019s Lister: 2nd Sem SY 2023-2024 \n\u25cf\u200b Relevant Coursework: Data Science in Python, Software Engineering, Data Structures and Algorithms Analysis,      \nInformation Management \n \nJOSE RIZAL UNIVERSITY\u200b\n        80 Shaw Blvd, Mandaluyong \nSTEM Strand\u200b\nJune 2019 \u2013 June 2021 \n \nDesign Projects Completed/Researches Undertaken \n    POINT OF SALES WITH INVENTORY SYSTEM FOR MOON HEY HOTPOT AND GRILL \nDeveloped a LAN-based POS with inventory system using Python (PyQt) and MySQL, automating order processing, \ninventory management, and reporting to improve efficiency in restaurant operations."
+      }
+    ],
+    "languages": [],
+    "achievements": []
+  },
+  "job_requirements": {
+    "skills": {
+      "hard_skills": {
+        "agile": 2,
+        "python": 1,
+        "java": 1,
+        "swift": 1,
+        "kotlin": 1,
+        "sql": 1,
+        "nosql": 1,
+        "firebase": 1,
+        "aws": 1,
+        "azure": 1,
+        "gcp": 1,
+        "cloud": 1,
+        "git": 1,
+        "ci/cd": 1,
+        "devops": 1,
+        "react": 1,
+        "node.js": 1,
+        "graphql": 1,
+        "mobile development": 1,
+        "ios": 1
+      },
+      "soft_skills": {
+        "collaboration": 3,
+        "integration": 3,
+        "communication": 2,
+        "application": 2,
+        "testing": 2,
+        "understanding": 2,
+        "cross-functional": 1,
+        "nation": 1,
+        "tracking": 1,
+        "debugging": 1
+      },
+      "additional_skills": {
+        "performance": 18,
+        "services": 15,
+        "globe": 12,
+        "development": 12,
+        "user": 9,
+        "work": 9,
+        "experience": 9,
+        "developer": 6,
+        "people": 6,
+        "passion": 6
+      }
+    },
+    "education": {
+      "details": [
+        {
+          "text": "By uniting people of passion who believe they can make a difference, we are confident that we can achieve this goal.Job DescriptionFullstack Mobile DeveloperWe are looking for a highly skilled Fullstack Mobile App Developer to join our team and help build, maintain, and enhance our telco mobile application.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "The ideal candidate is proficient in both frontend and backend development, capable of designing scalable mobile solutions, and experienced in working with APIs, databases, and cloud infrastructure.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "The role requires close collaboration with product owners, UX/UI designers, and backend engineers to deliver high-performance, user-friendly applications.Key Responsibilities\n* Develop, enhance, and maintain mobile applications using React Native, Swift (iOS), and Kotlin (Android)\n* Work with cloud services (AWS, GCP, or Azure) to deploy and manage backend services\n* Ensure mobile apps are optimized for performance, security, and scalability\n* Collaborate with UX/UI teams to implement responsive and intuitive user interfaces\n* Implement event tracking and analytics using tools like Firebase, Segment, or Google Analytics\n* Work with CI/CD pipelines to automate testing, deployment, and monitoring\n* Conduct technical reviews, debugging, and performance tuning\n* Stay updated on emerging mobile technologies and frameworks to continuously improve our app\u2019s architecture\nRoles & Responsibilities\n\nFrontend Development:\n\n* Build user-friendly and high-performance mobile interfaces\n* Implement responsive designs following UX/UI guidelines\n* Optimize app performance across various devices and screen sizes\nCollaboration & Integration\n\n* Work with cross-functional teams including Product, UX, QA, and DevOps\n* Integrate third-party services such as payment gateways, notifications, and location-based features\n* Ensure smooth communication between mobile and backend services\nTesting & Deployment\n\n* Write unit and integration tests to ensure application reliability\n* Implement CI/CD workflows for continuous integration and deployment\n* Monitor app health, crash reports, and performance metrics\nRequirements\n\n* 3+ years of experience in fullstack mobile app development\n* Proficiency in React Native, Swift, and Kotlin\n* Experience with Node.js, Python, or Java for backend development\n* Strong understanding of RESTful APIs, GraphQL, and WebSockets\n* Familiarity with cloud services (AWS, GCP, or Azure)\n* Experience in database management (SQL & NoSQL)\n* Knowledge of DevOps practices, CI/CD pipelines, and version control (Git)\n* Understanding of security best practices for mobile development\n* Ability to work in an agile environment and manage multiple tasks effectively\nEqual Opportunity Employer\n\nGlobe\u2019s hiring process promotes equal opportunity to applicants, Any form of discrimination is not tolerated throughout the entire employee lifecycle, including the hiring process such as in posting vacancies, selecting, and interviewing applicants.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Globe\u2019s Diversity, Equity and Inclusion Policy Commitment can be accessed here\n\nMake Your Passion Part of Your Profession.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        }
+      ],
+      "levels": [
+        "Master's",
+        "Master's"
+      ]
+    },
+    "experience": {
+      "years": 3,
+      "positions": [
+        "Job DescriptionFullstack Mobile DeveloperWe are looking for a highly skilled Fullstack Mobile App Developer",
+        "Mobile Developer",
+        "Fullstack Mobile Developer"
+      ],
+      "date_ranges": []
+    }
+  },
+  "comparison_results": {
+    "skill_match": {
+      "match_percentage": 35.0,
+      "missing": [
+        "azure",
+        "mobile development",
+        "gcp",
+        "ios",
+        "node.js",
+        "swift",
+        "ci/cd",
+        "nosql",
+        "aws",
+        "graphql",
+        "agile",
+        "devops",
+        "kotlin"
+      ]
+    },
+    "education_match": {
+      "sufficient": false
+    },
+    "experience_match": {
+      "sufficient": true,
+      "gap_years": 0
+    },
+    "overall_match": {
+      "score": 56.00000000000001,
+      "qualified": false
+    }
+  },
+  "semantic_similarity": 0.9048649072647095
+}
