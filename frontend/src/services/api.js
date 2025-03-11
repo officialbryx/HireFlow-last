@@ -1,98 +1,176 @@
-const API_BASE_URL = "http://localhost:5000/api";
+import { supabase } from "./supabaseClient";
 
 export const api = {
-  // Login API
-  async login(credentials) {
+  async login({ email, password }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Login failed");
-      }
+      if (error) throw error;
 
-      return await response.json();
+      return {
+        token: data.session.access_token,
+        user: data.user,
+      };
     } catch (error) {
+      console.error("Login error:", error);
       throw error;
     }
   },
 
-  // Signup API
-  async signup(userData) {
+  async signup({ email, password, firstName, middleName, lastName, userType }) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+      // First, sign up the user and wait for confirmation
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            middle_name: middleName, // Add this line
+            last_name: lastName,
+            user_type: userType,
+          },
+        },
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Signup failed");
+      if (authError) throw authError;
+
+      // Wait for 2 seconds to ensure the user record is created in auth.users
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Create profile only if user was created successfully
+      if (authData.user?.id) {
+        const { error: insertError } = await supabase.from("profiles").insert([
+          {
+            id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            user_type: userType,
+          },
+        ]);
+
+        if (insertError) {
+          console.error("Profile creation error:", insertError);
+          // Don't throw the error as the user is already created
+        }
       }
 
-      return await response.json();
+      return authData;
     } catch (error) {
+      console.error("Signup error:", error);
       throw error;
     }
   },
-  // Create a New Job Posting
-  async createJobPosting(jobData) {
+
+  async submitApplication(applicationData) {
     try {
-      console.log("Sending job data:", jobData); // Debugging request payload
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
-      const response = await fetch(`${API_BASE_URL}/job-postings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(jobData),
-      });
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([{
+          ...applicationData,
+          applicant_id: user.id,
+          status: 'pending'
+        }])
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Error response from server:", error); // Debugging response errors
-        throw new Error(error.error || "Failed to create job posting");
-      }
-
-      const job = await response.json();
-      console.log("Job created successfully:", job); // Debugging job creation success
-      const jobId = job.job_id;
-      console.log(jobId);
-
-      // Add Responsibilities
-      console.log("Adding responsibilities:", jobData.responsibilities);
-      await fetch(`${API_BASE_URL}/job-postings/${jobId}/responsibilities`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responsibilities: jobData.responsibilities }),
-      });
-      console.log("Responsibilities added successfully");
-
-      // Add Qualifications
-      console.log("Adding qualifications:", jobData.qualifications);
-      await fetch(`${API_BASE_URL}/job-postings/${jobId}/qualifications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qualifications: jobData.qualifications }),
-      });
-      console.log("Qualifications added successfully");
-
-      // Add Skills
-      console.log("Adding skills:", jobData.skills);
-      await fetch(`${API_BASE_URL}/job-postings/${jobId}/skills`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ skills: jobData.skills }),
-      });
-      console.log("Skills added successfully");
-
-      return job;
+      if (error) throw error;
+      return data;
     } catch (error) {
-      console.error("Error creating job:", error);
+      console.error('Error submitting application:', error);
       throw error;
     }
   },
+
+  getUserProfile: async () => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError && profileError.code !== "PGRST116") {
+        throw profileError;
+      }
+
+      // If profile doesn't exist, create an empty one
+      if (!profile) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: user.id,
+              email: user.email,
+              personal_summary: "",
+              career_history: [],
+              education: [],
+              certifications: [],
+              skills: [],
+              languages: [],
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return { user, profile: newProfile };
+      }
+
+      return { user, profile };
+    } catch (error) {
+      console.error("Error in getUserProfile:", error);
+      throw error;
+    }
+  },
+
+  updateUserProfile: async (profileData) => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const [profileError, metadataError] = await Promise.all([
+      supabase.from("profiles").update(profileData).eq("id", user.id),
+      supabase.auth.updateUser({ data: profileData }),
+    ]);
+
+    if (profileError) throw profileError;
+    if (metadataError) throw metadataError;
+
+    return true;
+  },
+
+  updateUserEmail: async (newEmail) => {
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) throw error;
+    return true;
+  },
+
+  updateUserPassword: async (newPassword) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Password update error:", error);
+      throw new Error(error.message || "Failed to update password");
+    }
+  }
 };

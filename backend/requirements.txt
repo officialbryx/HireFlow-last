@@ -8,3 +8,5 @@ transformers
 torch
 torchvision
 torchaudio
+pymupdf
+scikit-learn

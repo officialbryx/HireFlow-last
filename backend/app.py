@@ -1,25 +1,27 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
-from transformers import pipeline
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-import datetime
+from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline
+import logging
+import fitz  # PyMuPDF for PDF processing
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import json
 
-# Initialize Flask App
+logging.basicConfig(level=logging.DEBUG)
+
 app = Flask(__name__)
-# Configure CORS to accept requests from frontend
 CORS(app, resources={
     r"/api/*": {
         "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
-        "methods": ["GET", "POST", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
 
-# Connect to MySQL Database
-# Change password as needed
-# password="admin",
+# Connect to MySQL Database (only for non-auth related data)
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -28,11 +30,247 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
-# Load Hugging Face LLM (Example: Summarization Model)
-model = pipeline("summarization", model="facebook/bart-large-cnn")
+# Initialize JobBERT
+tokenizer = AutoTokenizer.from_pretrained("jjzha/jobbert-base-cased")
+model = AutoModelForMaskedLM.from_pretrained("jjzha/jobbert-base-cased")
+pipe = pipeline("fill-mask", model="jjzha/jobbert-base-cased")
 
-# JWT Configuration
-app.config['SECRET_KEY'] = 'your-secret-key'  # Change this to a secure secret key
+def extract_text_from_pdf(pdf_file):
+    text = ""
+    try:
+        # Open PDF file
+        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+        
+        # Extract text from each page
+        for page in doc:
+            text += page.get_text()
+        
+        return text
+    except Exception as e:
+        logging.error(f"Error extracting text from PDF: {str(e)}")
+        return None
+
+def analyze_resume_against_job(resume_text, job_requirements):
+    try:
+        # Initialize TF-IDF vectorizer
+        vectorizer = TfidfVectorizer(stop_words='english')
+        
+        # Analyze text similarity
+        documents = [resume_text, job_requirements]
+        tfidf_matrix = vectorizer.fit_transform(documents)
+        similarity_score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+
+        # Extract key components
+        skills_match = extract_skills_match(resume_text, job_requirements)
+        experience_match = extract_experience_match(resume_text, job_requirements)
+        education_match = extract_education_match(resume_text, job_requirements)
+
+        # Calculate overall match
+        overall_match = (similarity_score + skills_match + experience_match + education_match) / 4
+
+        analysis_result = {
+            "scan_accuracy": check_pdf_scan_quality(resume_text),
+            "similarity_score": float(similarity_score),
+            "skills_match": float(skills_match),
+            "experience_match": float(experience_match),
+            "education_match": float(education_match),
+            "overall_match": float(overall_match),
+            "qualified": overall_match >= 0.7,
+            "confidence_score": calculate_confidence_score(resume_text),
+            "detailed_analysis": {
+                "missing_requirements": find_missing_requirements(resume_text, job_requirements),
+                "matching_skills": find_matching_skills(resume_text, job_requirements),
+                "suggested_improvements": generate_suggestions(resume_text, job_requirements)
+            }
+        }
+
+        print("\n=== RESUME ANALYSIS RESULTS ===")
+        print(f"PDF Scan Accuracy: {analysis_result['scan_accuracy']:.2%}")
+        print(f"Overall Match Score: {analysis_result['overall_match']:.2%}")
+        print(f"Qualification Status: {'QUALIFIED' if analysis_result['qualified'] else 'NOT QUALIFIED'}")
+        print("\nDetailed Scores:")
+        print(f"- Skills Match: {analysis_result['skills_match']:.2%}")
+        print(f"- Experience Match: {analysis_result['experience_match']:.2%}")
+        print(f"- Education Match: {analysis_result['education_match']:.2%}")
+        print("\nConfidence Score: {analysis_result['confidence_score']:.2%}")
+        print("\nKey Findings:")
+        for finding in analysis_result['detailed_analysis']['missing_requirements']:
+            print(f"- {finding}")
+        
+        return analysis_result
+
+    except Exception as e:
+        print(f"Error in resume analysis: {str(e)}")
+        return None
+
+def check_pdf_scan_quality(text):
+    # Check for common OCR issues and text extraction quality
+    if not text:
+        return 0.0
+    
+    words = text.split()
+    recognizable_words = sum(1 for word in words if len(word) > 1 and word.isalnum())
+    scan_quality = min(recognizable_words / len(words) if words else 0, 1.0)
+    return scan_quality
+
+def calculate_confidence_score(text):
+    # Estimate confidence based on text quality and recognition
+    if not text:
+        return 0.0
+    
+    # Check for common indicators of good quality text
+    has_sections = any(header in text.lower() for header in ['experience', 'education', 'skills'])
+    has_formatting = '\n' in text and len(text.split('\n')) > 5
+    has_content = len(text.split()) > 100
+    
+    confidence = (has_sections + has_formatting + has_content) / 3
+    return confidence
+
+def extract_skills_match(resume_text, job_requirements):
+    """Extract and compare skills from resume and job requirements"""
+    # Common technical skills to look for
+    common_skills = [
+        'python', 'javascript', 'java', 'c++', 'sql', 'nosql', 'aws', 
+        'react', 'node', 'api', 'etl', 'git', 'docker', 'kubernetes',
+        'machine learning', 'data science', 'backend', 'frontend'
+    ]
+    
+    resume_lower = resume_text.lower()
+    requirements_lower = job_requirements.lower()
+    
+    # Find skills mentioned in both texts
+    skills_in_resume = set(skill for skill in common_skills if skill in resume_lower)
+    skills_in_job = set(skill for skill in common_skills if skill in requirements_lower)
+    
+    if not skills_in_job:
+        return 0.5  # Default score if no skills mentioned in requirements
+    
+    # Calculate match percentage
+    matching_skills = skills_in_resume.intersection(skills_in_job)
+    match_score = len(matching_skills) / len(skills_in_job)
+    
+    return min(match_score, 1.0)  # Cap at 1.0
+
+def extract_experience_match(resume_text, job_requirements):
+    """Analyze experience requirements match"""
+    resume_lower = resume_text.lower()
+    requirements_lower = job_requirements.lower()
+    
+    # Look for years of experience
+    exp_patterns = [
+        r'(\d+)[\+]?\s*(?:years?|yrs?)',
+        r'(\d+)[\+]?\s*years? experience',
+        r'experience:\s*(\d+)[\+]?\s*years?'
+    ]
+    
+    resume_years = 0
+    req_years = 0
+    
+    # Extract years from resume
+    for pattern in exp_patterns:
+        matches = re.findall(pattern, resume_lower)
+        if matches:
+            resume_years = max([int(y) for y in matches])
+            break
+    
+    # Extract years from requirements
+    for pattern in exp_patterns:
+        matches = re.findall(pattern, requirements_lower)
+        if matches:
+            req_years = max([int(y) for y in matches])
+            break
+    
+    if req_years == 0:
+        return 0.7  # Default score if no specific years mentioned
+    
+    # Calculate match percentage
+    match_score = min(resume_years / req_years, 1.0) if req_years > 0 else 0.5
+    return match_score
+
+def extract_education_match(resume_text, job_requirements):
+    """Analyze education requirements match"""
+    education_levels = {
+        'phd': 4,
+        'master': 3,
+        'bachelor': 2,
+        'associate': 1
+    }
+    
+    resume_lower = resume_text.lower()
+    requirements_lower = job_requirements.lower()
+    
+    # Find highest education level mentioned
+    resume_level = 0
+    req_level = 0
+    
+    for level, score in education_levels.items():
+        if level in resume_lower:
+            resume_level = max(resume_level, score)
+        if level in requirements_lower:
+            req_level = max(req_level, score)
+    
+    if req_level == 0:
+        return 0.7  # Default score if no specific education requirement
+    
+    # Calculate match percentage
+    match_score = min(resume_level / req_level, 1.0) if req_level > 0 else 0.5
+    return match_score
+
+def find_matching_skills(resume_text, job_requirements):
+    """Find skills that match between resume and job requirements"""
+    common_skills = [
+        'Python', 'JavaScript', 'Java', 'C++', 'SQL', 'NoSQL', 'AWS', 
+        'React', 'Node.js', 'API', 'ETL', 'Git', 'Docker', 'Kubernetes',
+        'Machine Learning', 'Data Science', 'Backend', 'Frontend'
+    ]
+    
+    resume_lower = resume_text.lower()
+    requirements_lower = job_requirements.lower()
+    
+    matching_skills = []
+    for skill in common_skills:
+        if skill.lower() in resume_lower and skill.lower() in requirements_lower:
+            matching_skills.append(skill)
+    
+    return matching_skills
+
+def find_missing_requirements(resume_text, job_requirements):
+    """Identify requirements missing from the resume"""
+    # Extract requirement phrases
+    req_patterns = [
+        r'[-•]\s*([^•\n]+)',
+        r'required:\s*([^•\n]+)',
+        r'requirements:\s*([^•\n]+)'
+    ]
+    
+    missing_reqs = []
+    resume_lower = resume_text.lower()
+    
+    for pattern in req_patterns:
+        matches = re.findall(pattern, job_requirements, re.IGNORECASE)
+        for req in matches:
+            req = req.strip()
+            if req and req.lower() not in resume_lower:
+                missing_reqs.append(req)
+    
+    return missing_reqs[:5]  # Return top 5 missing requirements
+
+def generate_suggestions(resume_text, job_requirements):
+    """Generate improvement suggestions based on analysis"""
+    suggestions = []
+    missing_reqs = find_missing_requirements(resume_text, job_requirements)
+    
+    if missing_reqs:
+        suggestions.append("Add experience or skills in: " + ", ".join(missing_reqs))
+    
+    # Add more specific suggestions based on the analysis
+    if len(resume_text.split()) < 300:
+        suggestions.append("Add more detailed descriptions of your experience")
+    
+    if 'education' not in resume_text.lower():
+        suggestions.append("Include your educational background")
+    
+    return suggestions
 
 @app.route("/")  
 def home():
@@ -40,192 +278,35 @@ def home():
 
 @app.route("/api/analyze-resume", methods=["POST"])
 def analyze_resume():
-    data = request.json
-    resume_text = data.get("resume_text")
+    if 'resume' not in request.files or 'job_requirements' not in request.form:
+        return jsonify({"error": "Missing resume file or job requirements"}), 400
     
-    if not resume_text:
-        return jsonify({"error": "No resume text provided"}), 400
+    try:
+        resume_file = request.files['resume']
+        job_requirements = request.form['job_requirements']
+        
+        # Extract text from PDF
+        resume_text = extract_text_from_pdf(resume_file)
+        if not resume_text:
+            return jsonify({"error": "Failed to extract text from PDF"}), 400
 
-    summary = model(resume_text, max_length=150, min_length=50, do_sample=False)
-    return jsonify({"summary": summary[0]["summary_text"]})
+        # Analyze resume against job requirements
+        analysis_result = analyze_resume_against_job(resume_text, job_requirements)
+        
+        if not analysis_result:
+            return jsonify({"error": "Failed to analyze resume"}), 500
+
+        return jsonify({"analysis": analysis_result})
+
+    except Exception as e:
+        logging.error(f"Error analyzing resume: {str(e)}")
+        return jsonify({"error": "Failed to analyze resume"}), 500
 
 @app.route("/api/applicants", methods=["GET"])
 def get_applicants():
     cursor.execute("SELECT * FROM applicants")
     applicants = cursor.fetchall()
     return jsonify({"applicants": applicants})
-
-# ============================== AUTHENTICATION ============================== #
-@app.route("/api/auth/signup", methods=["POST"])
-def signup():
-    data = request.json
-    
-    # Check if user already exists
-    cursor.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
-    if cursor.fetchone():
-        return jsonify({"error": "Email already registered"}), 409
-    
-    # Hash password
-    hashed_password = generate_password_hash(data['password'])
-    
-    try:
-        cursor.execute(
-            "INSERT INTO users (first_name, last_name, email, password, user_type) VALUES (%s, %s, %s, %s, %s)",
-            (data['firstName'], data['lastName'], data['email'], hashed_password, data['userType'])
-        )
-        db.commit()
-        return jsonify({"message": "User registered successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-@app.route("/api/auth/login", methods=["POST"])
-def login():
-    data = request.json
-    
-    cursor.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
-    user = cursor.fetchone()
-    
-    if user and check_password_hash(user[4], data['password']):  # Index 4 is password
-        token = jwt.encode({
-            'user_id': user[0],  # Index 0 is user_id
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, app.config['SECRET_KEY'])
-        
-        return jsonify({
-            "token": token,
-            "user": {
-                "id": user[0],
-                "email": user[3],
-                "firstName": user[1],
-                "lastName": user[2],
-                "userType": user[5]
-            }
-        })
-    
-    return jsonify({"error": "Invalid credentials"}), 401
-
-@app.route("/api/job-postings", methods=["GET"])
-def get_all_jobs():
-    cursor.execute("SELECT * FROM job_posting")
-    jobs = cursor.fetchall()
-
-    job_list = []
-    for job in jobs:
-        job_list.append({
-            "id": job[0],
-            "job_title": job[1],  
-            "company_name": job[2],  
-            "location": job[3],  
-            "employment_type": job[4],  
-            "salary_range": job[5],  
-            "applicants_needed": job[6],  
-            "company_logo_url": job[7],  
-            "company_description": job[8],  
-            "about_company": job[9],  
-            "created_at": job[10]  
-        })
-    
-    return jsonify({"jobs": job_list})
-
-@app.route("/api/job-postings/<int:job_id>", methods=["GET"])
-def get_job(job_id):
-    cursor.execute("SELECT * FROM job_posting WHERE id = %s", (job_id,))
-    job = cursor.fetchone()
-
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-
-    return jsonify({
-        "id": job[0],
-        "job_title": job[1],
-        "company_name": job[2],
-        "location": job[3],
-        "employment_type": job[4],
-        "salary_range": job[5],
-        "applicants_needed": job[6],
-        "company_logo_url": job[7],
-        "company_description": job[8],
-        "about_company": job[9],
-        "created_at": job[10]
-    })
-
-@app.route("/api/job-postings", methods=["POST"])
-def create_job():
-    data = request.json
-    try:
-        cursor.execute(
-            """
-            INSERT INTO job_posting 
-            (job_title, company_name, location, employment_type, salary_range, applicants_needed, 
-            company_logo_url, company_description, about_company, created_at) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            """,
-            (
-                data["job_title"], data["company_name"], data["location"], data["employment_type"], 
-                data["salary_range"], data["applicants_needed"], data["company_logo_url"], 
-                data["company_description"], data["about_company"]
-            )
-        )
-        db.commit()
-        job_id = cursor.lastrowid  # Get the inserted job ID
-        return jsonify({"message": "Job created successfully", "job_id": job_id}), 201
-    except Exception as e:
-        db.rollback()
-        return jsonify({"error": str(e)}), 400
-
-# ============================== JOB RESPONSIBILITIES CRUD ============================== #
-@app.route("/api/job-postings/<int:job_id>/responsibilities", methods=["GET"])
-def get_job_responsibilities(job_id):
-    cursor.execute("SELECT responsibility FROM job_responsibility WHERE job_posting_id = %s", (job_id,))
-    responsibilities = [row[0] for row in cursor.fetchall()]
-    return jsonify({"responsibilities": responsibilities})
-
-@app.route("/api/job-postings/<int:job_id>/responsibilities", methods=["POST"])
-def add_job_responsibility(job_id):
-    data = request.json
-    try:
-        for responsibility in data["responsibilities"]:
-            cursor.execute("INSERT INTO job_responsibility (job_posting_id, responsibility) VALUES (%s, %s)", (job_id, responsibility))
-        db.commit()
-        return jsonify({"message": "Responsibilities added successfully"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-# ============================== JOB QUALIFICATIONS CRUD ============================== #
-@app.route("/api/job-postings/<int:job_id>/qualifications", methods=["GET"])
-def get_job_qualifications(job_id):
-    cursor.execute("SELECT qualification FROM job_qualification WHERE job_posting_id = %s", (job_id,))
-    qualifications = [row[0] for row in cursor.fetchall()]
-    return jsonify({"qualifications": qualifications})
-
-@app.route("/api/job-postings/<int:job_id>/qualifications", methods=["POST"])
-def add_job_qualification(job_id):
-    data = request.json
-    try:
-        for qualification in data["qualifications"]:
-            cursor.execute("INSERT INTO job_qualification (job_posting_id, qualification) VALUES (%s, %s)", (job_id, qualification))
-        db.commit()
-        return jsonify({"message": "Qualifications added successfully"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    
-# ============================== JOB SKILLS CRUD ============================== #
-@app.route("/api/job-postings/<int:job_id>/skills", methods=["GET"])
-def get_job_skills(job_id):
-    cursor.execute("SELECT skill FROM job_skills WHERE job_posting_id = %s", (job_id,))
-    skills = [row[0] for row in cursor.fetchall()]
-    return jsonify({"skills": skills})
-
-@app.route("/api/job-postings/<int:job_id>/skills", methods=["POST"])
-def add_job_skills(job_id):
-    data = request.json
-    try:
-        for skill in data["skills"]:
-            cursor.execute("INSERT INTO job_skills (job_posting_id, skill) VALUES (%s, %s)", (job_id, skill))
-        db.commit()
-        return jsonify({"message": "Skills added successfully"})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

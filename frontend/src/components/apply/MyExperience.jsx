@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  TrashIcon,
+  XMarkIcon,
+  BriefcaseIcon,
+  AcademicCapIcon,
+  PlusCircleIcon,
+  DocumentTextIcon,
+  GlobeAltIcon,
+} from "@heroicons/react/24/outline";
 
 const degreeOptions = [
   "High School",
@@ -13,16 +21,119 @@ const degreeOptions = [
   "Juris Doctor",
 ];
 
-const MyExperience = ({ formData, setFormData }) => {
+const FormSection = ({ icon, title, description, children }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+    <div className="flex items-center space-x-3 mb-4">
+      {icon}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        {description && (
+          <p className="text-sm text-gray-500 mt-1">{description}</p>
+        )}
+      </div>
+    </div>
+    <div className="space-y-4">{children}</div>
+  </div>
+);
+
+const MyExperienceValidator = {
+  validate: (formData, setFieldErrors) => {
+    const errors = {};
+
+    // Skip validation if no work experience checkbox is checked
+    if (!formData.noWorkExperience) {
+      // Validate work experience
+      formData.workExperience.forEach((exp, index) => {
+        if (!exp.jobTitle?.trim()) {
+          errors[`workExperience.${index}.jobTitle`] = "Job title is required";
+        }
+        if (!exp.company?.trim()) {
+          errors[`workExperience.${index}.company`] =
+            "Company name is required";
+        }
+        if (!exp.location?.trim()) {
+          errors[`workExperience.${index}.location`] = "Location is required";
+        }
+        if (!exp.fromDate) {
+          errors[`workExperience.${index}.fromDate`] = "Start date is required";
+        }
+        if (!exp.currentWork && !exp.toDate) {
+          errors[`workExperience.${index}.toDate`] = "End date is required";
+        }
+        if (!exp.description?.trim()) {
+          errors[`workExperience.${index}.description`] =
+            "Description is required";
+        }
+      });
+    }
+
+    // Validate education
+    formData.education.forEach((edu, index) => {
+      if (!edu.school?.trim()) {
+        errors[`education.${index}.school`] = "School name is required";
+      }
+      if (!edu.degree) {
+        errors[`education.${index}.degree`] = "Degree is required";
+      }
+      if (!edu.fieldOfStudy?.trim()) {
+        errors[`education.${index}.fieldOfStudy`] =
+          "Field of study is required";
+      }
+      if (!edu.fromYear) {
+        errors[`education.${index}.fromYear`] = "Start date is required";
+      }
+      if (!edu.toYear) {
+        errors[`education.${index}.toYear`] = "End date is required";
+      }
+    });
+
+    // Update the field errors state
+    if (setFieldErrors) {
+      setFieldErrors(errors);
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  },
+};
+
+const MyExperience = ({
+  formData,
+  setFormData,
+  fieldErrors,
+  setFieldErrors,
+}) => {
   const [skillInput, setSkillInput] = useState("");
 
   const handleWorkExperienceChange = (index, field, value) => {
+    // Clear error when field changes
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`workExperience.${index}.${field}`]: undefined,
+      }));
+    }
+
     const newWorkExperience = [...formData.workExperience];
+    // Ensure dates are properly formatted
+    if (field === "fromDate" || field === "toDate") {
+      value = value ? value : null;
+    }
     newWorkExperience[index] = { ...newWorkExperience[index], [field]: value };
     setFormData((prev) => ({ ...prev, workExperience: newWorkExperience }));
   };
 
   const handleEducationChange = (index, field, value) => {
+    // Clear error when field changes
+    if (setFieldErrors) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`education.${index}.${field}`]: undefined,
+      }));
+    }
+
     const newEducation = [...formData.education];
     newEducation[index] = { ...newEducation[index], [field]: value };
     setFormData((prev) => ({ ...prev, education: newEducation }));
@@ -94,13 +205,13 @@ const MyExperience = ({ formData, setFormData }) => {
   const addWebsite = () => {
     setFormData((prev) => ({
       ...prev,
-      websites: [...(prev.websites || []), { url: "" }],
+      websites: [...(prev.websites || []), ""], // Store as string array
     }));
   };
 
   const handleWebsiteChange = (index, value) => {
     const newWebsites = [...(formData.websites || [])];
-    newWebsites[index].url = value;
+    newWebsites[index] = value; // Store direct URL string
     setFormData((prev) => ({ ...prev, websites: newWebsites }));
   };
 
@@ -111,17 +222,43 @@ const MyExperience = ({ formData, setFormData }) => {
     }));
   };
 
-  return (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-center">My Experience</h2>
-        <p className="text-sm text-gray-500">
-          <span className="text-red-500">*</span> Indicates a required field
-        </p>
+  const inputStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500 focus:ring-red-500 focus:border-red-500"
+        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+    }`;
 
-        {/* Work Experience Section */}
-        <div className="space-y-6">
-          <div className="flex items-center">
+  const selectStyles = (fieldName) =>
+    `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 bg-white appearance-none ${
+      fieldErrors && fieldErrors[fieldName]
+        ? "border-red-500 ring-1 ring-red-500 focus:ring-red-500 focus:border-red-500"
+        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+    }`;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <BriefcaseIcon className="h-5 w-5 text-blue-400" />
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-blue-700">
+              Share your professional journey. Fields marked with (
+              <span className="text-red-500">*</span>) are required.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <FormSection
+        icon={<BriefcaseIcon className="h-6 w-6 text-blue-500" />}
+        title="Work Experience"
+        description="Tell us about your work history"
+      >
+        <div className="flex items-center mb-4">
+          <label className="flex items-center space-x-2 text-gray-700">
             <input
               type="checkbox"
               checked={formData.noWorkExperience}
@@ -131,32 +268,37 @@ const MyExperience = ({ formData, setFormData }) => {
                   noWorkExperience: e.target.checked,
                 }))
               }
-              className="mr-2"
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span>I don't have any work experience</span>
-          </div>
+          </label>
+        </div>
 
-          {!formData.noWorkExperience &&
-            formData.workExperience.map((exp, index) => (
+        {!formData.noWorkExperience && (
+          <div className="space-y-6">
+            {formData.workExperience.map((exp, index) => (
               <div
                 key={index}
-                className="border p-6 rounded-lg space-y-4 relative"
+                className="bg-gray-50 p-6 rounded-lg border border-gray-200 relative group"
               >
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-small">
-                    Work Experience {index + 1}
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2 text-sm font-semibold">
+                      {index + 1}
+                    </span>
+                    Work Experience
                   </h3>
                   {formData.workExperience.length > 1 && (
                     <button
                       onClick={() => deleteWorkExperience(index)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-gray-400 hover:text-red-500 transition-colors"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Job Title <span className="text-red-500">*</span>
@@ -171,9 +313,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      className={inputStyles(
+                        `workExperience.${index}.jobTitle`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.jobTitle`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.jobTitle`]}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -190,9 +340,15 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      className={inputStyles(`workExperience.${index}.company`)}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.company`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.company`]}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -209,9 +365,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      className={inputStyles(
+                        `workExperience.${index}.location`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.location`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.location`]}
+                        </p>
+                      )}
                   </div>
 
                   <div className="md:col-span-2">
@@ -246,9 +410,17 @@ const MyExperience = ({ formData, setFormData }) => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      className={inputStyles(
+                        `workExperience.${index}.fromDate`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.fromDate`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.fromDate`]}
+                        </p>
+                      )}
                   </div>
 
                   {!exp.currentWork && (
@@ -266,9 +438,17 @@ const MyExperience = ({ formData, setFormData }) => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        className={inputStyles(
+                          `workExperience.${index}.toDate`
+                        )}
                         required
                       />
+                      {fieldErrors &&
+                        fieldErrors[`workExperience.${index}.toDate`] && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {fieldErrors[`workExperience.${index}.toDate`]}
+                          </p>
+                        )}
                     </div>
                   )}
 
@@ -286,35 +466,51 @@ const MyExperience = ({ formData, setFormData }) => {
                         )
                       }
                       rows={4}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                      className={inputStyles(
+                        `workExperience.${index}.description`
+                      )}
                       required
                     />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.description`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.description`]}
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>
             ))}
 
-          {!formData.noWorkExperience && (
             <button
               type="button"
               onClick={addWorkExperience}
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
             >
-              + Add Work Experience
+              <PlusCircleIcon className="h-5 w-5 mr-2" />
+              Add Work Experience
             </button>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </FormSection>
 
-      <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-      {/* Education Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Education</h3>
+      <FormSection
+        icon={<AcademicCapIcon className="h-6 w-6 text-blue-500" />}
+        title="Education"
+        description="Tell us about your educational background"
+      >
         {formData.education.map((edu, index) => (
-          <div key={index} className="border p-6 rounded-lg space-y-4 relative">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-small">Education {index + 1}</h3>
+          <div
+            key={index}
+            className="bg-gray-50 p-6 rounded-lg border border-gray-200 relative group"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2 text-sm font-semibold">
+                  {index + 1}
+                </span>
+                Education
+              </h3>
               {formData.education.length > 1 && (
                 <button
                   onClick={() => {
@@ -323,14 +519,14 @@ const MyExperience = ({ formData, setFormData }) => {
                       education: prev.education.filter((_, i) => i !== index),
                     }));
                   }}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   School or University <span className="text-red-500">*</span>
@@ -341,9 +537,14 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "school", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={inputStyles(`education.${index}.school`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.school`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.school`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -355,7 +556,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "degree", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={selectStyles(`education.${index}.degree`)}
                   required
                 >
                   <option value="">Select Degree</option>
@@ -365,6 +566,11 @@ const MyExperience = ({ formData, setFormData }) => {
                     </option>
                   ))}
                 </select>
+                {fieldErrors && fieldErrors[`education.${index}.degree`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.degree`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -377,9 +583,15 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "fieldOfStudy", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={inputStyles(`education.${index}.fieldOfStudy`)}
                   required
                 />
+                {fieldErrors &&
+                  fieldErrors[`education.${index}.fieldOfStudy`] && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors[`education.${index}.fieldOfStudy`]}
+                    </p>
+                  )}
               </div>
 
               <div>
@@ -392,7 +604,7 @@ const MyExperience = ({ formData, setFormData }) => {
                   onChange={(e) =>
                     handleEducationChange(index, "gpa", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={inputStyles(`education.${index}.gpa`)}
                 />
               </div>
 
@@ -401,14 +613,19 @@ const MyExperience = ({ formData, setFormData }) => {
                   From Date <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={edu.fromYear}
                   onChange={(e) =>
                     handleEducationChange(index, "fromYear", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={inputStyles(`education.${index}.fromYear`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.fromYear`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.fromYear`]}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -417,14 +634,19 @@ const MyExperience = ({ formData, setFormData }) => {
                   <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="month"
                   value={edu.toYear}
                   onChange={(e) =>
                     handleEducationChange(index, "toYear", e.target.value)
                   }
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  className={inputStyles(`education.${index}.toYear`)}
                   required
                 />
+                {fieldErrors && fieldErrors[`education.${index}.toYear`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.toYear`]}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -432,123 +654,128 @@ const MyExperience = ({ formData, setFormData }) => {
         <button
           type="button"
           onClick={addEducation}
-          className="text-blue-600 hover:text-blue-800 font-medium"
+          className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
         >
-          + Add Education
+          <PlusCircleIcon className="h-5 w-5 mr-2" />
+          Add Education
         </button>
-      </div>
+      </FormSection>
 
-      <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-      {/* Skills Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Skills</h3>
-        <h3 className="text-sm text-gray-500 font-small">
-          * Note this is a required field, kindly type in your skills and add it
-          accordingly
-        </h3>
-        <h3 className="text-sm text-black-500 font-small">
-          Type to add skills <span className="text-red-500">*</span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {formData.skills.map((skill, index) => (
-            <span
-              key={index}
-              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center"
-            >
-              {skill}
-              <XMarkIcon
-                className="h-4 w-4 ml-2 cursor-pointer"
-                onClick={() => removeSkill(skill)}
-              />
-            </span>
-          ))}
+      <FormSection
+        icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
+        title="Skills"
+        description="Add your professional skills (press Enter after each skill)"
+      >
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {formData.skills.map((skill, index) => (
+              <span
+                key={index}
+                className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full flex items-center group hover:bg-blue-100 transition-colors"
+              >
+                {skill}
+                <button
+                  onClick={() => removeSkill(skill)}
+                  className="ml-2 text-blue-400 hover:text-blue-600"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
+            onKeyDown={handleSkillsChange}
+            placeholder="Type a skill and press Enter"
+            className={inputStyles}
+          />
         </div>
-        <input
-          type="text"
-          value={skillInput}
-          placeholder="Type a skill and press Enter"
-          onChange={(e) => setSkillInput(e.target.value)}
-          onKeyDown={handleSkillsChange}
-          className="border rounded-md p-2 w-full"
-        />
-      </div>
+      </FormSection>
 
-      <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
+      <FormSection
+        icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
+        title="Resume/CV"
+        description="Upload your resume (PDF, DOC, or DOCX format)"
+      >
+        <div className="space-y-4">
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, resume: e.target.files[0] }))
+            }
+            className="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2.5 file:px-4
+              file:rounded-lg file:border-0
+              file:text-sm file:font-medium
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100
+              transition-all"
+          />
+          <p className="text-sm text-gray-500">Maximum file size: 5MB</p>
+        </div>
+      </FormSection>
 
-      {/* Resume Upload Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Resume/CV</h3>
-        <input
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              resume: e.target.files[0],
-            }))
-          }
-          className="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
-        />
-        <p className="text-sm text-gray-500">
-          Upload a file (5MB Max) <span className="text-red-500">*</span>
-        </p>
-      </div>
+      <FormSection
+        icon={<GlobeAltIcon className="h-6 w-6 text-blue-500" />}
+        title="Online Presence"
+        description="Add your professional websites and social media profiles"
+      >
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium text-gray-700">Websites</h4>
+              <button
+                type="button"
+                onClick={addWebsite}
+                className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <PlusCircleIcon className="h-5 w-5 mr-2" />
+                Add Website
+              </button>
+            </div>
+            {(formData.websites || []).map((website, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="url"
+                  value={website}
+                  onChange={(e) => handleWebsiteChange(index, e.target.value)}
+                  placeholder="https://example.com"
+                  className={inputStyles}
+                />
+                <button
+                  onClick={() => deleteWebsite(index)}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
+          </div>
 
-      <hr className="my-7 border-t border-gray-300 w-3/4 mx-auto" />
-
-      {/* Websites Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Websites</h3>
-        <p className="text-sm text-gray-500">Add any relevant websites.</p>
-
-        {(formData.websites || []).map((website, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div className="space-y-2">
+            <h4 className="font-medium text-gray-700">LinkedIn Profile</h4>
             <input
               type="url"
-              placeholder="Enter URL"
-              value={website.url}
-              onChange={(e) => handleWebsiteChange(index, e.target.value)}
-              className="flex-1 border rounded-md p-2"
+              name="linkedinUrl"
+              value={formData.linkedinUrl || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  linkedinUrl: e.target.value,
+                }))
+              }
+              placeholder="https://www.linkedin.com/in/yourprofile"
+              className={inputStyles}
             />
-            <button
-              onClick={() => deleteWebsite(index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
           </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={addWebsite}
-          className="text-blue-600 hover:text-blue-800 font-medium"
-        >
-          + Add Website
-        </button>
-        <h3 className="text-lg font-medium">Social Network URLs</h3>
-        <h3 className="text-lg font-medium">
-          Add your Linkedin url . Format should be https://
-        </h3>
-        <input
-          type="url"
-          name="linkedinUrl"
-          value={formData.linkedinUrl || ""}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, linkedinUrl: e.target.value }))
-          }
-          placeholder="https://www.linkedin.com/in/yourprofile"
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-        />
-      </div>
+        </div>
+      </FormSection>
     </div>
   );
 };
 
+MyExperience.validator = MyExperienceValidator;
 export default MyExperience;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   MapPinIcon,
   BriefcaseIcon,
@@ -7,21 +7,25 @@ import {
 } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 
-const CreateJobPost = () => {
-  const [formData, setFormData] = useState({
-    job_title: "", 
-    company_name: "", 
-    company_logo_url: "", 
-    location: "", 
-    employment_type: "Full-time",
-    salary_range: "", 
-    applicants_needed: "", 
-    company_description: "", 
-    about_company: "", 
-    responsibilities: [""], 
-    qualifications: [""], 
-    skills: [""],
-  });
+const initialFormState = {
+  title: "",
+  companyName: "",
+  companyLogo: null,
+  location: "",
+  employmentType: "Full-time",
+  salaryRange: "",
+  applicantsNeeded: "",
+  companyDescription: "",
+  responsibilities: [""],
+  qualifications: [""],
+  aboutCompany: "",
+  skills: [""],
+};
+
+const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
+  const [formData, setFormData] = useState(initialData || initialFormState);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +33,20 @@ const CreateJobPost = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('File size must be less than 5MB');
+        return;
+      }
+      setFormData(prev => ({
+        ...prev,
+        companyLogo: file
+      }));
+    }
   };
 
   const handleArrayInputChange = (index, field, value) => {
@@ -54,30 +72,48 @@ const CreateJobPost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setIsSubmitting(true);
+
     try {
-      console.log("Submitting job post:", formData); // Debugging before sending
+      const submitData = { ...formData };
       
-      const response = await api.createJobPosting(formData); // Call API
-  
-      console.log("Job post created successfully:", response); // Debugging success
-      alert("Job post created successfully!");
-  
-      // Reset form after successful submission (optional)
-      // setFormData({ title: "", description: "", responsibilities: [], qualifications: [], skills: [] });
-  
+      // Validate required fields
+      if (formData.responsibilities.some(r => !r.trim()) ||
+          formData.qualifications.some(q => !q.trim()) ||
+          formData.skills.some(s => !s.trim())) {
+        throw new Error("Please fill in all fields");
+      }
+
+      // Clean up arrays
+      submitData.responsibilities = formData.responsibilities.filter(r => r.trim());
+      submitData.qualifications = formData.qualifications.filter(q => q.trim());
+      submitData.skills = formData.skills.filter(s => s.trim());
+
+      await onJobCreated(submitData);
+      
+      // Reset form only if not in editing mode
+      if (!isEditing) {
+        setFormData(initialFormState);
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      }
     } catch (error) {
-      console.error("Error creating job post:", error);
-      alert("Failed to create job post! Please try again."); // User-friendly error message
+      console.error('Error submitting job:', error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="relative">
+      <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Create Job Post
+            {isEditing ? 'Edit Job Post' : 'Create Job Post'}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -108,8 +144,8 @@ const CreateJobPost = () => {
                   </label>
                   <input
                     type="text"
-                    name="company_name"
-                    value={formData.company_name}
+                    name="companyName"
+                    value={formData.companyName}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -140,8 +176,8 @@ const CreateJobPost = () => {
                   <div className="mt-1 relative">
                     <BriefcaseIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
-                      name="employment_type"
-                      value={formData.employment_type}
+                      name="employmentType"
+                      value={formData.employmentType}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                     >
@@ -161,8 +197,8 @@ const CreateJobPost = () => {
                     <CurrencyDollarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="text"
-                      name="salary_range"
-                      value={formData.salary_range}
+                      name="salaryRange"
+                      value={formData.salaryRange}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       placeholder="e.g. $80,000 - $100,000"
@@ -198,26 +234,34 @@ const CreateJobPost = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Company Logo URL
+                  Company Logo
                 </label>
-                <input
-                  type="text"
-                  name="company_logo_url"
-                  value={formData.company_logo_url}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  placeholder="/company-logos/your-company.png"
-                  required
-                />
+                <div className="mt-2 space-y-2">
+                  <input
+                    type="file"
+                    name="companyLogo"
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png,image/gif"
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
+                  />
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-xs text-gray-500">
+                      Accepted file types: JPEG, PNG, GIF
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Maximum file size: 5MB
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Company Description
+                  Job Description
                 </label>
                 <textarea
-                  name="company_description"
-                  value={formData.company_description}
+                  name="companyDescription"
+                  value={formData.companyDescription}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -371,17 +415,27 @@ const CreateJobPost = () => {
             <div className="pt-4 flex gap-4">
               <button
                 type="submit"
-                className="w-1/2 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+                disabled={isSubmitting}
+                className={`${
+                  isEditing ? 'w-1/2' : 'w-full'
+                } px-6 py-3 rounded-md text-white transition-colors ${
+                  isSubmitting 
+                    ? 'bg-blue-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Create Job Post
+                {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Job Post'}
               </button>
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
-              >
-                Cancel
-              </button>
+              
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-1/2 bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>
