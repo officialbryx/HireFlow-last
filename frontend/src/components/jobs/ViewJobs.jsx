@@ -5,7 +5,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
-const JobCard = ({ job, onEdit, onDelete }) => {
+const JobCard = ({ job, onEdit, onArchive }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative">
       <div className="flex items-start justify-between mb-4">
@@ -104,7 +104,7 @@ const JobCard = ({ job, onEdit, onDelete }) => {
             Edit
           </button>
           <button
-            onClick={(e) => onDelete(job.id, e)}
+            onClick={(e) => onArchive(job.id, e)}
             className="text-gray-600 hover:text-orange-600 transition-colors"
           >
             Archive
@@ -120,7 +120,7 @@ const ViewJobs = ({
   loading,
   currentJobs,
   handleEditJob,
-  handleDeleteJob,
+  handleDeleteJob, // This is actually handleArchiveJob
   currentPage,
   totalPages,
   handlePageChange,
@@ -137,8 +137,8 @@ const ViewJobs = ({
             <JobCard
               key={job.id}
               job={job}
-              onEdit={() => handleEditJob(job.id)}
-              onDelete={(e) => handleDeleteJob(job.id, e)}
+              onEdit={handleEditJob}
+              onArchive={handleDeleteJob} // Pass the archive handler
             />
           ))}
         </div>

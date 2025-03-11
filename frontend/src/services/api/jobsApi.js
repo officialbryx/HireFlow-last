@@ -8,46 +8,41 @@ export const jobsApi = {
 
       // Handle logo upload if it's a File object
       let logoUrl = null;
-      if (jobPostData.companyLogo instanceof File) {
-        const file = jobPostData.companyLogo;
+      if (jobPostData.company_logo_url instanceof File) {
+        const file = jobPostData.company_logo_url;
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         
-        // Upload the file
         const { error: uploadError } = await supabase.storage
           .from('company-logos')
           .upload(`logos/${fileName}`, file, {
             cacheControl: '3600',
             upsert: false,
-            contentType: file.type // Add content type
+            contentType: file.type
           });
 
         if (uploadError) throw uploadError;
 
-        // Get the public URL
         const { data } = supabase.storage
           .from('company-logos')
           .getPublicUrl(`logos/${fileName}`);
 
         logoUrl = data.publicUrl;
-      } else if (typeof jobPostData.companyLogo === 'string') {
-        // If it's already a URL string, use it directly
-        logoUrl = jobPostData.companyLogo;
       }
 
-      // Create job post with correct logo URL
+      // Create job post with matching field names
       const { data: jobPost, error: jobError } = await supabase
         .from('job_posting')
         .insert({
-          job_title: jobPostData.title,
-          company_name: jobPostData.companyName,
+          job_title: jobPostData.job_title, // Changed from title
+          company_name: jobPostData.company_name, // Changed from companyName
           company_logo_url: logoUrl,
           location: jobPostData.location,
-          employment_type: jobPostData.employmentType,
-          salary_range: jobPostData.salaryRange,
-          applicants_needed: jobPostData.applicantsNeeded,
-          company_description: jobPostData.companyDescription,
-          about_company: jobPostData.aboutCompany,
+          employment_type: jobPostData.employment_type, // Changed from employmentType
+          salary_range: jobPostData.salary_range, // Changed from salaryRange
+          applicants_needed: jobPostData.applicants_needed, // Changed from applicantsNeeded
+          company_description: jobPostData.company_description, // Changed from companyDescription
+          about_company: jobPostData.about_company, // Changed from aboutCompany
           status: 'active',
           creator_id: user.id
         })
@@ -56,9 +51,8 @@ export const jobsApi = {
 
       if (jobError) throw jobError;
 
-      // Insert related data
+      // Insert related data with consistent naming
       const promises = [
-        // Insert responsibilities
         jobPostData.responsibilities?.length > 0 &&
           supabase.from('job_responsibility').insert(
             jobPostData.responsibilities.map(r => ({
@@ -67,7 +61,6 @@ export const jobsApi = {
             }))
           ),
 
-        // Insert qualifications
         jobPostData.qualifications?.length > 0 &&
           supabase.from('job_qualification').insert(
             jobPostData.qualifications.map(q => ({
@@ -76,7 +69,6 @@ export const jobsApi = {
             }))
           ),
 
-        // Insert skills
         jobPostData.skills?.length > 0 &&
           supabase.from('job_skill').insert(
             jobPostData.skills.map(s => ({
@@ -86,10 +78,9 @@ export const jobsApi = {
           )
       ].filter(Boolean);
 
-      // Wait for all related data to be inserted
       await Promise.all(promises);
 
-      // Fetch the complete job post with related data
+      // Fetch complete job post
       const { data: completeJob, error: fetchError } = await supabase
         .from('job_posting')
         .select(`
@@ -287,12 +278,15 @@ export const jobsApi = {
 
   async archiveJobPost(jobId) {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_posting')
         .update({ status: 'archived' })
-        .eq('id', jobId);
+        .eq('id', jobId)
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Error archiving job:', error);
       throw error;
