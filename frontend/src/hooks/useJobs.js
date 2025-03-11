@@ -1,98 +1,94 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { supabase } from '../services/supabaseClient';
 import { jobsApi } from '../services/api/jobsApi';
 
 export function useJobs(isEmployer = false) {
   const queryClient = useQueryClient();
 
-  const { data: jobs = [], isLoading, error } = useQuery({
+  const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['jobs', isEmployer],
     queryFn: () => jobsApi.getAllJobPostings(isEmployer),
-    staleTime: 5 * 60 * 1000,
   });
 
-  // Archive job mutation
-  const archiveJobMutation = useMutation({
-    mutationFn: (jobId) => jobsApi.archiveJobPost(jobId),
-    onSuccess: (_, jobId) => {
-      // Update cache to reflect archived status
-      queryClient.setQueryData(['jobs', true], (oldData = []) => {
-        return oldData.map(job => 
-          job.id === jobId ? { ...job, status: 'archived' } : job
-        );
-      });
-      // Invalidate queries to refetch
-      queryClient.invalidateQueries(['jobs']);
-    },
-    onError: (error) => {
-      console.error('Error archiving job:', error);
+  const createJob = async (jobData) => {
+    try {
+      await jobsApi.createJobPost(jobData);
+      await queryClient.invalidateQueries(['jobs', isEmployer]);
+    } catch (error) {
+      console.error('Error creating job:', error);
       throw error;
     }
-  });
+  };
 
-  // Restore job mutation
-  const restoreJobMutation = useMutation({
-    mutationFn: (jobId) => jobsApi.restoreJobPost(jobId),
-    onSuccess: (_, jobId) => {
-      // Update cache to reflect active status
-      queryClient.setQueryData(['jobs', true], (oldData = []) => {
-        return oldData.map(job => 
-          job.id === jobId ? { ...job, status: 'active' } : job
-        );
-      });
-      // Invalidate queries to refetch
-      queryClient.invalidateQueries(['jobs']);
-    }
-  });
-
-  // Update job mutation
-  const updateJobMutation = useMutation({
-    mutationFn: ({ id, data }) => jobsApi.updateJobPost(id, data),
-    onSuccess: (updatedJob) => {
-      // Update cache with modified job
-      queryClient.setQueryData(['jobs', true], (oldData = []) => {
-        return oldData.map(job => 
-          job.id === updatedJob.id ? updatedJob : job
-        );
-      });
-      // Invalidate queries to refetch
-      queryClient.invalidateQueries(['jobs']);
-    },
-    onError: (error) => {
+  const updateJob = async ({ id, data }) => {
+    try {
+      await jobsApi.updateJobPost(id, data);
+      await queryClient.invalidateQueries(['jobs', isEmployer]);
+    } catch (error) {
       console.error('Error updating job:', error);
       throw error;
     }
-  });
+  };
 
-  const createJobMutation = useMutation({
-    mutationFn: async (jobData) => {
-      const result = await jobsApi.createJobPost(jobData);
-      return result;
-    },
-    onSuccess: (newJob) => {
-      // Update cache with new job
-      queryClient.setQueryData(['jobs', true], (oldData = []) => {
-        return [newJob, ...oldData];
-      });
-      // Invalidate queries to refetch
-      queryClient.invalidateQueries(['jobs']);
+  const archiveJob = async (jobId) => {
+    try {
+      await jobsApi.archiveJobPost(jobId);
+      // Invalidate and refetch jobs
+      await queryClient.invalidateQueries(['jobs', isEmployer]);
+    } catch (error) {
+      console.error('Error archiving job:', error);
+      throw error;
     }
-  });
+  };
+
+  const restoreJob = async (jobId) => {
+    try {
+      await jobsApi.restoreJobPost(jobId);
+      await queryClient.invalidateQueries(['jobs', isEmployer]);
+    } catch (error) {
+      console.error('Error restoring job:', error);
+      throw error;
+    }
+  };
+
+  // Add real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('job_updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_posting'
+        },
+        async (payload) => {
+          // Immediately update the cache with the new data
+          queryClient.setQueryData(['jobs', isEmployer], (oldData) => {
+            if (!oldData) return oldData;
+            return oldData.map(job => 
+              job.id === payload.new.id ? { ...job, ...payload.new } : job
+            );
+          });
+          
+          // Then refetch to ensure complete sync
+          await queryClient.invalidateQueries(['jobs', isEmployer]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, isEmployer]);
 
   return {
     jobs,
     isLoading,
-    error,
-    createJob: createJobMutation.mutate,
-    isCreating: createJobMutation.isPending,
-    createError: createJobMutation.error,
-    updateJob: updateJobMutation.mutateAsync,
-    isUpdating: updateJobMutation.isPending,
-    updateError: updateJobMutation.error,
-    archiveJob: archiveJobMutation.mutateAsync,
-    isArchiving: archiveJobMutation.isPending,
-    archiveError: archiveJobMutation.error,
-    restoreJob: restoreJobMutation.mutateAsync,
-    isRestoring: restoreJobMutation.isPending,
-    restoreError: restoreJobMutation.error
+    createJob,
+    updateJob,
+    archiveJob,
+    restoreJob
   };
 }

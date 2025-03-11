@@ -33,16 +33,18 @@ const JobCard = ({ job, onEdit, onArchive }) => {
             <p className="text-gray-600 truncate">{job.company_name}</p>
           </div>
         </div>
+      </div>
 
-        {/* Applicant count badge */}
-        {job.applicant_count > 0 && (
-          <div className="flex-shrink-0">
-            <div className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full flex items-center">
-              <UserGroupIcon className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">{job.applicant_count}</span>
-            </div>
-          </div>
-        )}
+      {/* Update applicant count badge to always show, with different styles based on count */}
+      <div className="absolute top-4 right-4">
+        <div className={`px-2.5 py-0.5 rounded-full flex items-center ${
+          job.applicant_count > 0 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-gray-100 text-gray-600'
+        }`}>
+          <UserGroupIcon className="h-4 w-4 mr-1" />
+          <span className="text-sm font-medium">{job.applicant_count || 0}</span>
+        </div>
       </div>
 
       {/* Rest of the job card content */}

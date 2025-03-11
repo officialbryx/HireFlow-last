@@ -240,14 +240,6 @@ export const jobsApi = {
 
   async getAllJobPostings(isEmployer = false) {
     try {
-      // Get current user if employer view
-      let userId = null;
-      if (isEmployer) {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        userId = user.id;
-      }
-
       let query = supabase
         .from('job_posting')
         .select(`
@@ -259,12 +251,9 @@ export const jobsApi = {
         `)
         .order('created_at', { ascending: false });
 
-      // If employer view, only show their posts
-      if (isEmployer && userId) {
-        query = query.eq('creator_id', userId);
-      } else {
-        // For jobseeker view, only show active posts
-        query = query.eq('status', 'active');
+      if (isEmployer) {
+        const { data: { user } } = await supabase.auth.getUser();
+        query = query.eq('creator_id', user.id);
       }
 
       const { data, error } = await query;

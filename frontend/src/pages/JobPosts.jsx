@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   HeartIcon,
 } from "@heroicons/react/24/outline";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const JobPosts = () => {
   const { jobs: jobListings, isLoading, error } = useJobs(false); // Pass false for jobseeker view
@@ -72,8 +72,15 @@ const JobPosts = () => {
 
   const formatPostedDate = (date) => {
     try {
-      return `Posted ${formatDistanceToNow(new Date(date), { addSuffix: true })}`;
+      // Simply parse the ISO string and format
+      const parsedDate = parseISO(date);
+      
+      return `Posted ${formatDistanceToNow(parsedDate, { 
+        addSuffix: true,
+        includeSeconds: true
+      })}`;
     } catch (error) {
+      console.error('Date formatting error:', error);
       return 'Invalid date';
     }
   };
