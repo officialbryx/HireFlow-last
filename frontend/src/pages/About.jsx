@@ -25,13 +25,12 @@ const About = () => {
     },
     {
       name: "Ymnwl Faurillo",
-      role: "AI Implementation Specialist",
-      image: "/mae.jpg",
-      description:
-        "Machine learning enthusiast with a knack for turning data into insights. Loves experimenting with neural networks while sipping green tea.",
-      linkedin: "https://linkedin.com/in/mae-buena",
-      github: "https://github.com/mae-buena",
-      email: "maebuena@email.com",
+      role: "?",
+      image: "/defaultprofile.jpg",
+      description: "?",
+      linkedin: "https://www.merriam-webster.com/dictionary/useless",
+      github: "https://www.merriam-webster.com/dictionary/useless",
+      email: "https://www.merriam-webster.com/dictionary/useless",
     },
   ];
 
