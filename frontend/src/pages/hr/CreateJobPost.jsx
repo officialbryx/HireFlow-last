@@ -6,19 +6,20 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
+// Update the initialFormState to match API field names exactly
 const initialFormState = {
-  title: "",
-  companyName: "",
-  companyLogo: null,
+  job_title: "",
+  company_name: "", // Changed from companyName
+  company_logo_url: null, // Changed from companyLogo
   location: "",
-  employmentType: "Full-time",
-  salaryRange: "",
-  applicantsNeeded: "",
-  companyDescription: "",
+  employment_type: "Full-time", // Changed from employmentType
+  salary_range: "", // Changed from salaryRange
+  applicants_needed: "",
+  company_description: "", // Changed from companyDescription
+  about_company: "",
   responsibilities: [""],
   qualifications: [""],
-  aboutCompany: "",
-  skills: [""],
+  skills: [""]
 };
 
 const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
@@ -43,7 +44,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
       }
       setFormData(prev => ({
         ...prev,
-        companyLogo: file
+        company_logo_url: file // Changed from companyLogo
       }));
     }
   };
@@ -69,31 +70,43 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
     }));
   };
 
+  // Update the handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const submitData = { ...formData };
-      
+      // Ensure all field names match exactly with the API expectations
+      const submitData = {
+        job_title: formData.job_title,
+        company_name: formData.company_name,
+        company_logo_url: formData.company_logo_url,
+        location: formData.location,
+        employment_type: formData.employment_type,
+        salary_range: formData.salary_range,
+        applicants_needed: formData.applicants_needed,
+        company_description: formData.company_description,
+        about_company: formData.about_company,
+        responsibilities: formData.responsibilities.filter(r => r.trim()),
+        qualifications: formData.qualifications.filter(q => q.trim()),
+        skills: formData.skills.filter(s => s.trim())
+      };
+
       // Validate required fields
-      if (formData.responsibilities.some(r => !r.trim()) ||
-          formData.qualifications.some(q => !q.trim()) ||
-          formData.skills.some(s => !s.trim())) {
-        throw new Error("Please fill in all fields");
+      if (!submitData.job_title || !submitData.job_title.trim()) {
+        throw new Error("Job title is required");
       }
 
-      // Clean up arrays
-      submitData.responsibilities = formData.responsibilities.filter(r => r.trim());
-      submitData.qualifications = formData.qualifications.filter(q => q.trim());
-      submitData.skills = formData.skills.filter(s => s.trim());
+      if (submitData.responsibilities.length === 0 ||
+          submitData.qualifications.length === 0 ||
+          submitData.skills.length === 0) {
+        throw new Error("Please fill in all required fields");
+      }
 
       await onJobCreated(submitData);
       
-      // Reset form only if not in editing mode
       if (!isEditing) {
         setFormData(initialFormState);
-        // Reset file input
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) {
           fileInput.value = '';
@@ -129,8 +142,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   </label>
                   <input
                     type="text"
-                    name="title"
-                    value={formData.title}
+                    name="job_title"  // This should match the field name from API
+                    value={formData.job_title || ""} // Add fallback for null/undefined
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -143,8 +156,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   </label>
                   <input
                     type="text"
-                    name="companyName"
-                    value={formData.companyName}
+                    name="company_name" // Changed from companyName
+                    value={formData.company_name}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
@@ -175,8 +188,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   <div className="mt-1 relative">
                     <BriefcaseIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
-                      name="employmentType"
-                      value={formData.employmentType}
+                      name="employment_type" // Changed from employmentType
+                      value={formData.employment_type}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                     >
@@ -196,8 +209,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                     <CurrencyDollarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="text"
-                      name="salaryRange"
-                      value={formData.salaryRange}
+                      name="salary_range" // Changed from salaryRange
+                      value={formData.salary_range}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       placeholder="e.g. $80,000 - $100,000"
@@ -214,8 +227,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                     <UserGroupIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
                       type="number"
-                      name="applicantsNeeded"
-                      value={formData.applicantsNeeded}
+                      name="applicants_needed"
+                      value={formData.applicants_needed}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
                       required
@@ -238,7 +251,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                 <div className="mt-2 space-y-2">
                   <input
                     type="file"
-                    name="companyLogo"
+                    name="company_logo_url"
                     onChange={handleFileChange}
                     accept="image/jpeg,image/png,image/gif"
                     className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
@@ -259,8 +272,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   Job Description
                 </label>
                 <textarea
-                  name="companyDescription"
-                  value={formData.companyDescription}
+                  name="company_description"
+                  value={formData.company_description}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -273,8 +286,8 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   About the Company
                 </label>
                 <textarea
-                  name="aboutCompany"
-                  value={formData.aboutCompany}
+                  name="about_company"
+                  value={formData.about_company}
                   onChange={handleInputChange}
                   rows={4}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"

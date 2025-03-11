@@ -116,16 +116,17 @@ const Jobs = () => {
       const jobDetails = await jobsApi.getJobPostingDetails(jobId);
       console.log("Raw Job Details:", jobDetails);
 
-      // Map API response to form data structure with proper array handling
+      // Map API response to form data structure using exact field names
       const mappedJobDetails = {
-        title: jobDetails.job_title || "",
-        companyName: jobDetails.company_name || "",
-        companyLogo: jobDetails.company_logo_url || null,
+        job_title: jobDetails.job_title || "",
+        company_name: jobDetails.company_name || "",
+        company_logo_url: jobDetails.company_logo_url || null,
         location: jobDetails.location || "",
-        employmentType: jobDetails.employment_type || "Full-time",
-        salaryRange: jobDetails.salary_range || "",
-        applicantsNeeded: jobDetails.applicants_needed || "",
-        companyDescription: jobDetails.company_description || "",
+        employment_type: jobDetails.employment_type || "Full-time",
+        salary_range: jobDetails.salary_range || "",
+        applicants_needed: jobDetails.applicants_needed || "",
+        company_description: jobDetails.company_description || "",
+        about_company: jobDetails.about_company || "",
         responsibilities: Array.isArray(jobDetails.job_responsibility)
           ? jobDetails.job_responsibility.map((r) => r.responsibility)
           : [""],
@@ -135,8 +136,7 @@ const Jobs = () => {
         skills: Array.isArray(jobDetails.job_skill)
           ? jobDetails.job_skill.map((s) => s.skill)
           : [""],
-        aboutCompany: jobDetails.about_company || "",
-        id: jobDetails.id,
+        id: jobDetails.id
       };
 
       console.log("Mapped Job Details:", mappedJobDetails);
@@ -148,18 +148,20 @@ const Jobs = () => {
     }
   };
 
+  // Update handleJobEdited to match the field names
   const handleJobEdited = async (updatedJobData) => {
     try {
+      // No need to transform the field names since they already match
       const formattedData = {
-        job_title: updatedJobData.title,
-        company_name: updatedJobData.companyName,
-        company_logo_url: updatedJobData.companyLogo, // This can be either a File or URL string
+        job_title: updatedJobData.job_title,
+        company_name: updatedJobData.company_name,
+        company_logo_url: updatedJobData.company_logo_url,
         location: updatedJobData.location,
-        employment_type: updatedJobData.employmentType,
-        salary_range: updatedJobData.salaryRange,
-        applicants_needed: updatedJobData.applicantsNeeded,
-        company_description: updatedJobData.companyDescription,
-        about_company: updatedJobData.aboutCompany,
+        employment_type: updatedJobData.employment_type,
+        salary_range: updatedJobData.salary_range,
+        applicants_needed: updatedJobData.applicants_needed,
+        company_description: updatedJobData.company_description,
+        about_company: updatedJobData.about_company,
         responsibilities: updatedJobData.responsibilities,
         qualifications: updatedJobData.qualifications,
         skills: updatedJobData.skills,
@@ -181,22 +183,26 @@ const Jobs = () => {
 
   // Rename handleDeleteJob to handleArchiveJob
   const handleArchiveJob = async (jobId, e) => {
-    e?.stopPropagation();
-    setJobToDelete(jobId); // We can keep this state name for now
-    setShowDeleteModal(true);
+    e?.stopPropagation(); // Prevent event bubbling
+    try {
+      setJobToDelete(jobId);
+      setShowDeleteModal(true);
+    } catch (error) {
+      console.error("Error preparing to archive job:", error);
+      showToast("error", "Error preparing to archive job");
+    }
   };
 
   // Rename handleConfirmDelete to handleConfirmArchive
   const handleConfirmArchive = async () => {
     try {
       await archiveJob(jobToDelete);
+      setShowDeleteModal(false);
+      setJobToDelete(null);
       showToast("success", "Job post archived successfully!");
     } catch (error) {
       console.error("Error archiving job:", error);
       showToast("error", error.message || "Error archiving job post");
-    } finally {
-      setShowDeleteModal(false);
-      setJobToDelete(null);
     }
   };
 

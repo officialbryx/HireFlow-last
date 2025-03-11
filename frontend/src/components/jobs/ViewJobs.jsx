@@ -5,7 +5,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
-const JobCard = ({ job, onEdit, onDelete }) => {
+const JobCard = ({ job, onEdit, onArchive }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative">
       <div className="flex items-start justify-between mb-4">
@@ -33,16 +33,18 @@ const JobCard = ({ job, onEdit, onDelete }) => {
             <p className="text-gray-600 truncate">{job.company_name}</p>
           </div>
         </div>
+      </div>
 
-        {/* Applicant count badge */}
-        {job.applicant_count > 0 && (
-          <div className="flex-shrink-0">
-            <div className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full flex items-center">
-              <UserGroupIcon className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">{job.applicant_count}</span>
-            </div>
-          </div>
-        )}
+      {/* Update applicant count badge to always show, with different styles based on count */}
+      <div className="absolute top-4 right-4">
+        <div className={`px-2.5 py-0.5 rounded-full flex items-center ${
+          job.applicant_count > 0 
+            ? 'bg-blue-100 text-blue-800' 
+            : 'bg-gray-100 text-gray-600'
+        }`}>
+          <UserGroupIcon className="h-4 w-4 mr-1" />
+          <span className="text-sm font-medium">{job.applicant_count || 0}</span>
+        </div>
       </div>
 
       {/* Rest of the job card content */}
@@ -104,7 +106,7 @@ const JobCard = ({ job, onEdit, onDelete }) => {
             Edit
           </button>
           <button
-            onClick={(e) => onDelete(job.id, e)}
+            onClick={(e) => onArchive(job.id, e)}
             className="text-gray-600 hover:text-orange-600 transition-colors"
           >
             Archive
@@ -120,7 +122,7 @@ const ViewJobs = ({
   loading,
   currentJobs,
   handleEditJob,
-  handleDeleteJob,
+  handleDeleteJob, // This is actually handleArchiveJob
   currentPage,
   totalPages,
   handlePageChange,
@@ -137,8 +139,8 @@ const ViewJobs = ({
             <JobCard
               key={job.id}
               job={job}
-              onEdit={() => handleEditJob(job.id)}
-              onDelete={(e) => handleDeleteJob(job.id, e)}
+              onEdit={handleEditJob}
+              onArchive={handleDeleteJob} // Pass the archive handler
             />
           ))}
         </div>
