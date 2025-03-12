@@ -131,13 +131,13 @@ const Dashboard = () => {
                 icon={UserGroupIcon}
                 change={metrics.applicantStats.monthlyChange}
                 changeType="increase"
-                onClick={() => handleCardClick('/hr/applicants')}
+                onClick={() => handleCardClick('/hr/jobs?tab=applicants')}
               />
               <StatCard
                 title="Shortlisted Candidates"
                 value={metrics.shortlistedStats.total}
                 icon={UserIcon}
-                onClick={() => handleCardClick('/hr/applicants?filter=shortlisted')}
+                onClick={() => handleCardClick('/hr/jobs?tab=applicants?filter=shortlisted')}
               />
             </div>
 

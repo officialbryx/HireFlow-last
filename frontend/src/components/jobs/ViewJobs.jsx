@@ -118,13 +118,13 @@ const JobCard = ({ job, onEdit, onArchive }) => {
 };
 
 const ViewJobs = ({
-  jobs,
-  loading,
-  currentJobs,
+  jobs = [], // Add default empty array
+  loading = false,
+  currentJobs = [],
   handleEditJob,
-  handleDeleteJob, // This is actually handleArchiveJob
-  currentPage,
-  totalPages,
+  handleDeleteJob,
+  currentPage = 1,
+  totalPages = 1,
   handlePageChange,
 }) => {
   return (
@@ -133,14 +133,14 @@ const ViewJobs = ({
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
-      ) : currentJobs.length > 0 ? (
+      ) : currentJobs?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentJobs.map((job) => (
             <JobCard
               key={job.id}
               job={job}
               onEdit={handleEditJob}
-              onArchive={handleDeleteJob} // Pass the archive handler
+              onArchive={handleDeleteJob}
             />
           ))}
         </div>
@@ -150,7 +150,7 @@ const ViewJobs = ({
         </div>
       )}
 
-      {jobs.length > 0 && (
+      {jobs?.length > 0 && (
         <div className="mt-8 flex justify-center space-x-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}

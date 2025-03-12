@@ -8,7 +8,7 @@ import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
-import ViewApplicants from "./pages/hr/ViewApplicants";
+import ViewApplicants from "./components/jobs/ViewApplicants";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
@@ -151,14 +151,6 @@ const App = () => {
           }
         />
         <Route
-          path="/hr/applicants"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <ViewApplicants />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/hr/dashboard"
           element={
             <ProtectedRoute allowedRoles={["employer"]}>
@@ -167,7 +159,7 @@ const App = () => {
           }
         />
         <Route
-          path="/hr/jobs"
+          path="/hr/jobs/*"
           element={
             <ProtectedRoute allowedRoles={["employer"]}>
               <Jobs />

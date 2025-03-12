@@ -13,6 +13,7 @@ import { useToast } from "../../hooks/useToast";
 import { useJobModals } from "../../hooks/useJobModals";
 import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
+import ViewApplicants from '../../components/jobs/ViewApplicants';
 
 const Jobs = () => {
   const {
@@ -255,11 +256,21 @@ const Jobs = () => {
               >
                 Archived Jobs
               </button>
+              <button
+                onClick={() => setActiveTab("applicants")}
+                className={`${
+                  activeTab === "applicants"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Applicants
+              </button>
             </nav>
           </div>
 
           {/* Search and Filter */}
-          {activeTab !== "create" && (
+          {activeTab !== "create" && activeTab !== "applicants" && (
             <div className="mb-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
@@ -290,31 +301,30 @@ const Jobs = () => {
           )}
 
           {/* Tab Content */}
-          {activeTab === "view" && (
-            <ViewJobs
-              jobs={jobs.filter((job) => job.status !== "archived")}
-              loading={loading}
-              currentJobs={currentJobs.filter(
-                (job) => job.status !== "archived"
-              )}
-              handleEditJob={handleEditJob}
-              handleDeleteJob={handleArchiveJob} // Update the prop name in ViewJobs component
-              currentPage={currentPage}
-              totalPages={totalPages}
-              handlePageChange={handlePageChange}
-            />
-          )}
-
-          {activeTab === "create" && (
-            <CreateJob onJobCreated={handleJobCreated} />
-          )}
-
-          {activeTab === "archived" && (
-            <ArchivedJobs
-              archivedJobs={jobs.filter((job) => job.status === "archived")}
-              handleRestore={handleRestore}
-            />
-          )}
+          <div className="mt-6">
+            {activeTab === "view" && (
+              <ViewJobs
+                jobs={jobs.filter((job) => job.status !== "archived")}
+                loading={loading}
+                currentJobs={currentJobs}
+                handleEditJob={handleEditJob}
+                handleDeleteJob={handleArchiveJob}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={handlePageChange}
+              />
+            )}
+            {activeTab === "create" && (
+              <CreateJob onJobCreated={handleJobCreated} />
+            )}
+            {activeTab === "archived" && (
+              <ArchivedJobs
+                archivedJobs={jobs.filter((job) => job.status === "archived")}
+                handleRestore={handleRestore}
+              />
+            )}
+            {activeTab === "applicants" && <ViewApplicants />}
+          </div>
         </div>
       </div>
 

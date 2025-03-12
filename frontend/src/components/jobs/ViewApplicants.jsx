@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { analyzeResume } from "../../services/resumeAnalysis";
-import HRNavbar from "../../components/HRNavbar";
+import HRNavbar from "../HRNavbar";
 import {
   ClipboardIcon,
   CheckCircleIcon,
@@ -989,7 +989,7 @@ export default function ViewApplicants() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HRNavbar />
-      <div className="max-w-7xl mx-auto px-4 py-8 pt-20">
+      <div className="max-w-7xl mx-auto px-4 ">
         {/* Changed from py-8 to pt-20 to account for fixed navbar */}
         <h1 className="text-2xl font-bold mb-6">Applicants Review</h1>
         <div className="flex gap-6">
