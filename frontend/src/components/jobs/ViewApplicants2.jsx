@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { pdfjs } from "react-pdf";
-import { supabase } from "../../services/supabaseClient";
-import { analyzeResume } from "../../services/resumeAnalysis";
 import { applicationsApi } from "../../services/api/applicationsApi";
 import HRNavbar from "../HRNavbar";
 import ApplicantsList from "../applicants/ApplicantsList";
