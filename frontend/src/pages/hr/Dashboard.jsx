@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   BriefcaseIcon,
@@ -21,6 +21,8 @@ const STALE_TIME = 1000 * 60 * 4; // 4 minutes
 const CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
   const { 
     data: metrics, 
     isLoading, 
@@ -35,6 +37,10 @@ const Dashboard = () => {
     staleTime: STALE_TIME, // Consider data stale after 4 minutes
     cacheTime: CACHE_TIME, // Cache for 1 hour
   });
+
+  const handleCardClick = (path) => {
+    navigate(path);
+  };
 
   if (isLoading) {
     return (
@@ -111,11 +117,13 @@ const Dashboard = () => {
                 title="Active Job Posts"
                 value={metrics.jobStats.active}
                 icon={BriefcaseIcon}
+                onClick={() => handleCardClick('/hr/jobs?tab=view')}
               />
               <StatCard
                 title="Archived Jobs"
                 value={metrics.jobStats.archived}
                 icon={ArchiveBoxIcon}
+                onClick={() => handleCardClick('/hr/jobs?tab=archived')}
               />
               <StatCard
                 title="Total Applicants"
@@ -123,11 +131,13 @@ const Dashboard = () => {
                 icon={UserGroupIcon}
                 change={metrics.applicantStats.monthlyChange}
                 changeType="increase"
+                onClick={() => handleCardClick('/hr/applicants')}
               />
               <StatCard
                 title="Shortlisted Candidates"
                 value={metrics.shortlistedStats.total}
                 icon={UserIcon}
+                onClick={() => handleCardClick('/hr/applicants?filter=shortlisted')}
               />
             </div>
 
