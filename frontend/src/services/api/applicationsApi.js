@@ -66,26 +66,80 @@ export const applicationsApi = {
         query = query.eq('job_posting_id', filters.job_id);
       }
       
+      // Fix search functionality
       if (filters.search) {
-        query = query.or(`
-          personal_info->>given_name.ilike.%${filters.search}%,
-          personal_info->>family_name.ilike.%${filters.search}%,
-          email.ilike.%${filters.search}%,
-          company.ilike.%${filters.search}%
-        `);
+        const searchTerm = filters.search.toLowerCase();
+        
+        // We need to get all items to perform client-side searching
+        // because Supabase has limitations with searching JSON fields
+        const { data: allData, error: allError } = await query;
+        
+        if (allError) throw allError;
+        
+        // Filter the data on client side by search term
+        const filteredData = allData.filter(item => {
+          const givenName = item.personal_info?.given_name?.toLowerCase() || '';
+          const familyName = item.personal_info?.family_name?.toLowerCase() || '';
+          const email = item.email?.toLowerCase() || '';
+          const company = item.company?.toLowerCase() || '';
+          const jobTitle = item.job_posting?.job_title?.toLowerCase() || '';
+          
+          return givenName.includes(searchTerm) || 
+                 familyName.includes(searchTerm) || 
+                 email.includes(searchTerm) || 
+                 company.includes(searchTerm) ||
+                 jobTitle.includes(searchTerm) ||
+                 `${givenName} ${familyName}`.includes(searchTerm);
+        });
+        
+        // Calculate pagination
+        const total = filteredData.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        
+        // Transform data
+        const transformedData = paginatedData.map(app => ({
+          ...app,
+          personal_info: {
+            ...app.personal_info,
+            phone: typeof app.personal_info?.phone === 'object'
+              ? `${app.personal_info.phone.code} ${app.personal_info.phone.number}`
+              : app.personal_info?.phone
+          },
+          contact_info: {
+            ...app.contact_info,
+            phone: typeof app.contact_info?.phone === 'object'
+              ? `${app.contact_info.phone.code} ${app.contact_info.phone.number}`
+              : app.contact_info?.phone
+          },
+          address: app.address || {},
+          work_experience: Array.isArray(app.work_experience) ? app.work_experience : [],
+          education: Array.isArray(app.education) ? app.education : [],
+          skills: Array.isArray(app.skills) ? app.skills : [],
+          websites: Array.isArray(app.websites) ? app.websites : [],
+          application_questions: app.application_questions || {},
+          company: app.job_posting?.company_name || app.company,
+          job_title: app.job_posting?.job_title
+        }));
+
+        return {
+          data: transformedData,
+          count: total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        };
       }
       
-      // Apply pagination
+      // Standard query with pagination (no search)
       const { data, error, count } = await query
         .order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      // Transform data to ensure consistent structure
+      if (error) throw error;
+      
+      // Transform data
       const transformedData = (data || []).map(app => ({
         ...app,
         personal_info: {

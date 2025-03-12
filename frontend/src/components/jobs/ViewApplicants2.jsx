@@ -313,24 +313,25 @@ export default function ViewApplicants({ initialFilter = "all", jobIdFilter = nu
                         }`}
                         onClick={() => handleSelectApplicant(applicant)}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-600 font-medium">
-                              {applicant.personal_info?.given_name?.[0]}{applicant.personal_info?.family_name?.[0]}
-                            </span>
-                          </div>
+                        <div className="flex items-start justify-between">
+                          {/* Left side - Name and company */}
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-gray-900 truncate">
                               {applicant.personal_info?.given_name} {applicant.personal_info?.family_name}
                             </p>
-                            <div className="flex items-center mt-1">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(applicant.status)}`}>
-                                {applicant.status?.charAt(0).toUpperCase() + applicant.status?.slice(1) || "Pending"}
-                              </span>
-                              <span className="ml-2 text-xs text-gray-500">
-                                {formatDate(applicant.created_at)}
-                              </span>
-                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {applicant.company || "No company"}
+                            </p>
+                            <span className="text-xs text-gray-400 block mt-1">
+                              {formatDate(applicant.created_at)}
+                            </span>
+                          </div>
+                          
+                          {/* Right side - Status badge */}
+                          <div>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(applicant.status)}`}>
+                              {applicant.status?.charAt(0).toUpperCase() + applicant.status?.slice(1) || "Pending"}
+                            </span>
                           </div>
                         </div>
                       </li>
