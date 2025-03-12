@@ -15,6 +15,11 @@ import { getDashboardMetrics } from '../../services/dashboardMetrics';
 import StatCard from '../../components/dashboard/StatCard';
 import HRNavbar from '../../components/HRNavbar';
 
+// Query configuration constants
+const REFETCH_INTERVAL = 1000 * 60; // 1 minute
+const STALE_TIME = 1000 * 60 * 4; // 4 minutes
+const CACHE_TIME = 1000 * 60 * 60; // 1 hour
+
 const Dashboard = () => {
   const { 
     data: metrics, 
@@ -25,9 +30,10 @@ const Dashboard = () => {
   } = useQuery({
     queryKey: ['dashboardMetrics'],
     queryFn: getDashboardMetrics,
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
-    staleTime: 1000 * 60 * 4, // Consider data stale after 4 minutes
-    cacheTime: 1000 * 60 * 60, // Cache for 1 hour
+    refetchInterval: REFETCH_INTERVAL,
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    staleTime: STALE_TIME, // Consider data stale after 4 minutes
+    cacheTime: CACHE_TIME, // Cache for 1 hour
   });
 
   if (isLoading) {

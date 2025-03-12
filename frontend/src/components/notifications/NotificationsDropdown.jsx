@@ -36,10 +36,12 @@ const NotificationsDropdown = () => {
 
   const fetchNotifications = async () => {
     try {
-      const data = await notificationsApi.getNotifications();
-      setNotifications(data);
+      const response = await notificationsApi.getNotifications();
+      // Make sure we're setting an array
+      setNotifications(response?.data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -85,13 +87,16 @@ const NotificationsDropdown = () => {
     }
   };
 
+  // Ensure we're working with an array before filtering
+  const notificationsList = Array.isArray(notifications) ? notifications : [];
+  
   // Calculate unread count
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notificationsList.filter(n => !n.read).length;
 
   // Get recent notifications, sorted by date
-  const displayedNotifications = notifications
+  const displayedNotifications = notificationsList
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 7);
+    .slice(0, 5);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -112,16 +117,8 @@ const NotificationsDropdown = () => {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50">
-          <div className="px-4 py-2 border-b border-gray-200 flex justify-between items-center">
+          <div className="px-4 py-2 border-b border-gray-200">
             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="text-xs text-blue-600 hover:text-blue-800"
-              >
-                Mark all as read
-              </button>
-            )}
           </div>
 
           <div className="max-h-96 overflow-y-auto">
@@ -137,11 +134,16 @@ const NotificationsDropdown = () => {
                     to={`/hr/jobs/${notification.job_posting_id}`}
                     className="block"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {notification.job_posting?.job_title}
-                        </p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-sm font-medium text-gray-900">
+                            {notification.job_posting?.company_name}
+                          </p>
+                          {!notification.read && (
+                            <span className="h-2 w-2 bg-blue-500 rounded-full"></span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-500">
                           {notification.message}
                         </p>
@@ -149,14 +151,6 @@ const NotificationsDropdown = () => {
                           {formatDate(notification.created_at)}
                         </p>
                       </div>
-                      {!notification.read && (
-                        <button
-                          onClick={(e) => handleMarkAsRead(e, notification.id)}
-                          className="text-xs text-blue-600 hover:text-blue-800 ml-2"
-                        >
-                          Mark as read
-                        </button>
-                      )}
                     </div>
                   </Link>
                 </div>
@@ -168,14 +162,20 @@ const NotificationsDropdown = () => {
             )}
           </div>
 
-          <div className="px-4 py-2 border-t border-gray-200">
+          <div className="px-4 py-2 border-t border-gray-200 flex items-center justify-between">
             <Link
               to="/hr/notifications"
               onClick={() => setIsOpen(false)}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
-              View all notifications ({unreadCount} unread)
+              View all ({unreadCount} unread)
             </Link>
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Mark all read
+            </button>
           </div>
         </div>
       )}

@@ -23,9 +23,9 @@ export const notificationsApi = {
     }
   },
 
-  async getNotifications() {
+  async getNotifications({ page = 1, pageSize = 10 } = {}) {
     try {
-      const { data, error } = await supabase
+      const { data, count, error } = await supabase
         .from('notifications')
         .select(`
           *,
@@ -36,30 +36,47 @@ export const notificationsApi = {
           applications:application_id (
             personal_info
           )
-        `)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+
+      return {
+        data: data || [],
+        total: count || 0
+      };
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      throw error;
+      return { data: [], total: 0 };
     }
   },
 
   async markAsRead(notificationId) {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('notifications')
         .update({ read: true })
+        .eq('id', notificationId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  },
+
+  async toggleReadStatus(notificationId, currentReadStatus) {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .update({ read: !currentReadStatus })
         .eq('id', notificationId)
-        .select()
-        .single();
+        .select(); // Add select to return updated data
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error toggling notification status:', error);
       throw error;
     }
   }

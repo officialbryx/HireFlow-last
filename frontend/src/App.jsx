@@ -31,7 +31,6 @@ const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
       cacheTime: 30 * 60 * 1000, // Cache kept for 30 minutes
       retry: 2, // Number of retries on failure
-      refetchOnWindowFocus: false, // Prevent unnecessary refetches
     },
   },
 });
