@@ -137,7 +137,7 @@ const Dashboard = () => {
                 title="Shortlisted Candidates"
                 value={metrics.shortlistedStats.total}
                 icon={UserIcon}
-                onClick={() => handleCardClick('/hr/jobs?tab=applicants?filter=shortlisted')}
+                onClick={() => handleCardClick('/hr/jobs?tab=applicants&filter=shortlisted')}
               />
             </div>
 
