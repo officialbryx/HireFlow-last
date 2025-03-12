@@ -13,7 +13,8 @@ import { useToast } from "../../hooks/useToast";
 import { useJobModals } from "../../hooks/useJobModals";
 import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
-import ViewApplicants from '../../components/jobs/ViewApplicants';
+import ViewApplicants from '../../components/jobs/ViewApplicants2';
+// import ViewApplicants from '../../components/jobs/ViewApplicants';
 
 const Jobs = () => {
   const {
