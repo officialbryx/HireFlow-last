@@ -41,6 +41,8 @@ const Jobs = () => {
   const [activeTab, setActiveTab] = useState("view");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [applicantFilter, setApplicantFilter] = useState("all");
+  const [jobIdFilter, setJobIdFilter] = useState(null);
 
   const [searchParams] = useSearchParams();
 
@@ -99,8 +101,18 @@ const Jobs = () => {
   useEffect(() => {
     // Set active tab based on URL query parameter
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["view", "create", "archived"].includes(tabParam)) {
+    if (tabParam && ["view", "create", "archived", "applicants"].includes(tabParam)) {
       setActiveTab(tabParam);
+      
+      // If it's the applicants tab, check for filters
+      if (tabParam === "applicants") {
+        const filterParam = searchParams.get("filter");
+        if (filterParam === "shortlisted") {
+          // Set a filter state for the ViewApplicants component
+          // You'll need to add this state and pass it to the ViewApplicants component
+          setApplicantFilter("shortlisted");
+        }
+      }
     }
   }, [searchParams]);
 
@@ -219,6 +231,12 @@ const Jobs = () => {
     }
   };
 
+  // Add a new function to handle clicking on a job card
+  const handleViewJobApplicants = (jobId) => {
+    setJobIdFilter(jobId);
+    setActiveTab("applicants");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <HRNavbar />
@@ -310,6 +328,7 @@ const Jobs = () => {
                 currentJobs={currentJobs}
                 handleEditJob={handleEditJob}
                 handleDeleteJob={handleArchiveJob}
+                handleViewJobApplicants={handleViewJobApplicants} // New prop
                 currentPage={currentPage}
                 totalPages={totalPages}
                 handlePageChange={handlePageChange}
@@ -324,7 +343,13 @@ const Jobs = () => {
                 handleRestore={handleRestore}
               />
             )}
-            {activeTab === "applicants" && <ViewApplicants />}
+            {activeTab === "applicants" && (
+              <ViewApplicants 
+                initialFilter={applicantFilter} 
+                jobIdFilter={jobIdFilter} 
+                onClearFilters={() => setJobIdFilter(null)} 
+              />
+            )}
           </div>
         </div>
       </div>
