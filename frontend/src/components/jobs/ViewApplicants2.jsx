@@ -29,7 +29,7 @@ export default function ViewApplicants({ initialFilter = "all", jobIdFilter = nu
   const [companyFilter, setCompanyFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState(jobIdFilter);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize] = useState(5);// Edit to increase number of displayed applicants per page
 
   // Get query client instance
   const queryClient = useQueryClient();
