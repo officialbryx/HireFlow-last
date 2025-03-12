@@ -3,11 +3,20 @@ import {
   BriefcaseIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
+  PencilIcon,
+  ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 
-const JobCard = ({ job, onEdit, onArchive }) => {
+const JobCard = ({ job, handleEditJob, handleDeleteJob, handleViewJobApplicants }) => {
+  // Standardize the applicant count property to make sure we use the right one
+  // This handles both naming conventions in case the API changes
+  const applicantCount = job.applicants_count ?? job.applicant_count ?? 0;
+  
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative">
+    <div 
+      className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 cursor-pointer hover:shadow-md transition-all relative"
+      onClick={() => handleViewJobApplicants(job.id)}
+    >
       <div className="flex items-start justify-between mb-4">
         {/* Left side with logo and title */}
         <div className="flex items-start space-x-4 flex-1 min-w-0">
@@ -35,15 +44,15 @@ const JobCard = ({ job, onEdit, onArchive }) => {
         </div>
       </div>
 
-      {/* Update applicant count badge to always show, with different styles based on count */}
+      {/* Update applicant count badge to use standardized count */}
       <div className="absolute top-4 right-4">
         <div className={`px-2.5 py-0.5 rounded-full flex items-center ${
-          job.applicant_count > 0 
+          applicantCount > 0 
             ? 'bg-blue-100 text-blue-800' 
             : 'bg-gray-100 text-gray-600'
         }`}>
           <UserGroupIcon className="h-4 w-4 mr-1" />
-          <span className="text-sm font-medium">{job.applicant_count || 0}</span>
+          <span className="text-sm font-medium">{applicantCount}</span>
         </div>
       </div>
 
@@ -85,31 +94,35 @@ const JobCard = ({ job, onEdit, onArchive }) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-        <span
-          className={`text-sm font-medium px-2 py-1 rounded-full ${
-            job.status === "active"
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {job.status}
-        </span>
-        <div className="flex space-x-2">
-          <button
-            className="text-gray-600 hover:text-blue-600 transition-colors"
+      {/* Keep the top badge and remove the redundant bottom display */}
+      <div className="flex justify-between items-center mt-4">
+        <div className="flex items-center">
+          <span className="text-sm text-gray-500">
+            {new Date(job.created_at).toLocaleDateString()}
+          </span>
+          
+          {/* Remove the redundant applicant count here */}
+        </div>
+        
+        {/* Existing action buttons */}
+        <div className="flex items-center space-x-2">
+          <button 
             onClick={(e) => {
               e.stopPropagation();
-              onEdit(job.id);
+              handleEditJob(job.id);
             }}
+            className="text-blue-600 hover:text-blue-800"
           >
-            Edit
+            <PencilIcon className="h-5 w-5" />
           </button>
-          <button
-            onClick={(e) => onArchive(job.id, e)}
-            className="text-gray-600 hover:text-orange-600 transition-colors"
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteJob(job.id);
+            }}
+            className="text-gray-500 hover:text-gray-700"
           >
-            Archive
+            <ArchiveBoxIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -123,6 +136,7 @@ const ViewJobs = ({
   currentJobs = [],
   handleEditJob,
   handleDeleteJob,
+  handleViewJobApplicants,
   currentPage = 1,
   totalPages = 1,
   handlePageChange,
@@ -139,8 +153,9 @@ const ViewJobs = ({
             <JobCard
               key={job.id}
               job={job}
-              onEdit={handleEditJob}
-              onArchive={handleDeleteJob}
+              handleEditJob={handleEditJob}
+              handleDeleteJob={handleDeleteJob}
+              handleViewJobApplicants={handleViewJobApplicants}
             />
           ))}
         </div>

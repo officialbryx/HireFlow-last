@@ -41,9 +41,9 @@ export const applicationsApi = {
     }
   },
 
-  async fetchApplications() {
+  async fetchApplications(page = 1, limit = 20, filters = {}) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("applications")
         .select(`
           *,
@@ -51,8 +51,34 @@ export const applicationsApi = {
             job_title,
             company_name
           )
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' });
+      
+      // Apply filters if provided
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      
+      if (filters.company) {
+        query = query.eq('company', filters.company);
+      }
+      
+      if (filters.job_id) {
+        query = query.eq('job_posting_id', filters.job_id);
+      }
+      
+      if (filters.search) {
+        query = query.or(`
+          personal_info->>given_name.ilike.%${filters.search}%,
+          personal_info->>family_name.ilike.%${filters.search}%,
+          email.ilike.%${filters.search}%,
+          company.ilike.%${filters.search}%
+        `);
+      }
+      
+      // Apply pagination
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
 
       if (error) {
         console.error('Supabase error:', error);
@@ -84,7 +110,13 @@ export const applicationsApi = {
         job_title: app.job_posting?.job_title
       }));
 
-      return transformedData;
+      return {
+        data: transformedData,
+        count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit)
+      };
     } catch (error) {
       console.error("Error in fetchApplications:", error);
       throw new Error(`Failed to fetch applications: ${error.message}`);
