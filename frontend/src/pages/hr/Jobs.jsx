@@ -13,7 +13,7 @@ import { useToast } from "../../hooks/useToast";
 import { useJobModals } from "../../hooks/useJobModals";
 import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
-import ViewApplicants from '../../components/jobs/ViewApplicants2';
+import ViewApplicants from "../../components/jobs/ViewApplicants2";
 // import ViewApplicants from '../../components/jobs/ViewApplicants';
 
 const Jobs = () => {
@@ -101,9 +101,12 @@ const Jobs = () => {
   useEffect(() => {
     // Set active tab based on URL query parameter
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["view", "create", "archived", "applicants"].includes(tabParam)) {
+    if (
+      tabParam &&
+      ["view", "create", "archived", "applicants"].includes(tabParam)
+    ) {
       setActiveTab(tabParam);
-      
+
       // If it's the applicants tab, check for filters
       if (tabParam === "applicants") {
         const filterParam = searchParams.get("filter");
@@ -150,7 +153,7 @@ const Jobs = () => {
         skills: Array.isArray(jobDetails.job_skill)
           ? jobDetails.job_skill.map((s) => s.skill)
           : [""],
-        id: jobDetails.id
+        id: jobDetails.id,
       };
 
       console.log("Mapped Job Details:", mappedJobDetails);
@@ -339,15 +342,19 @@ const Jobs = () => {
             )}
             {activeTab === "archived" && (
               <ArchivedJobs
-                archivedJobs={jobs.filter((job) => job.status === "archived")}
+                archivedJobs={currentJobs} // Use the filtered and paginated jobs
                 handleRestore={handleRestore}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={handlePageChange}
+                loading={loading}
               />
             )}
             {activeTab === "applicants" && (
-              <ViewApplicants 
-                initialFilter={applicantFilter} 
-                jobIdFilter={jobIdFilter} 
-                onClearFilters={() => setJobIdFilter(null)} 
+              <ViewApplicants
+                initialFilter={applicantFilter}
+                jobIdFilter={jobIdFilter}
+                onClearFilters={() => setJobIdFilter(null)}
               />
             )}
           </div>
