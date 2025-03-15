@@ -20,11 +20,9 @@ import Careers from "./pages/Careers";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
-import Companies from "./pages/Companies";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,92 +96,18 @@ const App = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
-        <Route path="/companies" element={<Companies />} />
-
-        {/* Routes accessible by both roles */}
         <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
-
-        {/* JobSeeker Routes */}
-        <Route
-          path="/jobposts"
-          element={
-            <ProtectedRoute allowedRoles={["jobseeker", "employer"]}>
-              {" "}
-              {/* Allow both roles */}
-              <JobPosts />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* JobSeeker specific routes */}
-        <Route
-          path="/apply/:company"
-          element={
-            <ProtectedRoute allowedRoles={["jobseeker"]}>
-              <Apply />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/apply/:company/:jobId"
-          element={
-            <ProtectedRoute allowedRoles={["jobseeker"]}>
-              <Apply />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Employer only routes */}
-        <Route
-          path="/createjobpost"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <CreateJobPost />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/jobs"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <Jobs />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/hr/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/hr/jobs/*"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <Jobs />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/hr/faq"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <FAQ />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/hr/notifications"
-          element={
-            <ProtectedRoute allowedRoles={["employer"]}>
-              <Notifications />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/jobposts" element={<JobPosts />} />
+        <Route path="/apply/:company" element={<Apply />} />
+        <Route path="/apply/:company/:jobId" element={<Apply />} />
+        <Route path="/createjobpost" element={<CreateJobPost />} />
+        <Route path="/jobs" element={<Jobs />} />
+        <Route path="/hr/dashboard" element={<Dashboard />} />
+        <Route path="/hr/jobs/*" element={<Jobs />} />
+        <Route path="/hr/faq" element={<FAQ />} />
+        <Route path="/hr/notifications" element={<Notifications />} />
       </Routes>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

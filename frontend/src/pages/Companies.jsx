@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import {
   BuildingOffice2Icon,
@@ -9,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const Companies = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
   const companies = [
@@ -83,6 +85,10 @@ const Companies = () => {
       company.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleCompanyClick = (companyId) => {
+    navigate(`/company/${companyId}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -116,7 +122,8 @@ const Companies = () => {
           {filteredCompanies.map((company) => (
             <div
               key={company.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+              onClick={() => handleCompanyClick(company.id)}
             >
               <div className="p-6">
                 <div className="flex items-center mb-4">
