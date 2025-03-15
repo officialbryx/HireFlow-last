@@ -71,7 +71,7 @@ const HRNavbar = () => {
             />
             <NavItem
               icon={<QuestionMarkCircleIcon className="h-5 w-5" />}
-              text="FAQ"
+              text="FAQ'S"
               to="/hr/faq"
             />
             <div onClick={handleSignOut} className="cursor-pointer">

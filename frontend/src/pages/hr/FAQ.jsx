@@ -1,90 +1,99 @@
+import { useState, useMemo } from 'react';
 import HRNavbar from '../../components/HRNavbar';
-import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { faqData } from '../../data/faqData';
+import { useFAQSearch } from '../../hooks/useFAQSearch';
+import { 
+  SearchHeader,
+  FAQSection,
+  EmptySearchResult,
+  FAQHeader
+} from '../../components/faq/FAQComponents';
 
 const FAQ = () => {
-  const faqSections = [
-    {
-      title: 'Dashboard',
-      questions: [
-        {
-          q: 'How do I read the dashboard metrics?',
-          a: 'The dashboard displays key metrics including active jobs, archived jobs, total applicants, and shortlisted candidates. Stats cards show current numbers and monthly changes where applicable.'
-        },
-        {
-          q: 'What are the quick actions?',
-          a: 'Quick actions allow you to post new jobs or manage existing job posts directly from the dashboard.'
-        }
-      ]
-    },
-    {
-      title: 'Job Management',
-      questions: [
-        {
-          q: 'How do I create a new job post?',
-          a: 'Click the "Post New Job" button and fill in all required information including job details, requirements, and company information.'
-        },
-        {
-          q: 'How do I edit or archive a job post?',
-          a: 'In the Jobs page, find the job you want to modify. Use the edit icon to update details or the archive button to move it to archived jobs.'
-        }
-      ]
-    },
-    {
-      title: 'Applicant Management',
-      questions: [
-        {
-          q: 'How do I review applicants?',
-          a: 'Navigate to the Applicants page where you can view all applications, filter by job post, and review individual applications.'
-        },
-        {
-          q: 'How do I shortlist candidates?',
-          a: 'While reviewing an application, use the shortlist button to add candidates to your shortlist for further consideration.'
-        }
-      ]
-    }
-  ];
+  const [activeSection, setActiveSection] = useState(null);
+  const [activeQuestions, setActiveQuestions] = useState({});
+
+  // Memoize the FAQ sections
+  const faqSections = useMemo(() => faqData, []); 
+
+  // Use the custom hook for search functionality
+  const { 
+    searchQuery, 
+    setSearchQuery,
+    filteredSections,
+    getTextSegments  // renamed from highlightMatches
+  } = useFAQSearch(faqSections, setActiveSection, setActiveQuestions);
+
+  // Toggle section expansion
+  const toggleSection = (index) => {
+    setActiveSection(activeSection === index ? null : index);
+  };
+
+  // Toggle question expansion
+  const toggleQuestion = (sectionIndex, questionIndex) => {
+    setActiveQuestions(prev => {
+      const key = `${sectionIndex}-${questionIndex}`;
+      const newState = { ...prev };
+      
+      // Toggle this question
+      newState[key] = !prev[key];
+      return newState;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <HRNavbar />
       <div className="pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Frequently Asked Questions
-              </h1>
-              <a
-                href="/user-manual.pdf"
-                download
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-                Download User Manual
-              </a>
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            {/* Header with search */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+              <FAQHeader title="Frequently Asked Questions" />
+              <SearchHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             </div>
 
-            <div className="space-y-8">
-              {faqSections.map((section, index) => (
-                <div key={index} className="border-b border-gray-200 pb-6 last:border-0">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    {section.title}
-                  </h2>
-                  <div className="space-y-6">
-                    {section.questions.map((item, qIndex) => (
-                      <div key={qIndex}>
-                        <h3 className="text-base font-medium text-gray-900 mb-2">
-                          {item.q}
-                        </h3>
-                        <p className="text-gray-600">
-                          {item.a}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+            {/* FAQ content */}
+            <div className="p-6">
+              {searchQuery && filteredSections.length === 0 && <EmptySearchResult />}
+
+              <div className="space-y-4">
+                {filteredSections.map((section, sectionIndex) => (
+                  <FAQSection
+                    key={sectionIndex}
+                    section={section}
+                    sectionIndex={sectionIndex}
+                    isActive={activeSection === sectionIndex}
+                    toggleSection={toggleSection}
+                    activeQuestions={activeQuestions}
+                    toggleQuestion={toggleQuestion}
+                    getTextSegments={getTextSegments}
+                  />
+                ))}
+              </div>
+              
+              {filteredSections.length > 0 && (
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => {
+                      if (activeSection !== null) {
+                        setActiveSection(null);
+                        setActiveQuestions({});
+                      } else {
+                        setActiveSection(0); 
+                      }
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {activeSection !== null ? "Collapse all" : "Expand first section"}
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
+          </div>
+          
+          <div className="text-center mt-8 text-sm text-gray-500">
+            Can&apos;t find what you&apos;re looking for? <a href="mailto:support@hireflow.com" className="text-blue-600 hover:underline">Contact support</a>
           </div>
         </div>
       </div>
