@@ -10,6 +10,7 @@ import {
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 
 const Navbar = () => {
@@ -89,6 +90,11 @@ const Navbar = () => {
                 icon={<BellIcon className="h-5 w-5" />}
                 text="Notifications"
                 to="/notifications"
+              />
+              <NavItem
+                icon={<BuildingOffice2Icon className="h-5 w-5" />}
+                text="Companies"
+                to="/companies"
               />
               <div className="mx-2 border-l border-gray-200 h-8" />
               <NavItem
