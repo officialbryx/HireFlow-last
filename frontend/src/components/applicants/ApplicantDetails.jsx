@@ -5,6 +5,7 @@ import { Education } from "./sections/Education";
 import { SkillsAndPresence } from "./sections/SkillsAndPresence";
 import { ResumeAnalysis } from "./sections/ResumeAnalysis";
 import { ScreeningQuestions } from "./sections/ScreeningQuestions";
+import { applicationsApi } from "../../services/api/applicationsApi";
 
 const ApplicantDetails = ({
   selectedApplicant,
@@ -13,7 +14,7 @@ const ApplicantDetails = ({
   analysis,
   getBadgeColor,
   formatDate,
-  setShowPdfModal
+  setShowPdfModal,
 }) => {
   if (!selectedApplicant) {
     return (
@@ -25,37 +26,44 @@ const ApplicantDetails = ({
           <h3 className="font-medium text-lg text-gray-700 mb-1">
             No Applicant Selected
           </h3>
-          <p className="text-gray-500">Select an applicant from the list to view their details</p>
+          <p className="text-gray-500">
+            Select an applicant from the list to view their details
+          </p>
         </div>
       </div>
     );
   }
 
-  const { 
-    personal_info = {}, 
-    contact_info = {}, 
-    address = {}, 
-    work_experience = [], 
-    education = [], 
-    skills = [], 
-    websites = [], 
+  const {
+    personal_info = {},
+    contact_info = {},
+    address = {},
+    work_experience = [],
+    education = [],
+    skills = [],
+    websites = [],
     linkedin_url,
     previous_employment = {},
     company,
     status,
     created_at,
     resume_url,
-    application_questions = {}
+    application_questions = {},
   } = selectedApplicant;
 
   const tabs = [
     { id: "details", label: "Applicant Details" },
     { id: "resume", label: "Resume Analysis" },
-    { id: "questions", label: "Screening Questions" }
+    { id: "questions", label: "Screening Questions" },
   ];
 
-  const handleViewResume = () => {
-    setShowPdfModal(true);
+  const handleResumeClick = () => {
+    if (selectedApplicant?.resume_url) {
+      const resumeUrl = applicationsApi.getResumeUrl(
+        selectedApplicant.resume_url
+      );
+      window.open(resumeUrl, "_blank");
+    }
   };
 
   return (
@@ -72,15 +80,20 @@ const ApplicantDetails = ({
             <div className="flex items-center mt-1 text-sm text-gray-500">
               <span>Applied on {formatDate(created_at)}</span>
               <span className="mx-2">•</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(status)}`}>
-                {status?.charAt(0).toUpperCase() + status?.slice(1) || "Pending"}
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(
+                  status
+                )}`}
+              >
+                {status?.charAt(0).toUpperCase() + status?.slice(1) ||
+                  "Pending"}
               </span>
             </div>
           </div>
           {resume_url && (
             <button
-              onClick={() => setShowPdfModal(true)}
-              className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-600 rounded hover:bg-blue-50"
+              onClick={handleResumeClick}
+              className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               View Resume
             </button>
@@ -120,10 +133,7 @@ const ApplicantDetails = ({
               formatDate={formatDate}
               company={company}
             />
-            <Education 
-              education={education}
-              formatDate={formatDate}
-            />
+            <Education education={education} formatDate={formatDate} />
             <SkillsAndPresence
               skills={skills}
               linkedinUrl={linkedin_url}
@@ -131,9 +141,9 @@ const ApplicantDetails = ({
             />
           </div>
         ) : activeTab === "resume" ? (
-          <ResumeAnalysis 
-            analysis={analysis} 
-            handleViewResume={resume_url ? handleViewResume : null} 
+          <ResumeAnalysis
+            analysis={analysis}
+            handleViewResume={resume_url ? handleResumeClick : null}
           />
         ) : (
           <ScreeningQuestions questions={application_questions} />
