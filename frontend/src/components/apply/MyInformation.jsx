@@ -333,7 +333,7 @@ const MyInformation = ({
         title="Previous Employment"
       >
         <FormField
-          label={`Have you been previously employed by ${formData.company}?`}
+          label={`Have you been previously employed by this company?`}
           required
         >
           <div className="grid grid-cols-2 gap-4 mt-2">

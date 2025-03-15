@@ -133,19 +133,19 @@ const ApplicationQuestions = ({
   const questions = [
     {
       id: "previouslyProcessed",
-      text: "Have you been previously employed by {company} (If you are a current employee, please apply on the Workday site instead)*",
+      text: "Have you been previously employed by this company (If you are a current employee, please apply on the Workday site instead)*",
     },
     {
       id: "previouslyProcessedWithCompany",
-      text: "Was your application previously processed with {company}?*",
+      text: "Was your application previously processed with this company?*",
     },
     {
       id: "directlyEmployed",
-      text: "Have you been directly employed by Globe, any of the Globe subsidiaries or other Ayala companies?*",
+      text: "Have you been directly employed by this company?*",
     },
     {
       id: "relativesInCompany",
-      text: "Do you have relatives working with {company}, any of the {company} subsidiaries, or other companies?*",
+      text: "Do you have relatives working with this company, any of the {company} subsidiaries, or other companies?*",
     },
     {
       id: "relativesInIndustry",
