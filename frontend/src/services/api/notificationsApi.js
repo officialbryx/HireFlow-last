@@ -79,5 +79,29 @@ export const notificationsApi = {
       console.error('Error toggling notification status:', error);
       throw error;
     }
+  },
+
+  // New methods for real-time subscriptions
+  subscribeToNotifications(callback) {
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications'
+        },
+        callback
+      )
+      .subscribe();
+
+    return channel;
+  },
+
+  unsubscribeFromChannel(channel) {
+    if (channel) {
+      supabase.removeChannel(channel);
+    }
   }
 };

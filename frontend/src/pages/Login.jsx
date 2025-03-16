@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-// import { api } from "../services/api";
-import { supabase } from "../services/supabaseClient";
+import { api } from "../services/api";
+// import { supabase } from "../services/supabaseClient";
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -50,16 +49,15 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { user } = await api.login({
         email: formData.email,
         password: formData.password,
       });
 
-      if (error) throw error;
+      // Access user type from user metadata
+      const userType = user.user_metadata.user_type;
 
-      const userType = data.user.user_metadata.user_type;
-
-      // Direct navigation based on user type, without considering previous location
+      // Direct navigation based on user type
       if (userType === "employer") {
         navigate("/hr/dashboard", { replace: true });
       } else {

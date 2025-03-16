@@ -1,5 +1,4 @@
 import { useContext, useState, useEffect } from 'react';
-import { supabase } from '../services/supabaseClient';
 import { notificationsApi } from '../services/api/notificationsApi';
 import { NotificationsContext } from './NotificationsContext';
 
@@ -9,31 +8,21 @@ export const NotificationsProvider = ({ children }) => {
   useEffect(() => {
     fetchNotifications();
 
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications'
-        },
-        (payload) => {
-          setNotifications(prev => [payload.new, ...prev]);
-        }
-      )
-      .subscribe();
+    const channel = notificationsApi.subscribeToNotifications((payload) => {
+      if (payload.eventType === 'INSERT') {
+        setNotifications(prev => [payload.new, ...prev]);
+      }
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      notificationsApi.unsubscribeFromChannel(channel);
     };
   }, []);
 
   const fetchNotifications = async () => {
     try {
       const data = await notificationsApi.getNotifications();
-      setNotifications(data);
+      setNotifications(data?.data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -46,4 +35,3 @@ export const NotificationsProvider = ({ children }) => {
   );
 };
 
-// useNotifications hook moved to a separate file

@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient'; // Adjust the path as necessary
 import { BellIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { notificationsApi } from '../../services/api/notificationsApi';
@@ -14,23 +13,13 @@ const NotificationsDropdown = () => {
   useEffect(() => {
     fetchNotifications();
 
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications'
-        },
-        () => {
-          fetchNotifications();
-        }
-      )
-      .subscribe();
+    // Use the API for subscription
+    const channel = notificationsApi.subscribeToNotifications(() => {
+      fetchNotifications();
+    });
 
     return () => {
-      channel.unsubscribe();
+      notificationsApi.unsubscribeFromChannel(channel);
     };
   }, []);
 
@@ -47,16 +36,16 @@ const NotificationsDropdown = () => {
     }
   };
 
-  const handleMarkAsRead = async (e, notificationId) => {
-    e.preventDefault(); // Prevent navigation
-    e.stopPropagation(); // Prevent event bubbling
-    try {
-      await notificationsApi.markAsRead(notificationId);
-      await fetchNotifications(); // Refresh notifications
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
+  // const handleMarkAsRead = async (e, notificationId) => {
+  //   e.preventDefault(); // Prevent navigation
+  //   e.stopPropagation(); // Prevent event bubbling
+  //   try {
+  //     await notificationsApi.markAsRead(notificationId);
+  //     await fetchNotifications(); // Refresh notifications
+  //   } catch (error) {
+  //     console.error('Error marking notification as read:', error);
+  //   }
+  // };
 
   const handleMarkAllAsRead = async () => {
     try {

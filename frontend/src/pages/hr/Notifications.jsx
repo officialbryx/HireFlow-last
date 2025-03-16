@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../../services/supabaseClient';
 import { notificationsApi } from '../../services/api/notificationsApi';
 import { formatDistanceToNow } from 'date-fns';
 import { BellIcon, CheckCircleIcon, TrashIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -29,24 +28,13 @@ const Notifications = () => {
   });
 
   useEffect(() => {
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications'
-        },
-        () => {
-          refetch();
-        }
-      )
-      .subscribe();
+    // Use the API for subscription
+    const channel = notificationsApi.subscribeToNotifications(() => {
+      refetch();
+    });
 
     return () => {
-      channel.unsubscribe();
+      notificationsApi.unsubscribeFromChannel(channel);
     };
   }, [refetch]);
 
