@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { notificationsApi } from '../../services/api/notificationsApi';
 import { formatDistanceToNow } from 'date-fns';
-import { BellIcon, CheckCircleIcon, TrashIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CheckCircleIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import HRNavbar from '../../components/HRNavbar';
 import { useQuery } from '@tanstack/react-query';
 
