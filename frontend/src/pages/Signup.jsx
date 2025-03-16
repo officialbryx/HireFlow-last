@@ -110,7 +110,9 @@ const Signup = () => {
       await api.signup(submitData);
       setModalStatus("success");
       setModalMessage(
-        `Your account has been created! Please check your email for a confirmation message to complete the setup. If you don't see it in your inbox, check your spam or junk folder.`
+        `Your account has been created! Please check your email for a 
+        confirmation message to complete the setup. If you don't see it in your inbox, 
+        check your spam or junk folder.`
       );
       setShowModal(true);
     } catch (err) {
