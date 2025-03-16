@@ -109,7 +109,8 @@ const App = () => {
         <Route path="/hr/faq" element={<FAQ />} />
         <Route path="/hr/notifications" element={<Notifications />} />
       </Routes>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* Enable this for cache debugging*/}
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 };
