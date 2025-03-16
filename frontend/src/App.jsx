@@ -8,7 +8,6 @@ import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
-import ViewApplicants from "./components/jobs/ViewApplicants";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
@@ -54,8 +53,6 @@ const App = () => {
       document.title = `Apply Job for ${company} | HireFlow`;
     } else if (location.pathname === "/messages") {
       document.title = "Messaging | HireFlow";
-    } else if (location.pathname === "/viewapplicants") {
-      document.title = "View Applicants | HireFlow";
     } else if (location.pathname === "/settings") {
       document.title = "Settings | HireFlow";
     } else if (location.pathname === "/forgot-password") {
