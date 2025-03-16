@@ -1,0 +1,50 @@
+Fullstack Mobile Developer
+ 
+Pateros, National Capital Region, Philippines
+
+About the job
+At Globe, our goal is to create a wonderful world for our people, business, and nation. By uniting people of passion who believe they can make a difference, we are confident that we can achieve this goal.Job DescriptionFullstack Mobile DeveloperWe are looking for a highly skilled Fullstack Mobile App Developer to join our team and help build, maintain, and enhance our telco mobile application. The ideal candidate is proficient in both frontend and backend development, capable of designing scalable mobile solutions, and experienced in working with APIs, databases, and cloud infrastructure. The role requires close collaboration with product owners, UX/UI designers, and backend engineers to deliver high-performance, user-friendly applications.Key Responsibilities
+* Develop, enhance, and maintain mobile applications using React Native, Swift (iOS), and Kotlin (Android)
+* Work with cloud services (AWS, GCP, or Azure) to deploy and manage backend services
+* Ensure mobile apps are optimized for performance, security, and scalability
+* Collaborate with UX/UI teams to implement responsive and intuitive user interfaces
+* Implement event tracking and analytics using tools like Firebase, Segment, or Google Analytics
+* Work with CI/CD pipelines to automate testing, deployment, and monitoring
+* Conduct technical reviews, debugging, and performance tuning
+* Stay updated on emerging mobile technologies and frameworks to continuously improve our app’s architecture
+Roles & Responsibilities
+
+Frontend Development:
+
+* Build user-friendly and high-performance mobile interfaces
+* Implement responsive designs following UX/UI guidelines
+* Optimize app performance across various devices and screen sizes
+Collaboration & Integration
+
+* Work with cross-functional teams including Product, UX, QA, and DevOps
+* Integrate third-party services such as payment gateways, notifications, and location-based features
+* Ensure smooth communication between mobile and backend services
+Testing & Deployment
+
+* Write unit and integration tests to ensure application reliability
+* Implement CI/CD workflows for continuous integration and deployment
+* Monitor app health, crash reports, and performance metrics
+Requirements
+
+* 3+ years of experience in fullstack mobile app development
+* Proficiency in React Native, Swift, and Kotlin
+* Experience with Node.js, Python, or Java for backend development
+* Strong understanding of RESTful APIs, GraphQL, and WebSockets
+* Familiarity with cloud services (AWS, GCP, or Azure)
+* Experience in database management (SQL & NoSQL)
+* Knowledge of DevOps practices, CI/CD pipelines, and version control (Git)
+* Understanding of security best practices for mobile development
+* Ability to work in an agile environment and manage multiple tasks effectively
+Equal Opportunity Employer
+
+Globe’s hiring process promotes equal opportunity to applicants, Any form of discrimination is not tolerated throughout the entire employee lifecycle, including the hiring process such as in posting vacancies, selecting, and interviewing applicants.
+
+Globe’s Diversity, Equity and Inclusion Policy Commitment can be accessed here
+
+Make Your Passion Part of Your Profession. Attracting the best and brightest Talents is pivotal to our success. If you are ready to share our purpose of Creating a Globe of Good, explore opportunities with us.
+
