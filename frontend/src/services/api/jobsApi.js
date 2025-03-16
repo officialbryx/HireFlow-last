@@ -254,6 +254,9 @@ export const jobsApi = {
       if (isEmployer) {
         const { data: { user } } = await supabase.auth.getUser();
         query = query.eq('creator_id', user.id);
+      } else {
+        // For job seekers, only show active jobs
+        query = query.eq('status', 'active');
       }
 
       const { data, error } = await query;
