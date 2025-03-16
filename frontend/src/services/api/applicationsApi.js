@@ -4,6 +4,32 @@ import { analyzeResume } from '../resumeAnalysis';
 export const applicationsApi = {
   async submitApplication(applicationData) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      
+      // Add applicant_id to data
+      applicationData.applicant_id = user.id;
+      
+      // Handle resume upload if exists
+      if (applicationData.resume_file instanceof File) {
+        const fileName = `${Date.now()}-${applicationData.resume_file.name}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('resumes')
+          .upload(`applications/${fileName}`, applicationData.resume_file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(`applications/${fileName}`);
+
+        applicationData.resume_url = publicUrl;
+      }
+      
+      // Remove the file object as it can't be stored in the database
+      delete applicationData.resume_file;
+      
       // Insert application and get job posting details
       const { data: application, error } = await supabase
         .from('applications')

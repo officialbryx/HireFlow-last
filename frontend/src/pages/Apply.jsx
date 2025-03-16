@@ -11,8 +11,8 @@ import {
   ArrowRightIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
-import { api } from "../services/api";
-import { supabase } from "../services/supabaseClient";
+// Replace api import with direct applicationsApi import
+import { applicationsApi } from "../services/api/applicationsApi";
 
 const stages = [
   { id: 1, name: "My Information" },
@@ -187,14 +187,9 @@ const Apply = () => {
     try {
       setIsSubmitting(true);
 
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-
       // Format the application data
       const applicationData = {
         job_posting_id: jobId,
-        applicant_id: user.id, // Add this line
         company: company,
         personal_info: {
           given_name: formData.givenName,
@@ -238,7 +233,7 @@ const Apply = () => {
           to_year: edu.toYear
         })),
         skills: formData.skills,
-        resume_url: null,
+        resume_file: formData.resume, // Pass the actual file object
         websites: formData.websites.filter(url => url),
         linkedin_url: formData.linkedin,
         application_questions: formData.applicationQuestions,
@@ -246,24 +241,8 @@ const Apply = () => {
         status: 'pending'
       };
 
-      // Handle resume upload if exists
-      if (formData.resume instanceof File) {
-        const fileName = `${Date.now()}-${formData.resume.name}`;
-        const { error: uploadError, data } = await supabase.storage
-          .from('resumes')
-          .upload(`applications/${fileName}`, formData.resume);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('resumes')
-          .getPublicUrl(`applications/${fileName}`);
-
-        applicationData.resume_url = publicUrl;
-      }
-
-      // Submit application and get response with job details
-      const response = await api.submitApplication(applicationData);
+      // Use applicationsApi directly instead of the central api service
+      const response = await applicationsApi.submitApplication(applicationData);
 
       if (!response) {
         throw new Error("Failed to submit application");
