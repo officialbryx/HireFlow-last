@@ -1,0 +1,449 @@
+{
+  "resume_analysis": {
+    "personal_info": {
+      "name": null,
+      "email": "a.ludkee@email.com",
+      "phone": "123) 456-7890",
+      "location": "Nashville",
+      "website": null
+    },
+    "summary": "Designed, developed, and modified 25+ software systems Developed 30+ new software solutions by analyzing",
+    "skills": {
+      "hard_skills": {
+        "agile": 2,
+        "javascript": 1,
+        "html": 1,
+        "css": 1,
+        "aws": 1,
+        "github": 1,
+        "scrum": 1,
+        "react": 1,
+        "angular": 1,
+        "node.js": 1,
+        "spring": 1,
+        "education": 1
+      },
+      "soft_skills": {
+        "planning": 2,
+        "processing": 1,
+        "application": 1,
+        "education": 1,
+        "spring": 1
+      },
+      "additional_skills": {
+        "software": 15,
+        "systems": 12,
+        "stack": 9,
+        "developer": 9,
+        "nashville": 9,
+        "performance": 9,
+        "work": 6,
+        "components": 6,
+        "system": 6,
+        "data": 6
+      }
+    },
+    "education": {
+      "details": [
+        {
+          "text": "a.ludkee@email.com",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Designed, developed, and modified 25+ software systems",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "system performance standards",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Analyzed systems flow, data usage, and work processes;",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "systems for higher performance",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "software design and performance requirements",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Planned, tracked, and managed deliverables on 200+",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "interfaces, back-end processing, connectivity, and",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "relational database interactions",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Maintained 8+ systems and applications as Tier 2 support",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "EDUCATION",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "University of Tennessee",
+          "degree": null,
+          "field": null,
+          "school": "university of tennessee",
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "CERTIFICATIONS",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        }
+      ],
+      "levels": [
+        "Master's",
+        "Master's",
+        "Master's"
+      ]
+    },
+    "experience": {
+      "years": 5,
+      "positions": [
+        "Stack Developer",
+        "Full-Stack Developer"
+      ],
+      "date_ranges": [
+        "2020 - current",
+        "August 2020",
+        "June 2019",
+        "August 2020",
+        "September 2015",
+        "June 2019"
+      ]
+    },
+    "certifications": [],
+    "projects": [],
+    "languages": [],
+    "achievements": []
+  },
+  "job_requirements": {
+    "skills": {
+      "hard_skills": {
+        "agile": 2,
+        "python": 1,
+        "java": 1,
+        "swift": 1,
+        "kotlin": 1,
+        "sql": 1,
+        "nosql": 1,
+        "firebase": 1,
+        "aws": 1,
+        "azure": 1,
+        "gcp": 1,
+        "cloud": 1,
+        "git": 1,
+        "ci/cd": 1,
+        "devops": 1,
+        "react": 1,
+        "node.js": 1,
+        "graphql": 1,
+        "mobile development": 1,
+        "ios": 1
+      },
+      "soft_skills": {
+        "collaboration": 3,
+        "integration": 3,
+        "communication": 2,
+        "application": 2,
+        "testing": 2,
+        "understanding": 2,
+        "cross-functional": 1,
+        "nation": 1,
+        "tracking": 1,
+        "debugging": 1
+      },
+      "additional_skills": {
+        "performance": 18,
+        "services": 15,
+        "globe": 12,
+        "development": 12,
+        "user": 9,
+        "work": 9,
+        "experience": 9,
+        "developer": 6,
+        "people": 6,
+        "passion": 6
+      }
+    },
+    "education": {
+      "details": [
+        {
+          "text": "By uniting people of passion who believe they can make a difference, we are confident that we can achieve this goal.Job DescriptionFullstack Mobile DeveloperWe are looking for a highly skilled Fullstack Mobile App Developer to join our team and help build, maintain, and enhance our telco mobile application.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "The ideal candidate is proficient in both frontend and backend development, capable of designing scalable mobile solutions, and experienced in working with APIs, databases, and cloud infrastructure.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "The role requires close collaboration with product owners, UX/UI designers, and backend engineers to deliver high-performance, user-friendly applications.Key Responsibilities",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Develop, enhance, and maintain mobile applications using React Native, Swift (iOS), and Kotlin (Android)",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Work with cloud services (AWS, GCP, or Azure) to deploy and manage backend services",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Ensure mobile apps are optimized for performance, security, and scalability",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Collaborate with UX/UI teams to implement responsive and intuitive user interfaces",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Implement event tracking and analytics using tools like Firebase, Segment, or Google Analytics",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Work with CI/CD pipelines to automate testing, deployment, and monitoring",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Conduct technical reviews, debugging, and performance tuning",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Build user-friendly and high-performance mobile interfaces",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Optimize app performance across various devices and screen sizes",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Work with cross-functional teams including Product, UX, QA, and DevOps",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Integrate third-party services such as payment gateways, notifications, and location-based features",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Ensure smooth communication between mobile and backend services",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Monitor app health, crash reports, and performance metrics",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Experience with Node.js, Python, or Java for backend development",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Strong understanding of RESTful APIs, GraphQL, and WebSockets",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Experience in database management (SQL & NoSQL)",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "* Ability to work in an agile environment and manage multiple tasks effectively",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        },
+        {
+          "text": "Make Your Passion Part of Your Profession.",
+          "degree": null,
+          "field": null,
+          "school": null,
+          "year": null,
+          "gpa": null
+        }
+      ],
+      "levels": [
+        "Master's",
+        "Master's"
+      ]
+    },
+    "experience": {
+      "years": 3,
+      "positions": [
+        "Mobile Developer",
+        "Fullstack Mobile Developer",
+        "Job DescriptionFullstack Mobile DeveloperWe are looking for a highly skilled Fullstack Mobile App Developer"
+      ],
+      "date_ranges": []
+    }
+  },
+  "comparison_results": {
+    "skill_match": {
+      "match_percentage": 20.0,
+      "missing": [
+        "azure",
+        "gcp",
+        "nosql",
+        "swift",
+        "git",
+        "cloud",
+        "ci/cd",
+        "firebase",
+        "graphql",
+        "ios",
+        "mobile development",
+        "kotlin",
+        "sql",
+        "python",
+        "java",
+        "devops"
+      ]
+    },
+    "education_match": {
+      "sufficient": true
+    },
+    "experience_match": {
+      "sufficient": true,
+      "gap_years": 0
+    },
+    "overall_match": {
+      "score": 68.0,
+      "qualified": true
+    }
+  },
+  "semantic_similarity": 0.9631784558296204
+}
