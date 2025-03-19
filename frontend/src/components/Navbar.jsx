@@ -7,6 +7,7 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 
 const Navbar = () => {
@@ -64,6 +65,11 @@ const Navbar = () => {
                 icon={<Cog6ToothIcon className="h-5 w-5" />}
                 text="Settings"
                 to="/settings"
+              />
+              <NavItem
+                icon={<QuestionMarkCircleIcon className="h-5 w-5" />}
+                text="FAQ'S"
+                to="/faq"
               />
               <div
                 onClick={() => setShowConfirm(true)}
