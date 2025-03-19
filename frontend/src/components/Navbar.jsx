@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 import {
@@ -11,11 +11,13 @@ import {
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      setShowConfirm(false);
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
@@ -63,13 +65,40 @@ const Navbar = () => {
                 text="Settings"
                 to="/settings"
               />
-              <div onClick={handleSignOut} className="cursor-pointer">
+              <div
+                onClick={() => setShowConfirm(true)}
+                className="cursor-pointer"
+              >
                 <NavItem
                   icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
                   text="Sign Out"
                 />
               </div>
             </div>
+
+            {/* Confirmation Dialog */}
+            {showConfirm && (
+              <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-xl">
+                  <h3 className="text-lg font-bold mb-4">Confirm Sign Out</h3>
+                  <p className="mb-4">Are you sure you want to sign out?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowConfirm(false)}
+                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center">

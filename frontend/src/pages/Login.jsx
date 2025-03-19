@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 // import { supabase } from "../services/supabaseClient";
@@ -147,12 +147,6 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                >
-                  Forgot password?
-                </Link>
               </div>
               <div className="relative">
                 <input
@@ -177,21 +171,12 @@ const Login = () => {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-700"
+              <Link
+                to="/forgot-password"
+                className="block text-right mt-2 text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Remember me
-              </label>
+                Forgot password?
+              </Link>
             </div>
 
             <div>

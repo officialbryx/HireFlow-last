@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   HeartIcon,
 } from "@heroicons/react/24/outline";
-import { formatDistanceToNow, parseISO } from 'date-fns';
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 const JobPosts = () => {
   const { jobs: jobListings, isLoading, error } = useJobs(false); // Pass false for jobseeker view
@@ -27,12 +27,15 @@ const JobPosts = () => {
     return {
       ...job,
       job_skill: job.job_skill || [],
-      responsibilities: (job.job_responsibility || []).map(r => r.responsibility),
-      qualifications: (job.job_qualification || []).map(q => q.qualification),
-      company_description: job.company_description || 'No description available',
-      about_company: job.about_company || 'No company information available',
-      applicants_needed: job.applicants_needed || 'Not specified',
-      location: job.location || 'Location not specified'
+      responsibilities: (job.job_responsibility || []).map(
+        (r) => r.responsibility
+      ),
+      qualifications: (job.job_qualification || []).map((q) => q.qualification),
+      company_description:
+        job.company_description || "No description available",
+      about_company: job.about_company || "No company information available",
+      applicants_needed: job.applicants_needed || "Not specified",
+      location: job.location || "Location not specified",
     };
   };
 
@@ -52,11 +55,19 @@ const JobPosts = () => {
       return matchesSearch && new Date(job.created_at) >= oneWeekAgo;
     }
     if (selectedFilter === "remote")
-      return matchesSearch && job.employment_type?.toLowerCase().includes("remote");
+      return (
+        matchesSearch && job.employment_type?.toLowerCase().includes("remote")
+      );
     if (selectedFilter === "fulltime")
-      return matchesSearch && job.employment_type?.toLowerCase().includes("full-time");
+      return (
+        matchesSearch &&
+        job.employment_type?.toLowerCase().includes("full-time")
+      );
     if (selectedFilter === "parttime")
-      return matchesSearch && job.employment_type?.toLowerCase().includes("part-time");
+      return (
+        matchesSearch &&
+        job.employment_type?.toLowerCase().includes("part-time")
+      );
 
     return matchesSearch;
   });
@@ -64,7 +75,7 @@ const JobPosts = () => {
   // Update the handleApply function to include jobId
   const handleApply = (company, jobId) => {
     if (!company || !jobId) {
-      console.error('Missing company or jobId:', { company, jobId });
+      console.error("Missing company or jobId:", { company, jobId });
       return;
     }
     navigate(`/apply/${encodeURIComponent(company)}/${jobId}`);
@@ -74,14 +85,14 @@ const JobPosts = () => {
     try {
       // Simply parse the ISO string and format
       const parsedDate = parseISO(date);
-      
-      return `Posted ${formatDistanceToNow(parsedDate, { 
+
+      return `Posted ${formatDistanceToNow(parsedDate, {
         addSuffix: true,
-        includeSeconds: true
+        includeSeconds: true,
       })}`;
     } catch (error) {
-      console.error('Date formatting error:', error);
-      return 'Invalid date';
+      console.error("Date formatting error:", error);
+      return "Invalid date";
     }
   };
 
@@ -164,7 +175,10 @@ const JobPosts = () => {
                         <div className="p-4">
                           <div className="flex gap-4">
                             <img
-                              src={job.company_logo_url || '/default-company-logo.png'}
+                              src={
+                                job.company_logo_url ||
+                                "/default-company-logo.png"
+                              }
                               alt={job.company_name}
                               className="w-12 h-12 rounded object-contain bg-gray-50"
                             />
@@ -203,7 +217,10 @@ const JobPosts = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex gap-4">
                       <img
-                        src={selectedJob.company_logo_url || '/default-company-logo.png'}
+                        src={
+                          selectedJob.company_logo_url ||
+                          "/default-company-logo.png"
+                        }
                         alt={selectedJob.company_name}
                         className="w-16 h-16 rounded"
                       />
@@ -217,8 +234,13 @@ const JobPosts = () => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="p-2 text-gray-500 hover:text-gray-700">
-                        <ShareIcon className="h-5 w-5" />
+                      <button
+                        className="bg-blue-600 text-white font-bold px-8 py-2 rounded-md hover:bg-blue-700"
+                        onClick={() =>
+                          handleApply(selectedJob.company_name, selectedJob.id)
+                        }
+                      >
+                        Apply Now
                       </button>
                     </div>
                   </div>
@@ -245,18 +267,6 @@ const JobPosts = () => {
                     ))}
                   </div>
 
-                  <div className="mt-6 flex gap-4">
-                    <button
-                      className="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700"
-                      onClick={() => handleApply(selectedJob.company_name, selectedJob.id)}
-                    >
-                      Apply Now
-                    </button>
-                    <button className="border border-gray-300 text-gray-700 px-8 py-2 rounded-md hover:bg-gray-50">
-                      <HeartIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-
                   <div className="mt-8">
                     <h4 className="text-lg font-semibold mb-4">
                       About The Job
@@ -267,7 +277,9 @@ const JobPosts = () => {
 
                     {selectedJob.responsibilities.length > 0 && (
                       <>
-                        <h5 className="font-semibold mb-2">Key Responsibilities:</h5>
+                        <h5 className="font-semibold mb-2">
+                          Key Responsibilities:
+                        </h5>
                         <ul className="list-disc pl-5 mb-6">
                           {selectedJob.responsibilities.map((item, index) => (
                             <li key={index} className="text-gray-600 mb-1">
