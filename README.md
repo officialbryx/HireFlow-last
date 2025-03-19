@@ -22,15 +22,22 @@ A professional networking and job search platform built with React, MySQL, Supab
 1. Clone the repository
 
 2. Install dependencies
+   
 Frontend
 cd frontend
+
 npm install vite
+
 npm install axios
+
 npm install @tanstack/react-query @tanstack/react-query-devtools date-fns
+
 npm install @react-pdf/renderer react-pdf
 
 Backend
+
 cd backend
+
 pip install -r requirements.txt
 
 3. Set up environment variables:
