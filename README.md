@@ -24,6 +24,7 @@ A professional networking and job search platform built with React, MySQL, Supab
 2. Install dependencies
    
 Frontend
+
 cd frontend
 
 npm install vite
