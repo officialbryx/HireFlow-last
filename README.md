@@ -19,6 +19,8 @@ A professional networking and job search platform built with React, MySQL, Supab
 
 ## Getting Started
 
+Python version: 3.11.9
+
 1. Clone the repository
 
 2. Install dependencies
@@ -35,11 +37,19 @@ npm install @tanstack/react-query @tanstack/react-query-devtools date-fns
 
 npm install @react-pdf/renderer react-pdf
 
+npm run dev
+
 Backend
 
 cd backend
 
 pip install -r requirements.txt
+
+python -m spacy download en_core_web_sm
+
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+
+python app.py
 
 3. Set up environment variables:
    
