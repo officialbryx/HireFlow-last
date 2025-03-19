@@ -155,68 +155,6 @@ def perform_resume_analysis(text):
         "languages": extract_languages(text),
         "achievements": extract_achievements(text)
     }
-    # Format and print analysis
-    print("\n=== Resume Analysis Summary ===\n")
-    # Personal Information
-    print("Personal Information:")
-    if analysis["personal_info"]["name"]:
-        print(f"   • Name: {analysis['personal_info']['name']}")
-    if analysis["personal_info"]["email"]:
-        print(f"   • Email: {analysis['personal_info']['email']}")
-    if analysis["personal_info"]["phone"]:
-        print(f"   • Phone: {analysis['personal_info']['phone']}")
-    if analysis["personal_info"]["location"]:
-        print(f"   • Location: {analysis['personal_info']['location']}")
-    if analysis["personal_info"]["website"]:
-        print(f"   • Website: {analysis['personal_info']['website']}")
-    # Professional Summary
-
-    # Skills
-    print("\nSkills:")
-    print("   Technical Skills:")
-    for skill, count in analysis["skills"]["hard_skills"].items():
-        print(f"   • {skill}")
-    print("\n   Soft Skills:")
-    for skill, count in analysis["skills"]["soft_skills"].items():
-        print(f"   • {skill}")
-    # Education
-    print("\nEducation:")
-    if analysis["education"]["details"]:
-        for edu in analysis["education"]["details"]:
-            if edu["degree"]:
-                print(f"   • {edu['degree']}")
-            if edu["school"]:
-                print(f"     {edu['school']}")
-            if edu["year"]:
-                print(f"     {edu['year']}")
-            if edu["gpa"]:
-                print(f"     GPA: {edu['gpa']}")
-    else:
-        print("   No formal education details detected")
-    # Work Experience
-    print("\nWork Experience:")
-    if analysis["experience"]["positions"]:
-        for pos in analysis["experience"]["positions"]:
-            print(f"   • {pos}")
-        if analysis["experience"]["years"]:
-            print(f"\n   Total Years: {analysis['experience']['years']}")
-
-    # Projects
-    if analysis["projects"]:
-        print("\nProjects:")
-        for proj in analysis["projects"]:
-            print(f"   • {proj['name']}")
-            print(f"     {proj['description']}")
-    # Languages
-    if analysis["languages"]:
-        print("\nLanguages:")
-        for lang in analysis["languages"]:
-            print(f"   • {lang}")
-    # Achievements
-    if analysis["achievements"]:
-        print("\nAchievements:")
-        for achievement in analysis["achievements"]:
-            print(f"   • {achievement}")
     return analysis
 
 # Define education keywords before extract_education function
@@ -228,6 +166,66 @@ education_keywords = [
     "major", "minor", "concentration", "specialization",
     "studied", "graduated", "education", "academic"
 ]
+
+def extract_skills(text):
+    """Extract skills from text with enhanced detection"""
+    skills = {
+        "hard_skills": {},
+        "soft_skills": {}
+    }
+    
+    # Common technical skills patterns
+    tech_patterns = [
+        r'\b(?:Python|Java|C\+\+|JavaScript|React|Node\.js|SQL|AWS|Azure|Docker|Kubernetes|Git|REST|API)\b',
+        r'\b(?:Machine Learning|AI|Deep Learning|Data Science|Cloud Computing|DevOps|Full Stack|Backend|Frontend)\b',
+        r'\b(?:HTML5?|CSS3?|MongoDB|MySQL|PostgreSQL|Redis|GraphQL|Jenkins|Linux|Unix|Agile|Scrum)\b'
+    ]
+    
+    # Common soft skills patterns
+    soft_patterns = [
+        r'\b(?:Communication|Leadership|Management|Problem[\s-]Solving|Team[\s-]Work|Collaboration)\b',
+        r'\b(?:Critical[\s-]Thinking|Time[\s-]Management|Project[\s-]Management|Decision[\s-]Making)\b',
+        r'\b(?:Adaptability|Flexibility|Creativity|Innovation|Analysis|Planning|Organization)\b'
+    ]
+    
+    # Process text with spaCy for better context understanding
+    doc = nlp(text)
+    
+    # Extract skills using patterns
+    for pattern in tech_patterns:
+        matches = re.finditer(pattern, text, re.IGNORECASE)
+        for match in matches:
+            skill = match.group(0).lower()
+            skills["hard_skills"][skill] = skills["hard_skills"].get(skill, 0) + 1
+            
+    for pattern in soft_patterns:
+        matches = re.finditer(pattern, text, re.IGNORECASE)
+        for match in matches:
+            skill = match.group(0).lower()
+            skills["soft_skills"][skill] = skills["soft_skills"].get(skill, 0) + 1
+    
+    # Extract additional skills using noun chunks and context
+    for chunk in doc.noun_chunks:
+        chunk_text = chunk.text.lower()
+        # Check if the chunk is near skill-related words
+        context_window = doc[max(0, chunk.start - 3):min(len(doc), chunk.end + 3)]
+        context_text = context_window.text.lower()
+        
+        if any(word in context_text for word in ["experience", "proficient", "skilled", "expertise", "knowledge"]):
+            # Determine if it's more likely a hard or soft skill
+            if any(tech_word in chunk_text for tech_word in ["software", "programming", "technical", "development", "system"]):
+                skills["hard_skills"][chunk_text] = skills["hard_skills"].get(chunk_text, 0) + 1
+            elif any(soft_word in chunk_text for soft_word in ["communication", "management", "leadership", "team"]):
+                skills["soft_skills"][chunk_text] = skills["soft_skills"].get(chunk_text, 0) + 1
+    
+    # Clean up skills (remove common words and very short terms)
+    for skill_type in ["hard_skills", "soft_skills"]:
+        skills[skill_type] = {
+            k: v for k, v in skills[skill_type].items()
+            if len(k) > 2 and k not in FALLBACK_STOPWORDS
+        }
+    
+    return skills
 
 def extract_education(text):
     """Enhanced education information extraction with improved PDF handling"""
@@ -755,15 +753,3 @@ if __name__ == "__main__":
 
         if not comparison_results['experience_match']['sufficient']:
             print(f"\n Experience Gap: {comparison_results['experience_match']['gap_years']} years short of requirement")
-
-        # Save analysis to file
-        analysis_file = os.path.join(os.path.dirname(job_post_path), "resume_analysis.json")
-        with open(analysis_file, 'w') as f:
-            analysis_data = {
-                "resume_analysis": resume_analysis,
-                "job_requirements": job_requirements, 
-                "comparison_results": comparison_results,
-                "semantic_similarity": float(semantic_similarity)
-            }
-            json.dump(analysis_data, f, indent=2)
-        print(f"\nDetailed analysis saved to {analysis_file}")
