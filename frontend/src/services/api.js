@@ -125,21 +125,38 @@ export const api = {
   },
 
   updateUserProfile: async (profileData) => {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError) throw userError;
+    try {
+      // Get current user
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
-    const [profileError, metadataError] = await Promise.all([
-      supabase.from("profiles").update(profileData).eq("id", user.id),
-      supabase.auth.updateUser({ data: profileData }),
-    ]);
+      // Update profile in profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update(profileData)
+        .eq("id", user.id);
 
-    if (profileError) throw profileError;
-    if (metadataError) throw metadataError;
+      if (profileError) throw profileError;
 
-    return true;
+      // Update user metadata
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          first_name: profileData.first_name,
+          middle_name: profileData.middle_name,
+          last_name: profileData.last_name,
+        },
+      });
+
+      if (metadataError) throw metadataError;
+
+      return true;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      throw error;
+    }
   },
 
   updateUserEmail: async (newEmail) => {
@@ -160,5 +177,21 @@ export const api = {
       console.error("Password update error:", error);
       throw new Error(error.message || "Failed to update password");
     }
-  }
+  },
+
+  async updateUserMetadata(metadata) {
+    const { data, error } = await supabase.auth.updateUser({
+      data: metadata,
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  async updateUserEmail({ email }) {
+    const { data, error } = await supabase.auth.updateUser({
+      email: email,
+    });
+    if (error) throw error;
+    return data;
+  },
 };

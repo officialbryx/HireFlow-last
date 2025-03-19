@@ -1,27 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
 import {
-  UserGroupIcon,
   BriefcaseIcon,
-  EnvelopeIcon,
   BellIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  UserCircleIcon,
-  MagnifyingGlassIcon,
   BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 
 const Navbar = () => {
-  const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/login", { replace: true }); // Changed to /login and added replace
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -31,9 +26,9 @@ const Navbar = () => {
     <nav className="fixed top-0 w-full bg-white border-b border-gray-200 shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Left side - Logo and Search */}
+          {/* Left side - Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0 flex items-center">
               <img
                 src="/hireflow-logo.ico"
                 alt="HireFlow"
@@ -42,24 +37,6 @@ const Navbar = () => {
               <span className="ml-2 text-lg font-semibold text-gray-800 hidden sm:block">
                 HireFlow
               </span>
-            </Link>
-            <div className="relative ml-6">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className={`w-64 pl-10 pr-4 py-2 bg-gray-50 border ${
-                    searchFocused
-                      ? "border-blue-500 ring-2 ring-blue-100"
-                      : "border-gray-200"
-                  } rounded-lg text-sm transition-all duration-200 focus:outline-none`}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                />
-              </div>
             </div>
           </div>
 
@@ -67,14 +44,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="hidden md:flex space-x-1">
               <NavItem
-                icon={<UserCircleIcon className="h-5 w-5" />}
-                text="Profile"
-                to="/profile"
-              />
-              <NavItem
-                icon={<UserGroupIcon className="h-5 w-5" />}
-                text="Network"
-                to="/network"
+                icon={<BuildingOffice2Icon className="h-5 w-5" />}
+                text="Companies"
+                to="/companies"
               />
               <NavItem
                 icon={<BriefcaseIcon className="h-5 w-5" />}
@@ -82,21 +54,10 @@ const Navbar = () => {
                 to="/jobposts"
               />
               <NavItem
-                icon={<EnvelopeIcon className="h-5 w-5" />}
-                text="Messages"
-                to="/messages"
-              />
-              <NavItem
                 icon={<BellIcon className="h-5 w-5" />}
                 text="Notifications"
                 to="/notifications"
               />
-              <NavItem
-                icon={<BuildingOffice2Icon className="h-5 w-5" />}
-                text="Companies"
-                to="/companies"
-              />
-              <div className="mx-2 border-l border-gray-200 h-8" />
               <NavItem
                 icon={<Cog6ToothIcon className="h-5 w-5" />}
                 text="Settings"

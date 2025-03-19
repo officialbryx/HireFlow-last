@@ -6,12 +6,10 @@ import Login from "./pages/Login";
 import JobPosts from "./pages/JobPosts";
 import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
-import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/hr/Dashboard";
 import Jobs from "./pages/hr/Jobs";
-import Profile from "./pages/Profile";
 import FAQ from "./pages/hr/FAQ";
 import Notifications from "./pages/hr/Notifications";
 import About from "./pages/About";
@@ -51,14 +49,10 @@ const App = () => {
     } else if (location.pathname.startsWith("/apply/")) {
       const company = decodeURIComponent(location.pathname.split("/")[2]);
       document.title = `Apply Job for ${company} | HireFlow`;
-    } else if (location.pathname === "/messages") {
-      document.title = "Messaging | HireFlow";
     } else if (location.pathname === "/settings") {
       document.title = "Settings | HireFlow";
     } else if (location.pathname === "/forgot-password") {
       document.title = "Forgot Password | HireFlow";
-    } else if (location.pathname === "/profile") {
-      document.title = "My Profile | HireFlow";
     } else if (location.pathname === "/hr/dashboard") {
       document.title = "Dashboard | HireFlow";
     } else if (location.pathname === "/hr/jobs") {
@@ -93,9 +87,7 @@ const App = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
-        <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/jobposts" element={<JobPosts />} />
         <Route path="/apply/:company" element={<Apply />} />
         <Route path="/apply/:company/:jobId" element={<Apply />} />
