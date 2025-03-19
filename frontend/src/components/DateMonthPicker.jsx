@@ -31,13 +31,11 @@ const MonthYearPicker = ({
   // Parse the value to set initial year and update display value
   useEffect(() => {
     if (value) {
-      const [yearPart, monthPart] = value.split("-");
-      if (yearPart && monthPart) {
-        setYear(parseInt(yearPart, 10));
-        const selectedMonth = months.find((m) => m.value === monthPart);
-        setDisplayValue(
-          selectedMonth ? `${selectedMonth.label} ${yearPart}` : ""
-        );
+      const [month, year] = value.split("/"); // Split MM/YYYY format
+      if (month && year) {
+        setYear(parseInt(year, 10));
+        const selectedMonth = months.find((m) => m.value === month);
+        setDisplayValue(selectedMonth ? `${selectedMonth.label} ${year}` : "");
       }
     } else {
       setDisplayValue("");
@@ -60,9 +58,13 @@ const MonthYearPicker = ({
 
   // Handle selecting a month
   const handleMonthSelect = (monthValue) => {
-    const newValue = `${year}-${monthValue}`;
-    onChange(newValue);
+    const formattedValue = `${monthValue}/${year}`; // Format as MM/YYYY
+    onChange(formattedValue);
     setIsOpen(false);
+
+    // Update display value to show Month YYYY format
+    const selectedMonth = months.find((m) => m.value === monthValue);
+    setDisplayValue(selectedMonth ? `${selectedMonth.label} ${year}` : "");
   };
 
   // Handle year change
@@ -72,7 +74,7 @@ const MonthYearPicker = ({
 
   // Get CSS class for month button
   const getMonthButtonClass = (monthValue) => {
-    const isSelected = value === `${year}-${monthValue}`;
+    const isSelected = value === `${monthValue}/${year}`;
     return `py-2 px-3 text-center rounded-md ${
       isSelected
         ? "bg-blue-600 text-white font-medium"
@@ -195,7 +197,13 @@ const MonthYearPicker = ({
 
             <button
               onClick={() => {
-                onChange(`${currentYear}-${currentMonth}`);
+                const today = new Date();
+                const currentMonth = String(today.getMonth() + 1).padStart(
+                  2,
+                  "0"
+                );
+                const currentYear = today.getFullYear();
+                onChange(`${currentMonth}/${currentYear}`);
                 setIsOpen(false);
               }}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"

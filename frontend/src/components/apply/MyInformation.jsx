@@ -195,6 +195,14 @@ const isPhoneValid = (number) => {
   return phoneRegex.test(number.replace(/\D/g, ""));
 };
 
+const isPostalCodeValid = (code) => {
+  return /^\d+$/.test(code);
+};
+
+const isTextOnly = (text) => {
+  return /^[A-Za-z\s-]+$/.test(text);
+};
+
 const MyInformationValidator = {
   validate: (formData, setFieldErrors) => {
     const errors = {};
@@ -211,19 +219,42 @@ const MyInformationValidator = {
     }
 
     // Personal Information validation
-    if (!formData.givenName?.trim())
+    if (!formData.givenName?.trim()) {
       errors.givenName = "Given name is required";
-    if (!formData.familyName?.trim())
+    } else if (!isTextOnly(formData.givenName)) {
+      errors.givenName = "Given name can only contain letters";
+    }
+
+    if (formData.middleName && !isTextOnly(formData.middleName)) {
+      errors.middleName = "Middle name can only contain letters";
+    }
+
+    if (!formData.familyName?.trim()) {
       errors.familyName = "Family name is required";
+    } else if (!isTextOnly(formData.familyName)) {
+      errors.familyName = "Family name can only contain letters";
+    }
 
     // Address validation
     if (!formData.country) errors.country = "Country is required";
     if (!formData.street?.trim()) errors.street = "Street address is required";
-    if (!formData.city?.trim()) errors.city = "City is required";
-    if (!formData.province?.trim())
+    if (!formData.city?.trim()) {
+      errors.city = "City is required";
+    } else if (!isTextOnly(formData.city)) {
+      errors.city = "City can only contain letters";
+    }
+
+    if (!formData.province?.trim()) {
       errors.province = "State/Province is required";
-    if (!formData.postalCode?.trim())
+    } else if (!isTextOnly(formData.province)) {
+      errors.province = "State/Province can only contain letters";
+    }
+
+    if (!formData.postalCode?.trim()) {
       errors.postalCode = "Postal code is required";
+    } else if (!isPostalCodeValid(formData.postalCode)) {
+      errors.postalCode = "Postal code must contain only numbers";
+    }
 
     // Contact Information validation
     if (!formData.email) {
@@ -258,7 +289,16 @@ const MyInformation = ({
 }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const finalValue = type === "checkbox" ? checked : value;
+    let finalValue = type === "checkbox" ? checked : value;
+
+    // Filter non-letter characters for text-only fields
+    if (
+      ["givenName", "middleName", "familyName", "city", "province"].includes(
+        name
+      )
+    ) {
+      finalValue = value.replace(/[^A-Za-z\s-]/g, "");
+    }
 
     // Clear error for this field when user starts typing
     setFieldErrors((prev) => ({
@@ -639,9 +679,15 @@ const MyInformation = ({
               type="text"
               name="postalCode"
               value={formData.postalCode}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                handleChange({ target: { name: "postalCode", value } });
+              }}
               className={inputStyles("postalCode")}
               required
+              maxLength="10"
+              inputMode="numeric"
+              pattern="\d*"
               aria-invalid={!!fieldErrors["postalCode"]}
               {...(fieldErrors["postalCode"] && {
                 "aria-describedby": `error-postalCode`,
@@ -739,10 +785,16 @@ const MyInformation = ({
               type="tel"
               name="phoneNumber"
               value={formData.phoneNumber}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                handleChange({ target: { name: "phoneNumber", value } });
+              }}
               className={inputStyles("phoneNumber")}
               placeholder="Enter phone number"
               required
+              maxLength="15"
+              inputMode="numeric"
+              pattern="\d*"
               aria-invalid={!!fieldErrors["phoneNumber"]}
               {...(fieldErrors["phoneNumber"] && {
                 "aria-describedby": `error-phoneNumber`,

@@ -37,6 +37,15 @@ const FormSection = ({ icon, title, description, children }) => (
   </div>
 );
 
+const isTextOnly = (text) => {
+  return /^[A-Za-z\s-]+$/.test(text);
+};
+
+const isValidGPA = (gpa) => {
+  // Allows numbers 0-4 with up to 2 decimal places
+  return /^([0-3](\.\d{1,2})?|4(\.0{1,2})?)$/.test(gpa);
+};
+
 const MyExperienceValidator = {
   validate: (formData, setFieldErrors) => {
     const errors = {};
@@ -47,6 +56,9 @@ const MyExperienceValidator = {
       formData.workExperience.forEach((exp, index) => {
         if (!exp.jobTitle?.trim()) {
           errors[`workExperience.${index}.jobTitle`] = "Job title is required";
+        } else if (!isTextOnly(exp.jobTitle)) {
+          errors[`workExperience.${index}.jobTitle`] =
+            "Job title can only contain letters";
         }
         if (!exp.company?.trim()) {
           errors[`workExperience.${index}.company`] =
@@ -72,6 +84,9 @@ const MyExperienceValidator = {
     formData.education.forEach((edu, index) => {
       if (!edu.school?.trim()) {
         errors[`education.${index}.school`] = "School name is required";
+      } else if (!isTextOnly(edu.school)) {
+        errors[`education.${index}.school`] =
+          "School name can only contain letters";
       }
       if (!edu.degree) {
         errors[`education.${index}.degree`] = "Degree is required";
@@ -79,6 +94,12 @@ const MyExperienceValidator = {
       if (!edu.fieldOfStudy?.trim()) {
         errors[`education.${index}.fieldOfStudy`] =
           "Field of study is required";
+      } else if (!isTextOnly(edu.fieldOfStudy)) {
+        errors[`education.${index}.fieldOfStudy`] =
+          "Field of study can only contain letters";
+      }
+      if (edu.gpa && !isValidGPA(edu.gpa)) {
+        errors[`education.${index}.gpa`] = "GPA must be between 0.00 and 4.00";
       }
       if (!edu.fromYear) {
         errors[`education.${index}.fromYear`] = "Start date is required";
@@ -117,6 +138,11 @@ const MyExperience = ({
       }));
     }
 
+    // Filter non-letter characters for text-only fields
+    if (field === "jobTitle") {
+      value = value.replace(/[^A-Za-z\s-]/g, "");
+    }
+
     const newWorkExperience = [...formData.workExperience];
     // Ensure dates are properly formatted
     if (field === "fromDate" || field === "toDate") {
@@ -133,6 +159,17 @@ const MyExperience = ({
         ...prev,
         [`education.${index}.${field}`]: undefined,
       }));
+    }
+
+    // Filter input based on field type
+    if (["school", "fieldOfStudy"].includes(field)) {
+      value = value.replace(/[^A-Za-z\s-]/g, "");
+    } else if (field === "gpa") {
+      // Only allow valid GPA input
+      const gpaRegex = /^\d*\.?\d{0,2}$/;
+      if (value && (!gpaRegex.test(value) || parseFloat(value) > 4)) {
+        return;
+      }
     }
 
     const newEducation = [...formData.education];
@@ -186,13 +223,13 @@ const MyExperience = ({
     if (e.key === "Enter" && skillInput.trim()) {
       e.preventDefault();
       const newSkill = skillInput.trim();
-      if (!formData.skills.includes(newSkill)) {
+      if (!formData.skills.includes(newSkill) && isTextOnly(newSkill)) {
         setFormData((prev) => ({
           ...prev,
           skills: [...prev.skills, newSkill],
         }));
+        setSkillInput("");
       }
-      setSkillInput("");
     }
   };
 
@@ -593,6 +630,11 @@ const MyExperience = ({
                   }
                   className={inputStyles(`education.${index}.gpa`)}
                 />
+                {fieldErrors && fieldErrors[`education.${index}.gpa`] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors[`education.${index}.gpa`]}
+                  </p>
+                )}
               </div>
 
               <div>
