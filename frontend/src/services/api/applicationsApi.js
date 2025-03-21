@@ -415,5 +415,34 @@ export const applicationsApi = {
       console.error('API: Error updating applicant shortlist:', error);
       throw error;
     }
+  },
+
+  async getApplicationsByJob(jobId) {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')  // Just select all fields from applications
+        .eq('job_posting_id', jobId);
+        
+      if (error) throw error;
+      
+      // Transform the data for consistency with other methods
+      const transformedData = data.map(app => ({
+        ...app,
+        personal_info: app.personal_info || {},
+        contact_info: app.contact_info || {},
+        address: app.address || {},
+        work_experience: Array.isArray(app.work_experience) ? app.work_experience : [],
+        education: Array.isArray(app.education) ? app.education : [],
+        skills: Array.isArray(app.skills) ? app.skills : [],
+        websites: Array.isArray(app.websites) ? app.websites : [],
+        application_questions: app.application_questions || {}
+      }));
+      
+      return transformedData;
+    } catch (error) {
+      console.error('Error fetching applications by job:', error);
+      throw error;
+    }
   }
 };

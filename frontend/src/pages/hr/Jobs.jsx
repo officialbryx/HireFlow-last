@@ -15,6 +15,7 @@ import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
 import ViewApplicants from "../../components/jobs/ViewApplicants2";
 import EvaluateJobs from "../../components/jobs/EvaluateJobs";
+import RankCandidates from "../../components/jobs/RankCandidates";
 
 const Jobs = () => {
   const {
@@ -280,6 +281,17 @@ const Jobs = () => {
               >
                 Archived Jobs
               </button>
+              {/* Add a new tab button in your nav section */}
+              <button
+                onClick={() => setActiveTab("rank")}
+                className={`${
+                  activeTab === "rank"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Rank Candidates
+              </button>
               <button
                 onClick={() => setActiveTab("applicants")}
                 className={`${
@@ -306,7 +318,8 @@ const Jobs = () => {
           {/* Search and Filter */}
           {activeTab !== "create" &&
             activeTab !== "applicants" &&
-            activeTab !== "evaluate" && (
+            activeTab !== "evaluate" &&
+            activeTab !== "rank" && (
               <div className="mb-6">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="relative flex-1">
@@ -345,7 +358,7 @@ const Jobs = () => {
                 currentJobs={currentJobs}
                 handleEditJob={handleEditJob}
                 handleDeleteJob={handleArchiveJob}
-                handleViewJobApplicants={handleViewJobApplicants} // New prop
+                handleViewJobApplicants={handleViewJobApplicants}
                 currentPage={currentPage}
                 totalPages={totalPages}
                 handlePageChange={handlePageChange}
@@ -356,7 +369,7 @@ const Jobs = () => {
             )}
             {activeTab === "archived" && (
               <ArchivedJobs
-                archivedJobs={currentJobs} // Use the filtered and paginated jobs
+                archivedJobs={currentJobs}
                 handleRestore={handleRestore}
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -372,6 +385,8 @@ const Jobs = () => {
               />
             )}
             {activeTab === "evaluate" && <EvaluateJobs />}
+            {/* Add this line to render the RankCandidates component */}
+            {activeTab === "rank" && <RankCandidates />}
           </div>
         </div>
       </div>
