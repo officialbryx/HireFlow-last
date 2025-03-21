@@ -99,7 +99,7 @@ const App = () => {
         <Route path="/hr/notifications" element={<Notifications />} />
       </Routes>
       {/* Enable this for cache debugging*/}
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };

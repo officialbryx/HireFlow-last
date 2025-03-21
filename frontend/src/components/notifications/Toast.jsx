@@ -1,30 +1,64 @@
 import React from 'react';
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  XMarkIcon,
+  InformationCircleIcon
+} from '@heroicons/react/24/outline';
 
 const Toast = ({ show, type, message }) => {
   if (!show) return null;
 
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return <CheckCircleIcon className="h-5 w-5 text-green-400" />;
+      case 'error':
+        return <ExclamationCircleIcon className="h-5 w-5 text-red-400" />;
+      case 'warning':
+        return <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" />;
+      case 'info':
+      default:
+        return <InformationCircleIcon className="h-5 w-5 text-blue-400" />;
+    }
+  };
+
+  const getBackgroundColor = () => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-50';
+      case 'error':
+        return 'bg-red-50';
+      case 'warning':
+        return 'bg-yellow-50';
+      case 'info':
+      default:
+        return 'bg-blue-50';
+    }
+  };
+
+  const getTextColor = () => {
+    switch (type) {
+      case 'success':
+        return 'text-green-800';
+      case 'error':
+        return 'text-red-800';
+      case 'warning':
+        return 'text-yellow-800';
+      case 'info':
+      default:
+        return 'text-blue-800';
+    }
+  };
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className={`rounded-lg shadow-lg p-4 ${
-        type === 'success' 
-          ? 'bg-green-100 border-l-4 border-green-500' 
-          : 'bg-red-100 border-l-4 border-red-500'
-      }`}>
-        <div className="flex items-center">
-          {type === 'success' ? (
-            <svg className="h-6 w-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="h-6 w-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          )}
-          <p className={`text-sm font-medium ${
-            type === 'success' ? 'text-green-800' : 'text-red-800'
-          }`}>
-            {message}
-          </p>
+    <div className="fixed top-4 right-4 z-50">
+      <div className={`rounded-md p-4 flex items-center shadow-lg ${getBackgroundColor()}`}>
+        <div className="flex-shrink-0">
+          {getIcon()}
+        </div>
+        <div className={`ml-3 ${getTextColor()}`}>
+          <p className="text-sm font-medium">{message}</p>
         </div>
       </div>
     </div>

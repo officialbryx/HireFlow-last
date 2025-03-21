@@ -135,6 +135,7 @@ const ApplicantsList = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Statuses</option>
+                <option value="shortlisted">Shortlisted</option>  {/* New option */}
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
@@ -198,6 +199,11 @@ const ApplicantsList = ({
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(applicant.status)}`}>
                       {applicant.status?.charAt(0).toUpperCase() + applicant.status?.slice(1) || "Pending"}
                     </span>
+                    {applicant.shortlisted && (
+                      <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Shortlisted
+                      </span>
+                    )}
                   </div>
                 </div>
               </li>

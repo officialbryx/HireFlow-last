@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { UserIcon } from "@heroicons/react/24/outline";
 import { PersonalInfo } from "./sections/PersonalInfo";
 import { WorkExperience } from "./sections/WorkExperience";
@@ -5,7 +6,9 @@ import { Education } from "./sections/Education";
 import { SkillsAndPresence } from "./sections/SkillsAndPresence";
 import { ResumeAnalysis } from "./sections/ResumeAnalysis";
 import { ScreeningQuestions } from "./sections/ScreeningQuestions";
+import StatusControls from "./StatusControls";
 import { applicationsApi } from "../../services/api/applicationsApi";
+import { useToast } from '../../hooks/useToast';
 
 const ApplicantDetails = ({
   selectedApplicant,
@@ -15,54 +18,84 @@ const ApplicantDetails = ({
   getBadgeColor,
   formatDate,
   setShowPdfModal,
+  onApplicantUpdated,
 }) => {
+  const { showToast } = useToast();
+  const [isShortlisting, setIsShortlisting] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
+
   if (!selectedApplicant) {
     return (
-      <div className="w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center h-[calc(100vh-200px)]">
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-            <UserIcon className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="font-medium text-lg text-gray-700 mb-1">
-            No Applicant Selected
-          </h3>
-          <p className="text-gray-500">
-            Select an applicant from the list to view their details
-          </p>
+      <div className="w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-[calc(100vh-50px)] flex items-center justify-center text-gray-400">
+        <div className="text-center p-8">
+          <UserIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <p>Select an applicant to view details</p>
         </div>
       </div>
     );
   }
 
   const {
+    id,
     personal_info = {},
     contact_info = {},
     address = {},
     work_experience = [],
+    previous_employment = {},
     education = [],
     skills = [],
+    company,
+    resume_url,
     websites = [],
     linkedin_url,
-    previous_employment = {},
-    company,
-    status,
-    created_at,
-    resume_url,
     application_questions = {},
+    created_at,
+    status
   } = selectedApplicant;
 
   const tabs = [
     { id: "details", label: "Applicant Details" },
     { id: "resume", label: "Resume Analysis" },
-    { id: "questions", label: "Screening Questions" },
+    { id: "screening", label: "Screening Questions" }
   ];
 
   const handleResumeClick = () => {
-    if (selectedApplicant?.resume_url) {
-      const resumeUrl = applicationsApi.getResumeUrl(
-        selectedApplicant.resume_url
+    setShowPdfModal(true);
+  };
+
+  const handleShortlistToggle = async () => {
+    if (!id) return;
+    
+    try {
+      setIsShortlisting(true);
+      
+      const newShortlistedStatus = !selectedApplicant.shortlisted;
+      
+      await applicationsApi.updateApplicantShortlist(
+        id, 
+        newShortlistedStatus
       );
-      window.open(resumeUrl, "_blank");
+      
+      if (onApplicantUpdated) {
+        onApplicantUpdated(id, { 
+          shortlisted: newShortlistedStatus 
+        });
+      }
+      
+      setJustUpdated(true);
+      setTimeout(() => setJustUpdated(false), 1500);
+      
+      showToast(
+        "success", 
+        newShortlistedStatus 
+          ? "Candidate added to shortlist" 
+          : "Candidate removed from shortlist"
+      );
+    } catch (error) {
+      console.error("Error updating shortlist status:", error);
+      showToast("error", "Failed to update shortlist status");
+    } finally {
+      setIsShortlisting(false);
     }
   };
 
@@ -88,7 +121,41 @@ const ApplicantDetails = ({
                 {status?.charAt(0).toUpperCase() + status?.slice(1) ||
                   "Pending"}
               </span>
+              {selectedApplicant?.shortlisted && (
+                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ${justUpdated ? 'animate-pulse' : ''}`}>
+                  Shortlisted
+                </span>
+              )}
+              <button
+                onClick={handleShortlistToggle}
+                disabled={isShortlisting}
+                className={`ml-2 px-2 py-1 text-xs rounded-md flex items-center ${
+                  isShortlisting ? "bg-gray-200 text-gray-500" :
+                  selectedApplicant.shortlisted 
+                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300" 
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
+                }`}
+              >
+                {isShortlisting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </>
+                ) : (
+                  selectedApplicant.shortlisted ? "Remove from Shortlist" : "Add to Shortlist"
+                )}
+              </button>
             </div>
+            
+            <StatusControls 
+              applicantId={id} 
+              currentStatus={status} 
+              onStatusUpdated={onApplicantUpdated}
+              getBadgeColor={getBadgeColor}
+            />
           </div>
           {resume_url && (
             <button

@@ -140,6 +140,20 @@ export default function ViewApplicants({ initialFilter = "all", jobIdFilter = nu
     }
   };
 
+  // Add this function
+  const handleApplicantUpdated = async (applicantId, updates = {}) => {
+    // First update the local state to immediately reflect changes
+    if (selectedApplicant && selectedApplicant.id === applicantId) {
+      setSelectedApplicant(prev => ({
+        ...prev,
+        ...updates
+      }));
+    }
+    
+    // Then invalidate the query to refresh data from server
+    await queryClient.invalidateQueries(applicantsQueryKey);
+  };
+
   // Clear all filters
   const clearAllFilters = () => {
     setJobFilter(null);
@@ -192,6 +206,7 @@ export default function ViewApplicants({ initialFilter = "all", jobIdFilter = nu
             getBadgeColor={getBadgeColor}
             formatDate={formatDate}
             setShowPdfModal={setShowPdfModal}
+            onApplicantUpdated={handleApplicantUpdated} // Add this prop
           />
         </div>
       </div>
