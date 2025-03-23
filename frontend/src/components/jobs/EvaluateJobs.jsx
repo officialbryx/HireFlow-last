@@ -141,7 +141,7 @@ const EvaluateJobs = () => {
                 <input
                   type="file"
                   onChange={(e) => setResumeFile(e.target.files[0])}
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx"
                   className="hidden"
                   id="resume-upload"
                   required
@@ -172,7 +172,7 @@ const EvaluateJobs = () => {
                   Choose File
                 </label>
                 <p className="mt-2 text-xs text-gray-500">
-                  Supported formats: PDF, DOC, DOCX, TXT
+                  Supported formats: PDF, DOC, & DOCX
                 </p>
               </div>
             </div>

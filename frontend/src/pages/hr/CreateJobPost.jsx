@@ -19,10 +19,15 @@ const initialFormState = {
   about_company: "",
   responsibilities: [""],
   qualifications: [""],
-  skills: [""]
+  skills: [""],
 };
 
-const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData = null }) => {
+const CreateJobPost = ({
+  onClose,
+  onJobCreated,
+  isEditing = false,
+  initialData = null,
+}) => {
   const [formData, setFormData] = useState(initialData || initialFormState);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,13 +43,14 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert('File size must be less than 5MB');
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        alert("File size must be less than 5MB");
         return;
       }
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        company_logo_url: file // Changed from companyLogo
+        company_logo_url: file, // Changed from companyLogo
       }));
     }
   };
@@ -87,9 +93,9 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
         applicants_needed: formData.applicants_needed,
         company_description: formData.company_description,
         about_company: formData.about_company,
-        responsibilities: formData.responsibilities.filter(r => r.trim()),
-        qualifications: formData.qualifications.filter(q => q.trim()),
-        skills: formData.skills.filter(s => s.trim())
+        responsibilities: formData.responsibilities.filter((r) => r.trim()),
+        qualifications: formData.qualifications.filter((q) => q.trim()),
+        skills: formData.skills.filter((s) => s.trim()),
       };
 
       // Validate required fields
@@ -97,23 +103,25 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
         throw new Error("Job title is required");
       }
 
-      if (submitData.responsibilities.length === 0 ||
-          submitData.qualifications.length === 0 ||
-          submitData.skills.length === 0) {
+      if (
+        submitData.responsibilities.length === 0 ||
+        submitData.qualifications.length === 0 ||
+        submitData.skills.length === 0
+      ) {
         throw new Error("Please fill in all required fields");
       }
 
       await onJobCreated(submitData);
-      
+
       if (!isEditing) {
         setFormData(initialFormState);
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) {
-          fileInput.value = '';
+          fileInput.value = "";
         }
       }
     } catch (error) {
-      console.error('Error submitting job:', error);
+      console.error("Error submitting job:", error);
       throw error;
     } finally {
       setIsSubmitting(false);
@@ -125,7 +133,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            {isEditing ? 'Edit Job Post' : 'Create Job Post'}
+            {isEditing ? "Edit Job Post" : "Create Job Post"}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -142,7 +150,7 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                   </label>
                   <input
                     type="text"
-                    name="job_title"  // This should match the field name from API
+                    name="job_title" // This should match the field name from API
                     value={formData.job_title || ""} // Add fallback for null/undefined
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -253,12 +261,12 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                     type="file"
                     name="company_logo_url"
                     onChange={handleFileChange}
-                    accept="image/jpeg,image/png,image/gif"
+                    accept="image/jpeg,image/png"
                     className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
                   />
                   <div className="flex flex-col space-y-1">
                     <p className="text-xs text-gray-500">
-                      Accepted file types: JPEG, PNG, GIF
+                      Accepted file types: JPEG & PNG
                     </p>
                     <p className="text-xs text-gray-500">
                       Maximum file size: 5MB
@@ -429,16 +437,20 @@ const CreateJobPost = ({ onClose, onJobCreated, isEditing = false, initialData =
                 type="submit"
                 disabled={isSubmitting}
                 className={`${
-                  isEditing ? 'w-1/2' : 'w-full'
+                  isEditing ? "w-1/2" : "w-full"
                 } px-6 py-3 rounded-md text-white transition-colors ${
-                  isSubmitting 
-                    ? 'bg-blue-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
+                  isSubmitting
+                    ? "bg-blue-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
                 }`}
               >
-                {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Job Post'}
+                {isSubmitting
+                  ? "Saving..."
+                  : isEditing
+                  ? "Save Changes"
+                  : "Create Job Post"}
               </button>
-              
+
               {isEditing && (
                 <button
                   type="button"
