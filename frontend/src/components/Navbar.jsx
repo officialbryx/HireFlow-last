@@ -37,9 +37,6 @@ const Navbar = () => {
                 alt="HireFlow"
                 className="h-8 w-8"
               />
-              <span className="ml-2 text-lg font-semibold text-gray-800 hidden sm:block">
-                HireFlow
-              </span>
             </div>
           </div>
 
