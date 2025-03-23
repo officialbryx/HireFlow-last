@@ -160,9 +160,9 @@ export const api = {
   },
 
   updateUserEmail: async (newEmail) => {
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    const { data, error } = await supabase.auth.updateUser({ email: newEmail });
     if (error) throw error;
-    return true;
+    return data || true;
   },
 
   updateUserPassword: async (newPassword) => {
@@ -187,11 +187,15 @@ export const api = {
     return data;
   },
 
-  async updateUserEmail({ email }) {
-    const { data, error } = await supabase.auth.updateUser({
-      email: email,
-    });
-    if (error) throw error;
-    return data;
+  // Add logout function
+  async logout() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
   },
 };
