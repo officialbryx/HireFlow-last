@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../services/supabaseClient";
+import { api } from "../services/api"; // Change import
+import { useQueryClient } from "@tanstack/react-query"; // Add this import
 import {
   BriefcaseIcon,
   BellIcon,
@@ -13,11 +14,16 @@ import {
 const Navbar = () => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
+  const queryClient = useQueryClient(); // Get QueryClient instance
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Clear all React Query caches to prevent data leakage between users
+      queryClient.clear();
+      
+      // Use the API logout function
+      await api.logout();
+      
       setShowConfirm(false);
       navigate("/login", { replace: true });
     } catch (error) {
