@@ -8,15 +8,18 @@ import {
 } from "@heroicons/react/24/outline";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
 import { supabase } from "../services/supabaseClient";
+import { useState } from "react";
 
 const HRNavbar = () => {
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/login", { replace: true }); // Changed to /login and added replace
+      setShowConfirm(false);
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -41,13 +44,13 @@ const HRNavbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo */}
           <div className="flex items-center">
-            <Link to="/hr/dashboard" className="flex-shrink-0">
+            <div className="flex-shrink-0">
               <img
                 src="/hireflow-logo.ico"
                 alt="HireFlow"
                 className="h-8 w-8"
               />
-            </Link>
+            </div>
           </div>
 
           {/* Right side - Navigation Items */}
@@ -63,7 +66,6 @@ const HRNavbar = () => {
               to="/hr/jobs"
             />
             <NotificationsDropdown notifications={notifications} />
-            <div className="border-l border-gray-200 h-8" />
             <NavItem
               icon={<Cog6ToothIcon className="h-5 w-5" />}
               text="Settings"
@@ -74,7 +76,10 @@ const HRNavbar = () => {
               text="FAQ'S"
               to="/hr/faq"
             />
-            <div onClick={handleSignOut} className="cursor-pointer">
+            <div
+              onClick={() => setShowConfirm(true)}
+              className="cursor-pointer"
+            >
               <NavItem
                 icon={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
                 text="Sign Out"
@@ -83,6 +88,30 @@ const HRNavbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Confirm Sign Out</h3>
+            <p className="mb-4">Are you sure you want to sign out?</p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
