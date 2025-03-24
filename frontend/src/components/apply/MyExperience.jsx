@@ -240,26 +240,6 @@ const MyExperience = ({
     }));
   };
 
-  const addWebsite = () => {
-    setFormData((prev) => ({
-      ...prev,
-      websites: [...(prev.websites || []), ""], // Store as string array
-    }));
-  };
-
-  const handleWebsiteChange = (index, value) => {
-    const newWebsites = [...(formData.websites || [])];
-    newWebsites[index] = value; // Store direct URL string
-    setFormData((prev) => ({ ...prev, websites: newWebsites }));
-  };
-
-  const deleteWebsite = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      websites: prev.websites.filter((_, i) => i !== index),
-    }));
-  };
-
   const inputStyles = (fieldName) =>
     `w-full px-4 py-2.5 rounded-lg border transition-colors duration-200 ${
       fieldErrors && fieldErrors[fieldName]
@@ -454,27 +434,25 @@ const MyExperience = ({
                       )}
                   </div>
 
-                  {!exp.currentWork && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        To Date <span className="text-red-500">*</span>
-                      </label>
-                      <DateMonthPicker
-                        value={exp.toDate}
-                        onChange={(value) =>
-                          handleWorkExperienceChange(index, "toDate", value)
-                        }
-                        placeholder="Select end date"
-                        id={`work-to-${index}`}
-                      />
-                      {fieldErrors &&
-                        fieldErrors[`workExperience.${index}.toDate`] && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {fieldErrors[`workExperience.${index}.toDate`]}
-                          </p>
-                        )}
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      To Date <span className="text-red-500">*</span>
+                    </label>
+                    <DateMonthPicker
+                      value={exp.toDate}
+                      onChange={(value) =>
+                        handleWorkExperienceChange(index, "toDate", value)
+                      }
+                      placeholder="Select end date"
+                      id={`work-to-${index}`}
+                    />
+                    {fieldErrors &&
+                      fieldErrors[`workExperience.${index}.toDate`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`workExperience.${index}.toDate`]}
+                        </p>
+                      )}
+                  </div>
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">
@@ -716,7 +694,7 @@ const MyExperience = ({
             onChange={(e) => setSkillInput(e.target.value)}
             onKeyDown={handleSkillsChange}
             placeholder="Type a skill and press Enter"
-            className={inputStyles}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </FormSection>
@@ -748,56 +726,23 @@ const MyExperience = ({
       <FormSection
         icon={<GlobeAltIcon className="h-6 w-6 text-blue-500" />}
         title="Online Presence"
-        description="Add your professional websites and social media profiles"
+        description="Add your LinkedIn profile"
       >
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h4 className="font-medium text-gray-700">Websites</h4>
-              <button
-                type="button"
-                onClick={addWebsite}
-                className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
-              >
-                <PlusCircleIcon className="h-5 w-5 mr-2" />
-                Add Website
-              </button>
-            </div>
-            {(formData.websites || []).map((website, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="url"
-                  value={website}
-                  onChange={(e) => handleWebsiteChange(index, e.target.value)}
-                  placeholder="https://example.com"
-                  className={inputStyles}
-                />
-                <button
-                  onClick={() => deleteWebsite(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors"
-                >
-                  <TrashIcon className="h-5 w-5" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-medium text-gray-700">LinkedIn Profile</h4>
-            <input
-              type="url"
-              name="linkedinUrl"
-              value={formData.linkedinUrl || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  linkedinUrl: e.target.value,
-                }))
-              }
-              placeholder="https://www.linkedin.com/in/yourprofile"
-              className={inputStyles}
-            />
-          </div>
+        <div className="space-y-2">
+          <h4 className="font-medium text-gray-700">LinkedIn Profile</h4>
+          <input
+            type="url"
+            name="linkedin_url"
+            value={formData.linkedin_url || ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                linkedin_url: e.target.value,
+              }))
+            }
+            placeholder="https://www.linkedin.com/in/yourprofile"
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
       </FormSection>
     </div>

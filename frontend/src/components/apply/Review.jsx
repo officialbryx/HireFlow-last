@@ -176,16 +176,7 @@ const Review = ({ formData }) => {
         icon={<GlobeAltIcon className="h-6 w-6 text-blue-500" />}
         title="Online Presence"
       >
-        <div className="space-y-4">
-          {formData.websites?.map((website, index) => (
-            <ReviewItem
-              key={index}
-              label={`Website ${index + 1}`}
-              value={website.url}
-            />
-          ))}
-          <ReviewItem label="LinkedIn Profile" value={formData.linkedinUrl} />
-        </div>
+        <ReviewItem label="LinkedIn Profile" value={formData.linkedin_url} />
       </ReviewSection>
 
       {/* Application Questions */}
