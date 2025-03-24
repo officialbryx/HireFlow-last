@@ -20,10 +20,10 @@ const Navbar = () => {
     try {
       // Clear all React Query caches to prevent data leakage between users
       queryClient.clear();
-      
+
       // Use the API logout function
       await api.logout();
-      
+
       setShowConfirm(false);
       navigate("/login", { replace: true });
     } catch (error) {
