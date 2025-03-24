@@ -732,12 +732,12 @@ const MyExperience = ({
           <h4 className="font-medium text-gray-700">LinkedIn Profile</h4>
           <input
             type="url"
-            name="linkedin_url"
-            value={formData.linkedin_url || ""}
+            name="linkedin"
+            value={formData.linkedin || ""}
             onChange={(e) =>
               setFormData((prev) => ({
                 ...prev,
-                linkedin_url: e.target.value,
+                linkedin: e.target.value,
               }))
             }
             placeholder="https://www.linkedin.com/in/yourprofile"

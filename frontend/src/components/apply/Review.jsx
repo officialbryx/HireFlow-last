@@ -176,7 +176,7 @@ const Review = ({ formData }) => {
         icon={<GlobeAltIcon className="h-6 w-6 text-blue-500" />}
         title="Online Presence"
       >
-        <ReviewItem label="LinkedIn Profile" value={formData.linkedin_url} />
+        <ReviewItem label="LinkedIn Profile" value={formData.linkedin} />
       </ReviewSection>
 
       {/* Application Questions */}
