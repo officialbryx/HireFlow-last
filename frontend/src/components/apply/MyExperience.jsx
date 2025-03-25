@@ -702,12 +702,12 @@ const MyExperience = ({
       <FormSection
         icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
         title="Resume/CV"
-        description="Upload your resume (PDF, DOC, or DOCX format)"
+        description="Upload your resume (PDF format)"
       >
         <div className="space-y-4">
           <input
             type="file"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf"
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, resume: e.target.files[0] }))
             }
