@@ -160,7 +160,7 @@ const Navbar = () => {
 const NavItem = ({ icon, text, to, notificationCount }) => (
   <Link
     to={to}
-    className="relative flex flex-col items-center px-3 py-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+    className="relative flex flex-col items-center px-3 py-2 text-gray-500 hover:text-black"
   >
     <div className="flex items-center justify-center">
       {icon}
