@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { PersonalInfo } from "./sections/PersonalInfo";
 import { WorkExperience } from "./sections/WorkExperience";
@@ -8,7 +8,7 @@ import { ResumeAnalysis } from "./sections/ResumeAnalysis";
 import { ScreeningQuestions } from "./sections/ScreeningQuestions";
 import StatusControls from "./StatusControls";
 import { applicationsApi } from "../../services/api/applicationsApi";
-import { useToast } from '../../hooks/useToast';
+import { useToast } from "../../hooks/useToast";
 
 const ApplicantDetails = ({
   selectedApplicant,
@@ -17,7 +17,6 @@ const ApplicantDetails = ({
   analysis,
   getBadgeColor,
   formatDate,
-  setShowPdfModal,
   onApplicantUpdated,
 }) => {
   const { showToast } = useToast();
@@ -50,45 +49,44 @@ const ApplicantDetails = ({
     linkedin_url,
     application_questions = {},
     created_at,
-    status
+    status,
   } = selectedApplicant;
 
   const tabs = [
     { id: "details", label: "Applicant Details" },
     { id: "resume", label: "Resume Analysis" },
-    { id: "screening", label: "Screening Questions" }
+    { id: "screening", label: "Screening Questions" },
   ];
 
   const handleResumeClick = () => {
-    setShowPdfModal(true);
+    if (resume_url) {
+      window.open(resume_url, "_blank");
+    }
   };
 
   const handleShortlistToggle = async () => {
     if (!id) return;
-    
+
     try {
       setIsShortlisting(true);
-      
+
       const newShortlistedStatus = !selectedApplicant.shortlisted;
-      
-      await applicationsApi.updateApplicantShortlist(
-        id, 
-        newShortlistedStatus
-      );
-      
+
+      await applicationsApi.updateApplicantShortlist(id, newShortlistedStatus);
+
       if (onApplicantUpdated) {
-        onApplicantUpdated(id, { 
-          shortlisted: newShortlistedStatus 
+        onApplicantUpdated(id, {
+          shortlisted: newShortlistedStatus,
         });
       }
-      
+
       setJustUpdated(true);
       setTimeout(() => setJustUpdated(false), 1500);
-      
+
       showToast(
-        "success", 
-        newShortlistedStatus 
-          ? "Candidate added to shortlist" 
+        "success",
+        newShortlistedStatus
+          ? "Candidate added to shortlist"
           : "Candidate removed from shortlist"
       );
     } catch (error) {
@@ -122,7 +120,11 @@ const ApplicantDetails = ({
                   "Pending"}
               </span>
               {selectedApplicant?.shortlisted && (
-                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ${justUpdated ? 'animate-pulse' : ''}`}>
+                <span
+                  className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ${
+                    justUpdated ? "animate-pulse" : ""
+                  }`}
+                >
                   Shortlisted
                 </span>
               )}
@@ -130,29 +132,48 @@ const ApplicantDetails = ({
                 onClick={handleShortlistToggle}
                 disabled={isShortlisting}
                 className={`ml-2 px-2 py-1 text-xs rounded-md flex items-center ${
-                  isShortlisting ? "bg-gray-200 text-gray-500" :
-                  selectedApplicant.shortlisted 
-                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300" 
+                  isShortlisting
+                    ? "bg-gray-200 text-gray-500"
+                    : selectedApplicant.shortlisted
+                    ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300"
                     : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
                 }`}
               >
                 {isShortlisting ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Updating...
                   </>
+                ) : selectedApplicant.shortlisted ? (
+                  "Remove from Shortlist"
                 ) : (
-                  selectedApplicant.shortlisted ? "Remove from Shortlist" : "Add to Shortlist"
+                  "Add to Shortlist"
                 )}
               </button>
             </div>
-            
-            <StatusControls 
-              applicantId={id} 
-              currentStatus={status} 
+
+            <StatusControls
+              applicantId={id}
+              currentStatus={status}
               onStatusUpdated={onApplicantUpdated}
               getBadgeColor={getBadgeColor}
             />
@@ -162,7 +183,7 @@ const ApplicantDetails = ({
               onClick={handleResumeClick}
               className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              View Resume
+              Download Resume
             </button>
           )}
         </div>

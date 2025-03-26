@@ -623,30 +623,10 @@ const EvaluateJobs = () => {
                     ))}
                   </div>
 
-                  {/* Education and Experience */}
-                  <div className="mb-4">
-                    <p className="text-yellow-400 font-semibold">Education:</p>
-                    {results.console_output.education.details.map(
-                      (edu, index) => (
-                        <div key={index} className="ml-4 mb-2">
-                          {edu.degree && (
-                            <p className="text-white">- {edu.degree}</p>
-                          )}
-                          {edu.school && (
-                            <p className="text-gray-400 ml-2">{edu.school}</p>
-                          )}
-                          {edu.year && (
-                            <p className="text-gray-400 ml-2">{edu.year}</p>
-                          )}
-                        </div>
-                      )
-                    )}
-                  </div>
-
                   {/* Match Results Summary */}
                   <div className="border-t border-gray-700 pt-4 mt-4">
                     <p className="text-yellow-400 font-semibold">
-                      $ Final Assessment:
+                      Final Assessment:
                     </p>
                     <p className="ml-4 mt-2">
                       Overall Match:{" "}

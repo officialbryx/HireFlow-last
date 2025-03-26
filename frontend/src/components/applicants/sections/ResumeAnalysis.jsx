@@ -1,173 +1,219 @@
-import { 
-  DocumentTextIcon, 
-  CheckCircleIcon, 
+import React, { useState } from "react";
+import axios from "axios";
+import {
+  DocumentTextIcon,
+  CloudArrowUpIcon,
   ExclamationCircleIcon,
-  LightBulbIcon,
-  ClipboardIcon
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
-const AnalysisSection = ({ title, children, icon: Icon }) => (
-  <div className="mb-6 last:mb-0">
-    <h4 className="font-medium text-gray-700 mb-3 flex items-center">
-      {Icon && <Icon className="h-5 w-5 mr-2 text-gray-500" />}
-      {title}
-    </h4>
-    {children}
-  </div>
-);
+export const ResumeAnalysis = () => {
+  const [jobPost, setJobPost] = useState("");
+  const [resumeFile, setResumeFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-const MatchItem = ({ label, match, description }) => (
-  <div className="flex items-start gap-2 mb-2 last:mb-0">
-    {match ? (
-      <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-    ) : (
-      <ExclamationCircleIcon className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-    )}
-    <div>
-      <p className="font-medium text-gray-700">{label}</p>
-      {description && <p className="text-sm text-gray-600">{description}</p>}
-    </div>
-  </div>
-);
+  const handleFileChange = (event) => {
+    setResumeFile(event.target.files[0]);
+  };
 
-const renderMatchRate = (rate) => {
-  const percentage = Math.round(rate * 100);
-  return (
-    <div className="flex items-center">
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className={`h-2.5 rounded-full ${
-            percentage >= 70 ? "bg-emerald-600" : "bg-amber-500"
-          }`}
-          style={{ width: `${percentage}%` }}
-        ></div>
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    setResumeFile(event.dataTransfer.files[0]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("jobPost", jobPost);
+    formData.append("resumeFile", resumeFile);
+
+    try {
+      const response = await axios.post("/api/evaluate", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setResults(response.data);
+    } catch (error) {
+      setError("An error occurred while evaluating the resume.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const LoadingSpinner = () => (
+    <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-700 font-medium">Analyzing resume...</p>
+        <p className="text-sm text-gray-500 mt-2">This may take a moment</p>
       </div>
-      <span className="ml-2 text-sm font-medium">{percentage}%</span>
     </div>
   );
-};
-
-export const ResumeAnalysis = ({ analysis = null, handleViewResume }) => {
-  // Show empty state if no analysis data
-  if (!analysis) {
-    return (
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-        <div className="text-center text-gray-500">
-          <DocumentTextIcon className="h-8 w-8 mx-auto mb-2" />
-          <p>No resume analysis available</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Destructure with default values to prevent mapping errors
-  const {
-    skillsMatch = 0,
-    experienceMatch = 0,
-    educationMatch = 0,
-    extractedSkills = [],
-    relevantSkills = [],
-    keyInsights = [],
-    recommendations = []
-  } = analysis;
-
-  // Ensure arrays are actually arrays
-  const safeExtractedSkills = Array.isArray(extractedSkills) ? extractedSkills : [];
-  const safeRelevantSkills = Array.isArray(relevantSkills) ? relevantSkills : [];
-  const safeKeyInsights = Array.isArray(keyInsights) ? keyInsights : [];
-  const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
 
   return (
-    <div className="space-y-8">
-      {/* Resume & Analysis */}
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-start mb-6">
-          <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-            <ClipboardIcon className="h-5 w-5 mr-2 text-gray-500" />
-            Resume Analysis
-          </h3>
-
-          {handleViewResume && (
-            <button
-              onClick={handleViewResume}
-              className="flex items-center gap-2 px-4 py-2 border border-blue-600 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors text-sm"
-            >
-              <DocumentTextIcon className="h-4 w-4" />
-              View Resume
-            </button>
-          )}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
+          <h2 className="text-2xl font-bold text-white flex items-center">
+            <DocumentTextIcon className="h-8 w-8 mr-3" />
+            Resume Analysis Tool
+          </h2>
+          <p className="text-blue-100 mt-2">
+            Compare resumes against job requirements for detailed compatibility
+            analysis
+          </p>
         </div>
-        
-        <div className="space-y-6">
-          <div>
-            <label className="text-sm text-gray-600 block mb-2">Overall Match</label>
-            {renderMatchRate((skillsMatch + experienceMatch + educationMatch) / 3)}
-          </div>
 
-          <div className="grid grid-cols-3 gap-6 pt-4 border-t">
-            <div>
-              <label className="text-sm text-gray-600 block mb-2">Skills Match</label>
-              {renderMatchRate(skillsMatch)}
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Job Post Section */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <label className="block text-lg font-medium text-gray-900 mb-4">
+                Job Description
+              </label>
+              <textarea
+                value={jobPost}
+                onChange={(e) => setJobPost(e.target.value)}
+                rows="6"
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Paste the complete job description here..."
+                required
+              />
             </div>
-            <div>
-              <label className="text-sm text-gray-600 block mb-2">Experience Match</label>
-              {renderMatchRate(experienceMatch)}
-            </div>
-            <div>
-              <label className="text-sm text-gray-600 block mb-2">Education Match</label>
-              {renderMatchRate(educationMatch)}
-            </div>
-          </div>
 
-          {safeKeyInsights.length > 0 && (
-            <div className="pt-4 border-t">
-              <h4 className="font-medium text-gray-700 mb-2">Key Insights</h4>
-              <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                {safeKeyInsights.map((insight, idx) => (
-                  <li key={idx}>{insight}</li>
-                ))}
-              </ul>
+            {/* Resume Upload Section */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <label className="block text-lg font-medium text-gray-900 mb-4">
+                Resume Upload
+              </label>
+              <div
+                className={`relative border-2 ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-dashed border-gray-300"
+                } rounded-lg p-8 text-center`}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+              >
+                <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="mt-4">
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                      {resumeFile
+                        ? resumeFile.name
+                        : "Drop your resume here, or"}
+                    </span>
+                    <input
+                      id="file-upload"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx"
+                    />
+                    {!resumeFile && (
+                      <span className="text-blue-600 hover:text-blue-500">
+                        browse to upload
+                      </span>
+                    )}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    PDF, DOC, DOCX up to 10MB
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={isLoading || !jobPost || !resumeFile}
+                className="px-8 py-3 rounded-lg text-white font-medium transition-all
+                  disabled:bg-gray-300 disabled:cursor-not-allowed
+                  bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Analyzing Resume...
+                  </span>
+                ) : (
+                  "Analyze Resume"
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <ExclamationCircleIcon className="h-5 w-5 text-red-400 mr-2" />
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
             </div>
           )}
 
-          {safeRecommendations.length > 0 && (
-            <div className="pt-4 border-t">
-              <h4 className="font-medium text-gray-700 mb-2 flex items-center">
-                <LightBulbIcon className="h-5 w-5 mr-2 text-gray-500" />
-                Recommendations
-              </h4>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <ul className="list-disc list-inside space-y-2 text-sm text-blue-700">
-                  {safeRecommendations.map((rec, index) => (
-                    <li key={index}>{rec}</li>
-                  ))}
-                </ul>
+          {/* Results Section */}
+          {results && (
+            <div className="mt-8 border-t border-gray-200 pt-8">
+              <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                <ChartBarIcon className="h-6 w-6 mr-2 text-blue-500" />
+                Analysis Results
+              </h3>
+              {/* Add your results visualization components here */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <pre className="overflow-auto text-sm text-gray-700">
+                  {JSON.stringify(results, null, 2)}
+                </pre>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Skills Detected Section */}
-      {safeExtractedSkills.length > 0 && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <h3 className="font-semibold text-lg mb-4 text-gray-800">Skills Detected in Resume</h3>
-          <div className="flex flex-wrap gap-2">
-            {safeExtractedSkills.map((skill, index) => (
-              <span
-                key={index}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  safeRelevantSkills.includes(skill)
-                    ? "bg-green-50 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {isLoading && <LoadingSpinner />}
     </div>
   );
 };
