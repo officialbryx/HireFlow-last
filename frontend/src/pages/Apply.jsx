@@ -255,6 +255,11 @@ const Apply = () => {
         application_questions: formData.applicationQuestions,
         terms_accepted: formData.termsAccepted,
         status: "pending",
+        // Add these fields at the top level
+        phone_type: formData.phoneType,
+        phone_code: formData.phoneCode,
+        phone_number: formData.phoneNumber,
+        email: formData.email,
       };
 
       const response = await applicationsApi.submitApplication(applicationData);

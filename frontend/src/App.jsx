@@ -17,6 +17,7 @@ import Careers from "./pages/Careers";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
+import JobSeekerFAQ from "./pages/FAQ";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -89,13 +90,14 @@ const App = () => {
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/jobposts" element={<JobPosts />} />
+        <Route path="/faq" element={<JobSeekerFAQ />} /> {/* Job Seeker FAQ */}
         <Route path="/apply/:company" element={<Apply />} />
         <Route path="/apply/:company/:jobId" element={<Apply />} />
         <Route path="/createjobpost" element={<CreateJobPost />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/hr/dashboard" element={<Dashboard />} />
         <Route path="/hr/jobs/*" element={<Jobs />} />
-        <Route path="/hr/faq" element={<FAQ />} />
+        <Route path="/hr/faq" element={<FAQ />} /> {/* HR FAQ */}
         <Route path="/hr/notifications" element={<Notifications />} />
       </Routes>
       {/* Enable this for cache debugging*/}

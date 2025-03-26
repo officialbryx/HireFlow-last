@@ -7,6 +7,7 @@ const EvaluateJobs = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,6 +46,39 @@ const EvaluateJobs = () => {
       setResults(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type === "application/pdf") {
+        setResumeFile(file);
+      } else {
+        alert("Please upload a PDF file");
+      }
     }
   };
 
@@ -137,11 +171,29 @@ const EvaluateJobs = () => {
                   Resume
                 </h2>
               </div>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center h-64">
+              <div
+                className={`border-2 ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-dashed border-gray-300"
+                } rounded-lg p-6 flex flex-col items-center justify-center h-64 relative`}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <input
                   type="file"
-                  onChange={(e) => setResumeFile(e.target.files[0])}
-                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type === "application/pdf") {
+                      setResumeFile(file);
+                    } else if (file) {
+                      alert("Please upload a PDF file");
+                      e.target.value = "";
+                    }
+                  }}
+                  accept=".pdf"
                   className="hidden"
                   id="resume-upload"
                   required
@@ -172,7 +224,7 @@ const EvaluateJobs = () => {
                   Choose File
                 </label>
                 <p className="mt-2 text-xs text-gray-500">
-                  Supported formats: PDF, DOC, & DOCX
+                  Supported format: PDF
                 </p>
               </div>
             </div>

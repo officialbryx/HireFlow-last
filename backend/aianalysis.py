@@ -12,7 +12,7 @@ print(f"Using device: {device}")
 
 # Configure DeepSeek client
 client = OpenAI(
-    api_key="",  
+    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4",  
     base_url="https://api.deepseek.com/v1"  
 )
 
@@ -30,56 +30,56 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
 
         CANDIDATE PROFILE:
         Personal Information:
-        - Name: {analysis_results['resume_analysis']['personal_info'].get('name', 'Not provided')}
-        - Email: {analysis_results['resume_analysis']['personal_info'].get('email', 'Not provided')}
-        - Location: {analysis_results['resume_analysis']['personal_info'].get('location', 'Not provided')}
+        Name: {analysis_results['resume_analysis']['personal_info'].get('name', 'Not provided')}
+        Email: {analysis_results['resume_analysis']['personal_info'].get('email', 'Not provided')}
+        Location: {analysis_results['resume_analysis']['personal_info'].get('location', 'Not provided')}
 
         Skills Assessment:
-        - Hard Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['hard_skills'].keys())}
-        - Soft Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['soft_skills'].keys())}
-        - Missing Critical Skills: {', '.join(analysis_results['comparison']['skill_match']['missing'])}
-        - Skills Match Rate: {analysis_results['comparison']['skill_match']['match_percentage']}%
+        Hard Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['hard_skills'].keys())}
+        Soft Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['soft_skills'].keys())}
+        Missing Critical Skills: {', '.join(analysis_results['comparison']['skill_match']['missing'])}
+        Skills Match Rate: {analysis_results['comparison']['skill_match']['match_percentage']}%
 
         Education:
-        - Level: {', '.join(analysis_results['resume_analysis']['education']['levels']) if analysis_results['resume_analysis']['education']['levels'] else 'Not specified'}
-        - Requirements Met: {'Yes' if analysis_results['comparison']['education_match']['sufficient'] else 'No'}
+        Level: {', '.join(analysis_results['resume_analysis']['education']['levels']) if analysis_results['resume_analysis']['education']['levels'] else 'Not specified'}
+        Requirements Met: {'Yes' if analysis_results['comparison']['education_match']['sufficient'] else 'No'}
 
         Experience:
-        - Years: {analysis_results['resume_analysis']['experience']['years']}
-        - Recent Positions: {', '.join(analysis_results['resume_analysis']['experience']['positions'][:2]) if analysis_results['resume_analysis']['experience']['positions'] else 'Not specified'}
-        - Requirements Met: {'Yes' if analysis_results['comparison']['experience_match']['sufficient'] else 'No'}
+        Years: {analysis_results['resume_analysis']['experience']['years']}
+        Recent Positions: {', '.join(analysis_results['resume_analysis']['experience']['positions'][:2]) if analysis_results['resume_analysis']['experience']['positions'] else 'Not specified'}
+        Requirements Met: {'Yes' if analysis_results['comparison']['experience_match']['sufficient'] else 'No'}
 
         Overall Match Score: {analysis_results['comparison']['overall_match']['score']}%
 
-        Please provide a structured HR analysis with the following sections:
+        Please provide a plain text analysis with the following sections. Do not use any special characters, formatting, or bullet points:
 
         1. CANDIDATE OVERVIEW
-        - Summarize the candidate's profile
-        - Highlight key qualifications
-        - Note any immediate red flags
+        Write a simple summary of the candidate's profile.
+        Include their key qualifications without bullet points.
+        List any concerns in plain text.
 
         2. SKILLS ANALYSIS
-        - Match between required and present skills
-        - Critical missing skills and impact
-        - Skill development potential
+        List the matching skills in plain text.
+        Note missing critical skills.
+        Describe skill development potential.
 
         3. QUALIFICATION ASSESSMENT
-        - Education alignment with requirements
-        - Experience relevance and depth
-        - Overall qualification status
+        Describe education background.
+        Explain experience level.
+        State overall qualification fit.
 
         4. HIRING RECOMMENDATIONS
-        - Interview focus areas
-        - Potential role fit
-        - Compensation considerations
-        - Risk assessment
+        List interview topics.
+        Describe role fit.
+        Note compensation factors.
+        List risks plainly.
 
         5. DEVELOPMENT OPPORTUNITIES
-        - Training needs
-        - Growth potential
-        - Career path alignment
+        List training needs.
+        Note growth areas.
+        Describe career alignment.
 
-        Format each section with clear bullet points and concise, actionable insights for HR use.
+        Use only plain text with numbers for sections. Avoid any special characters or formatting.
         """
 
         # Generate HR-focused analysis

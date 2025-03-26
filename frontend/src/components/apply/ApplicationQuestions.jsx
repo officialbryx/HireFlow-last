@@ -145,7 +145,7 @@ const ApplicationQuestions = ({
     },
     {
       id: "relativesInCompany",
-      text: "Do you have relatives working with this company, any of the {company} subsidiaries, or other companies?*",
+      text: "Do you have relatives working with this company, any of the company subsidiaries, or other companies?*",
     },
     {
       id: "relativesInIndustry",

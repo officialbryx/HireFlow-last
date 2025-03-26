@@ -5,11 +5,8 @@ import { useJobs } from "../hooks/useJobs";
 import {
   MagnifyingGlassIcon,
   MapPinIcon,
-  ShareIcon,
   UserGroupIcon,
-  HeartIcon,
   BriefcaseIcon,
-  CalendarIcon,
   ClockIcon,
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
@@ -279,14 +276,6 @@ const JobPosts = () => {
                       >
                         Apply Now
                       </button>
-                      <div className="flex gap-3 mt-2">
-                        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 transition duration-200">
-                          <HeartIcon className="h-5 w-5 text-gray-600" />
-                        </button>
-                        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 transition duration-200">
-                          <ShareIcon className="h-5 w-5 text-gray-600" />
-                        </button>
-                      </div>
                     </div>
                   </div>
 
