@@ -108,7 +108,7 @@ const Navbar = () => {
 
             {/* Confirmation Dialog */}
             {showConfirm && (
-              <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl">
                   <h3 className="text-lg font-bold mb-4">Confirm Sign Out</h3>
                   <p className="mb-4">Are you sure you want to sign out?</p>
