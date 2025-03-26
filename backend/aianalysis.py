@@ -12,7 +12,7 @@ print(f"Using device: {device}")
 
 # Configure DeepSeek client
 client = OpenAI(
-    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4",  
+    api_key="",  
     base_url="https://api.deepseek.com/v1"  
 )
 
