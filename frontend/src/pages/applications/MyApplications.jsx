@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { BriefcaseIcon, FunnelIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -29,7 +29,7 @@ const MyApplications = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  const applications = applicationsData?.data || [];
+  const applications = useMemo(() => applicationsData?.data || [], [applicationsData]);
   const totalPages = Math.ceil((applicationsData?.total || 0) / ITEMS_PER_PAGE);
 
   useEffect(() => {
@@ -40,6 +40,19 @@ const MyApplications = () => {
       }, 100);
     }
   }, [highlightedAppId, applications]);
+
+  // Add this function to detect archived job postings
+  const isJobArchived = (application) => {
+    return application?.job_posting?.status === 'archived' 
+  };
+  console.log('Application data:', applications);
+  // Add this near the console.log statement already in the file
+console.log('Job archived check:', {
+    is_archived: applications?.job_posting?.is_archived,
+    archived: applications?.job_posting?.archived,
+    status: applications?.job_posting?.status,
+    active: applications?.job_posting?.active
+  });
 
   const getStatusBadge = (status) => {
     switch(status) {
@@ -137,21 +150,33 @@ const MyApplications = () => {
                         ref={application.id === highlightedAppId ? highlightedRowRef : null}
                         className={`hover:bg-gray-50 ${
                           application.id === highlightedAppId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                        }`}
+                        } ${isJobArchived(application) ? 'bg-gray-50' : ''}`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {application.job_posting?.job_title}
+                          <div className="flex items-center">
+                            <div className={`text-sm font-medium ${isJobArchived(application) ? 'text-gray-500' : 'text-gray-900'}`}>
+                              {application.job_posting?.job_title}
+                            </div>
+                            {isJobArchived(application) && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Archived
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
+                          <div className={`text-sm ${isJobArchived(application) ? 'text-gray-400' : 'text-gray-500'}`}>
                             {application.job_posting?.company_name}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(application.status)}`}>
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            isJobArchived(application) 
+                              ? 'bg-gray-100 text-gray-600 border border-gray-200' 
+                              : getStatusBadge(application.status)
+                          }`}>
                             {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                            {isJobArchived(application) && " (Job Archived)"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -163,7 +188,7 @@ const MyApplications = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Link 
                             to={`/applications/${application.id}`} 
-                            className="text-blue-600 hover:text-blue-900"
+                            className={`${isJobArchived(application) ? 'text-gray-400 hover:text-gray-600' : 'text-blue-600 hover:text-blue-900'}`}
                           >
                             View Details
                           </Link>

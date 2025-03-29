@@ -462,7 +462,8 @@ export const applicationsApi = {
             job_title,
             company_name,
             location,  
-            salary_range
+            salary_range,
+            status
           )
         `, { count: 'exact' })
         .eq('applicant_id', user.id);
