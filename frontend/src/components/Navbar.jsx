@@ -4,18 +4,16 @@ import { api } from "../services/api";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BriefcaseIcon,
-  BellIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
   QuestionMarkCircleIcon,
-  InboxIcon,
 } from "@heroicons/react/24/outline";
+import JobseekerNotificationsDropdown from "./notifications/JobseekerNotificationsDropdown";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
@@ -57,34 +55,10 @@ const Navbar = () => {
                 text="Jobs"
                 to="/jobposts"
               />
-              <div className="relative">
-                <div onClick={() => setShowNotifications(!showNotifications)}>
-                  <NavItem
-                    icon={<BellIcon className="h-5 w-5" />}
-                    text="Notifications"
-                  />
-                </div>
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <BellIcon className="h-5 w-5 mr-2 text-gray-500" />
-                        Notifications
-                      </h3>
-                      <span className="text-xs text-gray-500">0 new</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                      <InboxIcon className="h-16 w-16 text-gray-300 mb-4" />
-                      <p className="text-gray-600 font-medium mb-2">
-                        No notifications
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        You're all caught up! Check back later.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              
+              {/* Replace the old notifications with our new component */}
+              <JobseekerNotificationsDropdown />
+              
               <NavItem
                 icon={<Cog6ToothIcon className="h-5 w-5" />}
                 text="Settings"

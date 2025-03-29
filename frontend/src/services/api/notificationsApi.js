@@ -25,6 +25,14 @@ export const notificationsApi = {
 
   async getNotifications({ page = 1, pageSize = 10 } = {}) {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      // Calculate range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       const { data, count, error } = await supabase
         .from('notifications')
         .select(`
@@ -37,17 +45,60 @@ export const notificationsApi = {
             personal_info
           )
         `, { count: 'exact' })
-        .order('created_at', { ascending: false });
+        .eq('recipient_id', user.id)  // Only get notifications for this user
+        .order('created_at', { ascending: false })
+        .range(from, to); // Apply pagination
 
       if (error) throw error;
 
       return {
         data: data || [],
-        total: count || 0
+        total: count || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
       };
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      return { data: [], total: 0 };
+      return { data: [], total: 0, page, pageSize, totalPages: 0 };
+    }
+  },
+
+  async getJobseekerNotifications({ page = 1, pageSize = 10 } = {}) {
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      // Calculate range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, count, error } = await supabase
+        .from('notifications')
+        .select(`
+          *,
+          job_posting:job_posting_id (
+            job_title,
+            company_name
+          )
+        `, { count: 'exact' })
+        .eq('recipient_id', user.id) // Only get notifications for this user
+        .order('created_at', { ascending: false })
+        .range(from, to); // Apply pagination
+
+      if (error) throw error;
+
+      return {
+        data: data || [],
+        total: count || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      };
+    } catch (error) {
+      console.error('Error fetching jobseeker notifications:', error);
+      return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
   },
 
