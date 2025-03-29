@@ -1,28 +1,35 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { notificationsApi } from '../../services/api/notificationsApi';
-import { formatDistanceToNow } from 'date-fns';
-import { BellIcon, CheckCircleIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import HRNavbar from '../../components/HRNavbar';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { notificationsApi } from "../../services/api/notificationsApi";
+import { formatDistanceToNow } from "date-fns";
+import {
+  BellIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import HRNavbar from "../../components/HRNavbar";
+import { useQuery } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
 
 const Notifications = () => {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  const { 
-    data: notificationsData, 
-    isLoading, 
+  const {
+    data: notificationsData,
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useQuery({
-    queryKey: ['notifications', page],
-    queryFn: () => notificationsApi.getNotifications({ 
-      page, 
-      pageSize: ITEMS_PER_PAGE 
-    }),
+    queryKey: ["notifications", page],
+    queryFn: () =>
+      notificationsApi.getNotifications({
+        page,
+        pageSize: ITEMS_PER_PAGE,
+      }),
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     cacheTime: 1000 * 60 * 30, // Cache for 30 minutes
   });
@@ -39,11 +46,13 @@ const Notifications = () => {
   }, [refetch]);
 
   const notifications = notificationsData?.data || [];
-  const totalPages = Math.ceil((notificationsData?.total || 0) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    (notificationsData?.total || 0) / ITEMS_PER_PAGE
+  );
 
-  const filteredNotifications = notifications.filter(notification => {
-    if (filter === 'unread') return !notification.read;
-    if (filter === 'read') return notification.read;
+  const filteredNotifications = notifications.filter((notification) => {
+    if (filter === "unread") return !notification.read;
+    if (filter === "read") return notification.read;
     return true;
   });
 
@@ -53,39 +62,45 @@ const Notifications = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <p className="text-sm text-gray-700">
-            Showing{' '}
-            <span className="font-medium">{((page - 1) * ITEMS_PER_PAGE) + 1}</span>
-            {' '}-{' '}
+            Showing{" "}
+            <span className="font-medium">
+              {(page - 1) * ITEMS_PER_PAGE + 1}
+            </span>{" "}
+            -{" "}
             <span className="font-medium">
               {Math.min(page * ITEMS_PER_PAGE, notificationsData?.total || 0)}
-            </span>
-            {' '}of{' '}
-            <span className="font-medium">{notificationsData?.total || 0}</span>
-            {' '}results
+            </span>{" "}
+            of{" "}
+            <span className="font-medium">{notificationsData?.total || 0}</span>{" "}
+            results
           </p>
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className={`
               inline-flex items-center px-3 py-1.5 rounded-md text-sm
-              ${page === 1 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-gray-50'}
+              ${
+                page === 1
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-50"
+              }
             `}
           >
             <ChevronLeftIcon className="h-5 w-5 mr-1" />
             Previous
           </button>
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className={`
               inline-flex items-center px-3 py-1.5 rounded-md text-sm
-              ${page >= totalPages 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-gray-50'}
+              ${
+                page >= totalPages
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-50"
+              }
             `}
           >
             Next
@@ -100,34 +115,37 @@ const Notifications = () => {
     try {
       return formatDistanceToNow(new Date(date), { addSuffix: true });
     } catch (error) {
-      return 'Invalid date';
+      return "Invalid date";
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter(n => !n.read);
+      const unreadNotifications = notifications.filter((n) => !n.read);
       await Promise.all(
-        unreadNotifications.map(notification => 
+        unreadNotifications.map((notification) =>
           notificationsApi.markAsRead(notification.id)
         )
       );
       await refetch();
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error("Error marking all as read:", error);
     }
   };
 
   const handleToggleRead = async (e, notificationId, currentReadStatus) => {
     e.preventDefault(); // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
-    
+
     try {
-      await notificationsApi.toggleReadStatus(notificationId, currentReadStatus);
+      await notificationsApi.toggleReadStatus(
+        notificationId,
+        currentReadStatus
+      );
       // Refresh notifications list after toggle
       await refetch();
     } catch (error) {
-      console.error('Error toggling notification status:', error);
+      console.error("Error toggling notification status:", error);
     }
   };
 
@@ -159,8 +177,18 @@ const Notifications = () => {
                       <option value="read">Read only</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -174,7 +202,7 @@ const Notifications = () => {
                 </div>
               </div>
             </div>
-            
+
             {isLoading ? (
               <div className="px-4 py-12 flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -192,7 +220,12 @@ const Notifications = () => {
                       className="block transition-colors duration-150 hover:bg-gray-50 relative group"
                     >
                       <Link
-                        to={`/hr/jobs/${notification.job_posting_id}`}
+                        to={`/hr/jobs?tab=applicants&jobId=${notification.job_posting_id}`}
+                        onClick={() => {
+                          if (!notification.read) {
+                            notificationsApi.markAsRead(notification.id);
+                          }
+                        }}
                         className="block"
                       >
                         <div className="px-6 py-4">
@@ -216,17 +249,27 @@ const Notifications = () => {
                               </p>
                             </div>
                             <button
-                              onClick={(e) => handleToggleRead(e, notification.id, notification.read)}
+                              onClick={(e) =>
+                                handleToggleRead(
+                                  e,
+                                  notification.id,
+                                  notification.read
+                                )
+                              }
                               className={`
                                 opacity-0 group-hover:opacity-100 transition-opacity
                                 inline-flex items-center px-2 py-1 rounded-md text-xs
-                                ${notification.read 
-                                  ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                  : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50'}
+                                ${
+                                  notification.read
+                                    ? "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                                    : "text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                                }
                               `}
                             >
                               <CheckIcon className="h-4 w-4 mr-1" />
-                              {notification.read ? 'Mark as unread' : 'Mark as read'}
+                              {notification.read
+                                ? "Mark as unread"
+                                : "Mark as read"}
                             </button>
                           </div>
                         </div>
@@ -241,8 +284,8 @@ const Notifications = () => {
                 <div className="flex flex-col items-center">
                   <BellIcon className="h-12 w-12 text-gray-300 mb-4" />
                   <p className="text-gray-500 text-sm">
-                    {filter === 'all' 
-                      ? 'No notifications found' 
+                    {filter === "all"
+                      ? "No notifications found"
                       : `No ${filter} notifications`}
                   </p>
                 </div>

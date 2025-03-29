@@ -109,7 +109,12 @@ const NotificationsDropdown = () => {
                   }`}
                 >
                   <Link
-                    to={`/hr/jobs/${notification.job_posting_id}`}
+                    to={`/hr/jobs?tab=applicants&jobId=${notification.job_posting_id}`}
+                    onClick={() => {
+                      if (!notification.read) {
+                        notificationsApi.markAsRead(notification.id);
+                      }
+                    }}
                     className="block"
                   >
                     <div className="flex items-start">

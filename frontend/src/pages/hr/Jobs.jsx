@@ -104,7 +104,7 @@ const Jobs = () => {
     const tabParam = searchParams.get("tab");
     if (
       tabParam &&
-      ["view", "create", "archived", "applicants", "evaluate"].includes(
+      ["view", "create", "archived", "applicants", "evaluate", "rank"].includes(
         tabParam
       )
     ) {
@@ -112,11 +112,11 @@ const Jobs = () => {
 
       // If it's the applicants tab, check for filters
       if (tabParam === "applicants") {
-        const filterParam = searchParams.get("filter");
-        if (filterParam === "shortlisted") {
-          // Set a filter state for the ViewApplicants component
-          // You'll need to add this state and pass it to the ViewApplicants component
-          setApplicantFilter("shortlisted");
+        const jobIdParam = searchParams.get("jobId");
+        if (jobIdParam) {
+          setJobIdFilter(jobIdParam);
+          // You may need to reset other filters when a specific job is selected
+          setApplicantFilter("all");
         }
       }
     }
