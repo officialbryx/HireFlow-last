@@ -1,14 +1,33 @@
 import { useState } from 'react';
 import { applicationsApi } from '../../services/api/applicationsApi';
+import { notificationsApi } from '../../services/api/notificationsApi';
 
 const StatusControls = ({ 
-  applicantId, 
+  applicantId,
+  jobId, 
+  applicantUserId, 
   currentStatus, 
   onStatusUpdated,
-  getBadgeColor 
+  getBadgeColor,
+  jobTitle = "this position" // Default value if not provided
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeStatus, setActiveStatus] = useState(null);
+
+  const getStatusNotificationMessage = (status) => {
+    switch(status) {
+      case 'pending':
+        return `Your application for ${jobTitle} has been marked as pending review.`;
+      case 'approved':
+        return `Congratulations! Your application for ${jobTitle} has been approved.`;
+      case 'interview':
+        return `Good news! We'd like to schedule an interview for your application to ${jobTitle}.`;
+      case 'rejected':
+        return `Thank you for your interest in ${jobTitle}. Unfortunately, we've decided not to move forward with your application at this time.`;
+      default:
+        return `Your application status for ${jobTitle} has been updated to ${status}.`;
+    }
+  };
 
   const handleStatusChange = async (newStatus) => {
     if (currentStatus === newStatus || isUpdating) return;
@@ -18,6 +37,17 @@ const StatusControls = ({
     
     try {
       await applicationsApi.updateApplicationStatus(applicantId, newStatus);
+      
+      // Create notification for the applicant
+      if (applicantUserId) {
+        await notificationsApi.createNotification({
+          job_posting_id: jobId,
+          application_id: applicantId,
+          recipient_id: applicantUserId,
+          message: getStatusNotificationMessage(newStatus),
+          type: newStatus  // Now we can use the status directly as the type
+        });
+      }
       
       if (onStatusUpdated) {
         onStatusUpdated(applicantId, { status: newStatus });

@@ -36,17 +36,6 @@ const NotificationsDropdown = () => {
     }
   };
 
-  // const handleMarkAsRead = async (e, notificationId) => {
-  //   e.preventDefault(); // Prevent navigation
-  //   e.stopPropagation(); // Prevent event bubbling
-  //   try {
-  //     await notificationsApi.markAsRead(notificationId);
-  //     await fetchNotifications(); // Refresh notifications
-  //   } catch (error) {
-  //     console.error('Error marking notification as read:', error);
-  //   }
-  // };
-
   const handleMarkAllAsRead = async () => {
     try {
       // Get all unread notification IDs

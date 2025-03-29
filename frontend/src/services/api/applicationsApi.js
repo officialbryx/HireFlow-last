@@ -265,27 +265,27 @@ export const applicationsApi = {
         
       if (error) throw error;
       
-      // Optional - create notification
+      // Create notification for the applicant about status change
       const { data: appData } = await supabase
         .from('applications')
         .select(`
+          applicant_id,
           job_posting_id,
           job_posting:job_posting_id (
-            job_title,
-            creator_id
+            job_title
           )
         `)
         .eq('id', id)
         .single();
         
-      if (appData?.job_posting) {
+      if (appData) {
         await supabase
           .from('notifications')
           .insert({
             job_posting_id: appData.job_posting_id,
             application_id: id,
-            recipient_id: appData.job_posting.creator_id,
-            message: `Application status changed to ${status} for ${appData.job_posting.job_title}`,
+            recipient_id: appData.applicant_id, // Send to applicant, not employer
+            message: `Your application for ${appData.job_posting.job_title} status changed to ${status}`,
             type: status
           });
       }
@@ -343,16 +343,16 @@ export const applicationsApi = {
     console.log("API: updateApplicantShortlist called with:", { applicantId, shortlisted });
     
     try {
-      // First get the current application to check if we need to create a notification
+      // First get the current application
       const { data: currentApp, error: fetchError } = await supabase
         .from('applications')
         .select(`
           id, 
           shortlisted,
+          applicant_id,
           job_posting_id,
           job_posting:job_posting_id (
-            job_title,
-            creator_id
+            job_title
           )
         `)
         .eq('id', applicantId)
@@ -385,18 +385,18 @@ export const applicationsApi = {
         
         console.log("API: Shortlist updated successfully");
         
-        // Optionally create a notification about shortlist change
+        // Create notification for the applicant about shortlist change
         if (currentApp.job_posting) {
           const { error: notificationError } = await supabase
             .from('notifications')
             .insert({
               job_posting_id: currentApp.job_posting_id,
               application_id: currentApp.id,
-              recipient_id: currentApp.job_posting.creator_id,
+              recipient_id: currentApp.applicant_id, // Send to applicant
               message: shortlisted 
-                ? `Candidate shortlisted for ${currentApp.job_posting.job_title}`
-                : `Candidate removed from shortlist for ${currentApp.job_posting.job_title}`,
-              type: 'shortlist'
+                ? `You've been shortlisted for ${currentApp.job_posting.job_title}`
+                : `You've been removed from the shortlist for ${currentApp.job_posting.job_title}`,
+              type: 'shortlisted'
             });
           
           if (notificationError) {

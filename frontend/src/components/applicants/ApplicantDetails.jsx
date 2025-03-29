@@ -173,7 +173,10 @@ const ApplicantDetails = ({
 
             <StatusControls
               applicantId={id}
+              jobId={selectedApplicant.job_posting_id}
+              applicantUserId={selectedApplicant.user_id}
               currentStatus={status}
+              jobTitle={company}
               onStatusUpdated={onApplicantUpdated}
               getBadgeColor={getBadgeColor}
             />
