@@ -217,7 +217,8 @@ export const applicationsApi = {
       const { data, error } = await supabase
         .from("applications")
         .select(`
-          *
+          *,
+          job_posting:job_posting_id (*)
         `)
         .eq('id', id)
         .single();
@@ -443,6 +444,55 @@ export const applicationsApi = {
     } catch (error) {
       console.error('Error fetching applications by job:', error);
       throw error;
+    }
+  },
+
+  async getMyApplications({ page = 1, pageSize = 10, status = undefined } = {}) {
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      
+      // Build query with the applicant_id filter
+      let query = supabase
+        .from("applications")
+        .select(`
+          *,
+          job_posting:job_posting_id (
+            job_title,
+            company_name,
+            location,  
+            salary_range
+          )
+        `, { count: 'exact' })
+        .eq('applicant_id', user.id);
+      
+      // Apply status filter if provided
+      if (status) {
+        query = query.eq('status', status);
+      }
+      
+      // Calculate range for pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      
+      // Execute query with pagination
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      
+      if (error) throw error;
+      
+      return {
+        data: data || [],
+        total: count || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      };
+    } catch (error) {
+      console.error('Error fetching my applications:', error);
+      return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
   }
 };

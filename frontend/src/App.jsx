@@ -18,6 +18,9 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
 import JobSeekerFAQ from "./pages/FAQ";
+import ApplicationNotifications from "./pages/applications/ApplicationNotifications";
+import MyApplications from "./pages/applications/MyApplications";
+import ApplicationDetails from "./pages/applications/ApplicationDetails";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -99,6 +102,9 @@ const App = () => {
         <Route path="/hr/jobs/*" element={<Jobs />} />
         <Route path="/hr/faq" element={<FAQ />} /> {/* HR FAQ */}
         <Route path="/hr/notifications" element={<Notifications />} />
+        <Route path="/applications" element={<MyApplications />} />
+        <Route path="/applications/notifications" element={<ApplicationNotifications />} />
+        <Route path="/applications/:id" element={<ApplicationDetails />} />
       </Routes>
       {/* Enable this for cache debugging*/}
       <ReactQueryDevtools initialIsOpen={false} />

@@ -163,7 +163,7 @@ const JobseekerNotificationsDropdown = () => {
 
           <div className="px-4 py-2 border-t border-gray-200 flex items-center justify-between">
             <Link
-              to="/applications/history"
+              to="/applications/notifications"  // Change from "/applications/history"
               onClick={() => setIsOpen(false)}
               className="text-sm text-blue-600 hover:text-blue-800"
             >

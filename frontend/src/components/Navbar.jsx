@@ -8,6 +8,7 @@ import {
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
   QuestionMarkCircleIcon,
+  DocumentTextIcon, // Add this import
 } from "@heroicons/react/24/outline";
 import JobseekerNotificationsDropdown from "./notifications/JobseekerNotificationsDropdown";
 
@@ -54,6 +55,11 @@ const Navbar = () => {
                 icon={<BriefcaseIcon className="h-5 w-5" />}
                 text="Jobs"
                 to="/jobposts"
+              />
+              <NavItem
+                icon={<DocumentTextIcon className="h-5 w-5" />}
+                text="My Applications"
+                to="/applications"
               />
               
               {/* Replace the old notifications with our new component */}
