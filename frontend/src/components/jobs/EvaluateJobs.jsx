@@ -1,13 +1,160 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { jobsApi } from "../../services/api/jobsApi";
+import { applicationsApi } from "../../services/api/applicationsApi";
 
 const EvaluateJobs = () => {
+  // Existing state
   const [jobPost, setJobPost] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // New state for job and application selection
+  const [jobs, setJobs] = useState([]);
+  const [selectedJobId, setSelectedJobId] = useState("");
+  const [applications, setApplications] = useState([]);
+  const [selectedApplicationId, setSelectedApplicationId] = useState("");
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
+
+  // Fetch all available jobs on component mount
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoadingJobs(true);
+        const fetchedJobs = await jobsApi.getAllJobPostings(true);
+        setJobs(fetchedJobs);
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+        setError("Failed to load jobs. Please try again.");
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  // Fetch applications when a job is selected
+  useEffect(() => {
+    const fetchApplications = async () => {
+      if (!selectedJobId) {
+        setApplications([]);
+        return;
+      }
+
+      try {
+        setLoadingApplications(true);
+        const fetchedApplications = await applicationsApi.getApplicationsByJob(selectedJobId);
+        setApplications(fetchedApplications);
+      } catch (err) {
+        console.error("Error fetching applications:", err);
+        setError("Failed to load applications. Please try again.");
+      } finally {
+        setLoadingApplications(false);
+      }
+    };
+
+    fetchApplications();
+  }, [selectedJobId]);
+
+  // Auto-populate job description when a job is selected
+  useEffect(() => {
+    const populateJobDetails = async () => {
+      if (!selectedJobId) {
+        setJobPost("");
+        return;
+      }
+
+      try {
+        const jobDetails = await jobsApi.getJobPostingDetails(selectedJobId);
+        
+        // Format the job posting as a complete description
+        const responsibilities = jobDetails.job_responsibility?.map(r => r.responsibility) || [];
+        const qualifications = jobDetails.job_qualification?.map(q => q.qualification) || [];
+        const skills = jobDetails.job_skill?.map(s => s.skill) || [];
+        
+        const formattedJobPost = `
+Job Title: ${jobDetails.job_title}
+Company: ${jobDetails.company_name}
+Location: ${jobDetails.location}
+Employment Type: ${jobDetails.employment_type}
+Salary Range: ${jobDetails.salary_range || 'Not specified'}
+
+About the Company:
+${jobDetails.about_company || jobDetails.company_description || 'No company description provided.'}
+
+Job Description:
+${jobDetails.company_description || 'No job description provided.'}
+
+Responsibilities:
+${responsibilities.length > 0 ? responsibilities.map(r => `- ${r}`).join('\n') : 'Not specified'}
+
+Qualifications:
+${qualifications.length > 0 ? qualifications.map(q => `- ${q}`).join('\n') : 'Not specified'}
+
+Skills Required:
+${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
+        `.trim();
+        
+        setJobPost(formattedJobPost);
+      } catch (err) {
+        console.error("Error fetching job details:", err);
+        setError("Failed to load job details. Please try again.");
+      }
+    };
+
+    populateJobDetails();
+  }, [selectedJobId]);
+
+  // Handle resume population when an application is selected
+  const handleApplicationSelect = async (applicationId) => {
+    setSelectedApplicationId(applicationId);
+    if (!applicationId) {
+      setResumeFile(null);
+      return;
+    }
+
+    try {
+      setLoadingCandidate(true); // Use loadingCandidate instead of isLoading
+      const application = await applicationsApi.getApplicationDetails(applicationId);
+      
+      if (application.resume_url) {
+        try {
+          // Download the resume file
+          const blob = await applicationsApi.downloadResume(application.resume_url);
+          
+          // Create a File object from the blob
+          const resumeFileName = application.resume_url.split('/').pop() || 'resume.pdf';
+          const file = new File([blob], resumeFileName, { type: 'application/pdf' });
+          
+          setResumeFile(file);
+        } catch (downloadErr) {
+          console.error("Error downloading resume:", downloadErr);
+          setError("Failed to download candidate's resume. Please try again or upload manually.");
+          setResumeFile(null);
+        }
+      } else {
+        setError("This candidate doesn't have a resume file. Please upload one manually.");
+        setResumeFile(null);
+      }
+    } catch (err) {
+      console.error("Error fetching application details:", err);
+      setError("Failed to load candidate details. Please try again.");
+    } finally {
+      setLoadingCandidate(false);
+    }
+  };
+
+  // Reset application selection when job changes
+  useEffect(() => {
+    setSelectedApplicationId("");
+    setResumeFile(null);
+  }, [selectedJobId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,7 +230,7 @@ const EvaluateJobs = () => {
   };
 
   const LoadingSpinner = () => (
-    <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-4 text-gray-700 font-medium">
@@ -110,6 +257,90 @@ const EvaluateJobs = () => {
         </p>
       </div>
 
+      {/* Job and Candidate Selection Section */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Select Job and Candidate
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Job Selection */}
+            <div>
+              <label htmlFor="job-select" className="block text-sm font-medium text-gray-700 mb-2">
+                Select Job Posting
+              </label>
+              <div className="relative">
+                {loadingJobs ? (
+                  <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
+                ) : (
+                  <select
+                    id="job-select"
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(e.target.value)}
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    <option value="">-- Select a Job Posting --</option>
+                    {jobs.map((job) => (
+                      <option key={job.id} value={job.id}>
+                        {job.job_title} - {job.company_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Application Selection (only shows if job is selected) */}
+            <div>
+              <label htmlFor="application-select" className="block text-sm font-medium text-gray-700 mb-2">
+                Select Candidate
+              </label>
+              <div className="relative">
+                {!selectedJobId ? (
+                  <select
+                    disabled
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-gray-100 text-gray-500 sm:text-sm rounded-md cursor-not-allowed"
+                  >
+                    <option>-- Select a job first --</option>
+                  </select>
+                ) : loadingApplications ? (
+                  <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
+                ) : (
+                  <select
+                    id="application-select"
+                    value={selectedApplicationId}
+                    onChange={(e) => handleApplicationSelect(e.target.value)}
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    disabled={loadingCandidate}
+                  >
+                    <option value="">
+                      {loadingCandidate ? "Loading candidate resume..." : "-- Select a Candidate --"}
+                    </option>
+                    {applications.length === 0 ? (
+                      <option disabled>No candidates found for this job</option>
+                    ) : (
+                      applications.map((app) => (
+                        <option key={app.id} value={app.id}>
+                          {app.personal_info?.given_name || ''} {app.personal_info?.family_name || ''} 
+                          {!app.personal_info?.given_name && !app.personal_info?.family_name && 'Unnamed Candidate'}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {selectedJobId && selectedApplicationId && (
+            <div className="mt-4 text-sm text-green-600">
+              <p>✓ Job and candidate selected. Form fields have been populated automatically.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Existing Form Content */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
