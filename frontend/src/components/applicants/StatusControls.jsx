@@ -19,7 +19,7 @@ const StatusControls = ({
       case 'pending':
         return `Your application for ${jobTitle} has been marked as pending review.`;
       case 'accepted':
-        return `Congratulations! Your application for ${jobTitle} has been approved.`;
+        return `Congratulations! Your application for ${jobTitle} has been accepted.`;
       case 'interview':
         return `Good news! We'd like to schedule an interview for your application to ${jobTitle}.`;
       case 'rejected':
@@ -45,7 +45,7 @@ const StatusControls = ({
           application_id: applicantId,
           recipient_id: applicantUserId,
           message: getStatusNotificationMessage(newStatus),
-          type: newStatus  // Now we can use the status directly as the type
+          type: newStatus
         });
       }
       
@@ -92,24 +92,25 @@ const StatusControls = ({
         </button>
       )}
 
+      {/* Single Accept button - Using 'accepted' status only */}
       <button
-        disabled={isUpdating || currentStatus === 'approved'}
-        onClick={() => handleStatusChange('approved')}
+        disabled={isUpdating || currentStatus === 'accepted'}
+        onClick={() => handleStatusChange('accepted')}
         className={`px-3 py-1 text-sm rounded-md flex items-center ${
-          isUpdating && activeStatus === 'approved' 
+          isUpdating && activeStatus === 'accepted' 
             ? 'bg-gray-200 text-gray-500'
-            : currentStatus === 'approved'
+            : currentStatus === 'accepted'
               ? 'bg-green-100 text-green-800 border border-green-300'
               : 'bg-white text-green-800 border border-green-300 hover:bg-green-50'
         }`}
       >
-        {isUpdating && activeStatus === 'approved' ? (
+        {isUpdating && activeStatus === 'accepted' ? (
           <>
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Approving...
+            Accepting...
           </>
         ) : (
           <>
@@ -175,35 +176,6 @@ const StatusControls = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
             Reject
-          </>
-        )}
-      </button>
-
-      <button
-        disabled={isUpdating || currentStatus === 'accepted'}
-        onClick={() => handleStatusChange('accepted')}
-        className={`px-3 py-1 text-sm rounded-md flex items-center ${
-          isUpdating && activeStatus === 'accepted' 
-            ? 'bg-gray-200 text-gray-500'
-            : currentStatus === 'accepted'
-              ? 'bg-green-100 text-green-800 border border-green-300'
-              : 'bg-white text-green-800 border border-green-300 hover:bg-green-50'
-        }`}
-      >
-        {isUpdating && activeStatus === 'accepted' ? (
-          <>
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Accepting...
-          </>
-        ) : (
-          <>
-            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            Accept
           </>
         )}
       </button>
