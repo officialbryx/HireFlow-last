@@ -21,6 +21,9 @@ const EvaluateJobs = () => {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [loadingCandidate, setLoadingCandidate] = useState(false);
 
+  // State for toggling technical analysis visibility
+  const [showTechnicalAnalysis, setShowTechnicalAnalysis] = useState(false);
+
   // Fetch all available jobs on component mount
   useEffect(() => {
     const fetchJobs = async () => {
@@ -670,24 +673,6 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                 </div>
 
                 <div className="bg-gray-50 rounded-xl p-6 shadow-sm space-y-6">
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-1 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
-                      />
-                    </svg>
-                    Analysis performed using: {results.device_used}
-                  </div>
-
                   {/* Structured Analysis Sections */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {Object.entries(results.ai_insights.sections).map(
@@ -722,72 +707,40 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                       )
                     )}
                   </div>
-
-                  {/* Analysis Metadata */}
-                  <div className="grid grid-cols-2 gap-4 text-sm mt-6">
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                      <div className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-500 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <p className="font-semibold text-blue-800">
-                          Analysis Confidence
-                        </p>
-                      </div>
-                      <p className="mt-2 text-blue-700 pl-7">
-                        {results.ai_insights.confidence_score
-                          ? "High"
-                          : "Medium"}
-                      </p>
-                    </div>
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                      <div className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <p className="font-semibold text-green-800">
-                          Processing Status
-                        </p>
-                      </div>
-                      <p className="mt-2 text-green-700 pl-7">
-                        {results.ai_insights.error
-                          ? "Analysis Failed"
-                          : "Success"}
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
 
             {/* Technical Output Section */}
             <div className="mt-8">
-              <div className="flex items-center mb-4">
+              <button
+                onClick={() => setShowTechnicalAnalysis(!showTechnicalAnalysis)}
+                className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 px-6 py-4 rounded-xl transition-colors duration-200"
+              >
+                <div className="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-700"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <h3 className="text-xl font-bold text-gray-800 ml-2">
+                    Technical Analysis
+                  </h3>
+                </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-700"
+                  className={`h-6 w-6 text-gray-600 transform transition-transform duration-200 ${
+                    showTechnicalAnalysis ? "rotate-180" : ""
+                  }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -796,166 +749,167 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    d="M19 9l-7 7-7-7"
                   />
                 </svg>
-                <h3 className="text-xl font-bold text-gray-800 ml-2">
-                  Technical Analysis
-                </h3>
-              </div>
+              </button>
 
-              <div className="bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto shadow-md">
-                <div className="flex items-center mb-4 border-b border-gray-700 pb-2">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  </div>
-                  <p className="text-white ml-4 text-xs">analysis_output.log</p>
-                </div>
-
-                {/* Input Analysis */}
-                <div className="mb-6 border-b border-gray-700 pb-4">
-                  <p className="text-yellow-400 font-semibold">
-                    Input Analysis:
-                  </p>
-                  <div className="mt-2">
-                    <p className="text-blue-400 font-semibold">
-                      JobPost Content:
+              {showTechnicalAnalysis && (
+                <div className="mt-4 bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto shadow-md">
+                  <div className="flex items-center mb-4 border-b border-gray-700 pb-2">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <p className="text-white ml-4 text-xs">
+                      analysis_output.log
                     </p>
-                    <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
-                      {jobPost.split("\n").map((line, i) => (
-                        <p key={i}>{line || " "}</p>
-                      ))}
+                  </div>
+
+                  {/* Input Analysis */}
+                  <div className="mb-6 border-b border-gray-700 pb-4">
+                    <p className="text-yellow-400 font-semibold">
+                      Input Analysis:
+                    </p>
+                    <div className="mt-2">
+                      <p className="text-blue-400 font-semibold">
+                        JobPost Content:
+                      </p>
+                      <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
+                        {jobPost.split("\n").map((line, i) => (
+                          <p key={i}>{line || " "}</p>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <p className="text-blue-400 font-semibold">
+                        Resume Content:
+                      </p>
+                      <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
+                        {results.resume_text.split("\n").map((line, i) => (
+                          <p key={i}>{line || " "}</p>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <p className="text-blue-400 font-semibold">
-                      Resume Content:
-                    </p>
-                    <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
-                      {results.resume_text.split("\n").map((line, i) => (
-                        <p key={i}>{line || " "}</p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
 
-                {/* Analysis Results */}
-                <div className="space-y-4">
-                  {/* Personal Info */}
-                  <div className="mb-4">
-                    <p className="text-yellow-400 font-semibold">
-                      Personal Information:
-                    </p>
-                    {results.console_output.personal_info.name && (
-                      <p className="ml-4">
-                        Name:{" "}
-                        <span className="text-white">
-                          {results.console_output.personal_info.name}
-                        </span>
+                  {/* Analysis Results */}
+                  <div className="space-y-4">
+                    {/* Personal Info */}
+                    <div className="mb-4">
+                      <p className="text-yellow-400 font-semibold">
+                        Personal Information:
                       </p>
-                    )}
-                    {results.console_output.personal_info.email && (
-                      <p className="ml-4">
-                        Email:{" "}
-                        <span className="text-white">
-                          {results.console_output.personal_info.email}
-                        </span>
-                      </p>
-                    )}
-                    {results.console_output.personal_info.phone && (
-                      <p className="ml-4">
-                        Phone:{" "}
-                        <span className="text-white">
-                          {results.console_output.personal_info.phone}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Skills */}
-                  <div className="mb-4">
-                    <p className="text-yellow-400 font-semibold"> Skills:</p>
-                    <p className="ml-4 text-cyan-400"> Technical Skills:</p>
-                    {Object.entries(
-                      results.console_output.skills.hard_skills
-                    ).map(([skill], index) => (
-                      <p key={index} className="ml-6 text-white">
-                        - {skill}
-                      </p>
-                    ))}
-
-                    <p className="ml-4 mt-2 text-cyan-400"> Soft Skills:</p>
-                    {Object.entries(
-                      results.console_output.skills.soft_skills
-                    ).map(([skill], index) => (
-                      <p key={index} className="ml-6 text-white">
-                        - {skill}
-                      </p>
-                    ))}
-                  </div>
-
-                  {/* Match Results Summary */}
-                  <div className="border-t border-gray-700 pt-4 mt-4">
-                    <p className="text-yellow-400 font-semibold">
-                      Final Assessment:
-                    </p>
-                    <p className="ml-4 mt-2">
-                      Overall Match:{" "}
-                      <span className="text-white">
-                        {Math.round(results.comparison.overall_match.score)}%
-                      </span>
-                    </p>
-                    <p className="ml-4">
-                      Skills Match:{" "}
-                      <span className="text-white">
-                        {Math.round(
-                          results.comparison.skill_match.match_percentage
-                        )}
-                        %
-                      </span>
-                    </p>
-                    <p className="ml-4">
-                      Experience:{" "}
-                      <span
-                        className={
-                          results.comparison.experience_match.sufficient
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }
-                      >
-                        {results.comparison.experience_match.sufficient
-                          ? "Sufficient"
-                          : "Insufficient"}
-                      </span>
-                    </p>
-
-                    {!results.comparison.experience_match.sufficient && (
-                      <p className="ml-4 text-red-400 mt-2">
-                        Experience Gap:{" "}
-                        {results.comparison.experience_match.gap_years} years
-                        short of requirement
-                      </p>
-                    )}
-
-                    {results.comparison.skill_match.missing.length > 0 && (
-                      <>
-                        <p className="ml-4 text-yellow-400 mt-2">
-                          Missing Skills:
+                      {results.console_output.personal_info.name && (
+                        <p className="ml-4">
+                          Name:{" "}
+                          <span className="text-white">
+                            {results.console_output.personal_info.name}
+                          </span>
                         </p>
-                        {results.comparison.skill_match.missing.map(
-                          (skill, index) => (
-                            <p key={index} className="ml-6 text-red-400">
-                              - {skill}
-                            </p>
-                          )
-                        )}
-                      </>
-                    )}
+                      )}
+                      {results.console_output.personal_info.email && (
+                        <p className="ml-4">
+                          Email:{" "}
+                          <span className="text-white">
+                            {results.console_output.personal_info.email}
+                          </span>
+                        </p>
+                      )}
+                      {results.console_output.personal_info.phone && (
+                        <p className="ml-4">
+                          Phone:{" "}
+                          <span className="text-white">
+                            {results.console_output.personal_info.phone}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Skills */}
+                    <div className="mb-4">
+                      <p className="text-yellow-400 font-semibold"> Skills:</p>
+                      <p className="ml-4 text-cyan-400"> Technical Skills:</p>
+                      {Object.entries(
+                        results.console_output.skills.hard_skills
+                      ).map(([skill], index) => (
+                        <p key={index} className="ml-6 text-white">
+                          - {skill}
+                        </p>
+                      ))}
+
+                      <p className="ml-4 mt-2 text-cyan-400"> Soft Skills:</p>
+                      {Object.entries(
+                        results.console_output.skills.soft_skills
+                      ).map(([skill], index) => (
+                        <p key={index} className="ml-6 text-white">
+                          - {skill}
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* Match Results Summary */}
+                    <div className="border-t border-gray-700 pt-4 mt-4">
+                      <p className="text-yellow-400 font-semibold">
+                        Final Assessment:
+                      </p>
+                      <p className="ml-4 mt-2">
+                        Overall Match:{" "}
+                        <span className="text-white">
+                          {Math.round(results.comparison.overall_match.score)}%
+                        </span>
+                      </p>
+                      <p className="ml-4">
+                        Skills Match:{" "}
+                        <span className="text-white">
+                          {Math.round(
+                            results.comparison.skill_match.match_percentage
+                          )}
+                          %
+                        </span>
+                      </p>
+                      <p className="ml-4">
+                        Experience:{" "}
+                        <span
+                          className={
+                            results.comparison.experience_match.sufficient
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }
+                        >
+                          {results.comparison.experience_match.sufficient
+                            ? "Sufficient"
+                            : "Insufficient"}
+                        </span>
+                      </p>
+
+                      {!results.comparison.experience_match.sufficient && (
+                        <p className="ml-4 text-red-400 mt-2">
+                          Experience Gap:{" "}
+                          {results.comparison.experience_match.gap_years} years
+                          short of requirement
+                        </p>
+                      )}
+
+                      {results.comparison.skill_match.missing.length > 0 && (
+                        <>
+                          <p className="ml-4 text-yellow-400 mt-2">
+                            Missing Skills:
+                          </p>
+                          {results.comparison.skill_match.missing.map(
+                            (skill, index) => (
+                              <p key={index} className="ml-6 text-red-400">
+                                - {skill}
+                              </p>
+                            )
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
