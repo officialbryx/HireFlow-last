@@ -227,20 +227,6 @@ const LandingPage = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  98% accuracy in skill extraction
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg
-                    className="h-5 w-5 mr-2 text-green-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
                   Contextual understanding of job requirements
                 </li>
                 <li className="flex items-center text-gray-600">
@@ -297,20 +283,6 @@ const LandingPage = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  95% candidate-job match accuracy
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg
-                    className="h-5 w-5 mr-2 text-green-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
                   Automated resume scoring and ranking
                 </li>
                 <li className="flex items-center text-gray-600">
@@ -335,16 +307,58 @@ const LandingPage = () => {
         {/* Additional AI Benefits Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center p-6">
-            <div className="text-blue-600 text-4xl font-bold mb-2">85%</div>
-            <p className="text-gray-600">Reduction in screening time</p>
+            <div className="text-blue-600 text-4xl font-bold mb-2">
+              <svg
+                className="h-12 w-12 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600">Improved HR workflow</p>
           </div>
           <div className="text-center p-6">
-            <div className="text-blue-600 text-4xl font-bold mb-2">93%</div>
-            <p className="text-gray-600">Matching accuracy</p>
+            <div className="text-blue-600 text-4xl font-bold mb-2">
+              <svg
+                className="h-12 w-12 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600">Ease of candidate evaluation</p>
           </div>
           <div className="text-center p-6">
-            <div className="text-blue-600 text-4xl font-bold mb-2">2.5s</div>
-            <p className="text-gray-600">Average processing time per resume</p>
+            <div className="text-blue-600 text-4xl font-bold mb-2">
+              <svg
+                className="h-12 w-12 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600">Efficient application</p>
           </div>
         </div>
       </div>
