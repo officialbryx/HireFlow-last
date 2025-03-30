@@ -285,7 +285,7 @@ const Signup = () => {
                   name="password"
                   id="password"
                   required
-                  minLength={12}
+                  minLength={8}
                   className={getInputClassName("password")}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -381,7 +381,7 @@ const Signup = () => {
                   name="confirmPassword"
                   id="confirmPassword"
                   required
-                  minLength={12}
+                  minLength={8}
                   className={getInputClassName("confirmPassword")}
                   onChange={handleChange}
                   onBlur={handleBlur}
