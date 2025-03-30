@@ -11,7 +11,7 @@ const EvaluateJobs = () => {
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // New state for job and application selection
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState("");
@@ -49,7 +49,9 @@ const EvaluateJobs = () => {
 
       try {
         setLoadingApplications(true);
-        const fetchedApplications = await applicationsApi.getApplicationsByJob(selectedJobId);
+        const fetchedApplications = await applicationsApi.getApplicationsByJob(
+          selectedJobId
+        );
         setApplications(fetchedApplications);
       } catch (err) {
         console.error("Error fetching applications:", err);
@@ -72,35 +74,49 @@ const EvaluateJobs = () => {
 
       try {
         const jobDetails = await jobsApi.getJobPostingDetails(selectedJobId);
-        
+
         // Format the job posting as a complete description
-        const responsibilities = jobDetails.job_responsibility?.map(r => r.responsibility) || [];
-        const qualifications = jobDetails.job_qualification?.map(q => q.qualification) || [];
-        const skills = jobDetails.job_skill?.map(s => s.skill) || [];
-        
+        const responsibilities =
+          jobDetails.job_responsibility?.map((r) => r.responsibility) || [];
+        const qualifications =
+          jobDetails.job_qualification?.map((q) => q.qualification) || [];
+        const skills = jobDetails.job_skill?.map((s) => s.skill) || [];
+
         const formattedJobPost = `
 Job Title: ${jobDetails.job_title}
 Company: ${jobDetails.company_name}
 Location: ${jobDetails.location}
 Employment Type: ${jobDetails.employment_type}
-Salary Range: ${jobDetails.salary_range || 'Not specified'}
+Salary Range: ${jobDetails.salary_range || "Not specified"}
 
 About the Company:
-${jobDetails.about_company || jobDetails.company_description || 'No company description provided.'}
+${
+  jobDetails.about_company ||
+  jobDetails.company_description ||
+  "No company description provided."
+}
 
 Job Description:
-${jobDetails.company_description || 'No job description provided.'}
+${jobDetails.company_description || "No job description provided."}
 
 Responsibilities:
-${responsibilities.length > 0 ? responsibilities.map(r => `- ${r}`).join('\n') : 'Not specified'}
+${
+  responsibilities.length > 0
+    ? responsibilities.map((r) => `- ${r}`).join("\n")
+    : "Not specified"
+}
 
 Qualifications:
-${qualifications.length > 0 ? qualifications.map(q => `- ${q}`).join('\n') : 'Not specified'}
+${
+  qualifications.length > 0
+    ? qualifications.map((q) => `- ${q}`).join("\n")
+    : "Not specified"
+}
 
 Skills Required:
-${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
+${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         `.trim();
-        
+
         setJobPost(formattedJobPost);
       } catch (err) {
         console.error("Error fetching job details:", err);
@@ -121,25 +137,36 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
 
     try {
       setLoadingCandidate(true); // Use loadingCandidate instead of isLoading
-      const application = await applicationsApi.getApplicationDetails(applicationId);
-      
+      const application = await applicationsApi.getApplicationDetails(
+        applicationId
+      );
+
       if (application.resume_url) {
         try {
           // Download the resume file
-          const blob = await applicationsApi.downloadResume(application.resume_url);
-          
+          const blob = await applicationsApi.downloadResume(
+            application.resume_url
+          );
+
           // Create a File object from the blob
-          const resumeFileName = application.resume_url.split('/').pop() || 'resume.pdf';
-          const file = new File([blob], resumeFileName, { type: 'application/pdf' });
-          
+          const resumeFileName =
+            application.resume_url.split("/").pop() || "resume.pdf";
+          const file = new File([blob], resumeFileName, {
+            type: "application/pdf",
+          });
+
           setResumeFile(file);
         } catch (downloadErr) {
           console.error("Error downloading resume:", downloadErr);
-          setError("Failed to download candidate's resume. Please try again or upload manually.");
+          setError(
+            "Failed to download candidate's resume. Please try again or upload manually."
+          );
           setResumeFile(null);
         }
       } else {
-        setError("This candidate doesn't have a resume file. Please upload one manually.");
+        setError(
+          "This candidate doesn't have a resume file. Please upload one manually."
+        );
         setResumeFile(null);
       }
     } catch (err) {
@@ -266,7 +293,10 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Job Selection */}
             <div>
-              <label htmlFor="job-select" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="job-select"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Select Job Posting
               </label>
               <div className="relative">
@@ -292,7 +322,10 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
 
             {/* Application Selection (only shows if job is selected) */}
             <div>
-              <label htmlFor="application-select" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="application-select"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Select Candidate
               </label>
               <div className="relative">
@@ -314,15 +347,20 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
                     disabled={loadingCandidate}
                   >
                     <option value="">
-                      {loadingCandidate ? "Loading candidate resume..." : "-- Select a Candidate --"}
+                      {loadingCandidate
+                        ? "Loading candidate resume..."
+                        : "-- Select a Candidate --"}
                     </option>
                     {applications.length === 0 ? (
                       <option disabled>No candidates found for this job</option>
                     ) : (
                       applications.map((app) => (
                         <option key={app.id} value={app.id}>
-                          {app.personal_info?.given_name || ''} {app.personal_info?.family_name || ''} 
-                          {!app.personal_info?.given_name && !app.personal_info?.family_name && 'Unnamed Candidate'}
+                          {app.personal_info?.given_name || ""}{" "}
+                          {app.personal_info?.family_name || ""}
+                          {!app.personal_info?.given_name &&
+                            !app.personal_info?.family_name &&
+                            "Unnamed Candidate"}
                         </option>
                       ))
                     )}
@@ -334,7 +372,10 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
 
           {selectedJobId && selectedApplicationId && (
             <div className="mt-4 text-sm text-green-600">
-              <p>✓ Job and candidate selected. Form fields have been populated automatically.</p>
+              <p>
+                ✓ Job and candidate selected. Form fields have been populated
+                automatically.
+              </p>
             </div>
           )}
         </div>
@@ -427,7 +468,8 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join('\n') : 'Not specified'}
                   accept=".pdf"
                   className="hidden"
                   id="resume-upload"
-                  required
+                  aria-label="Upload resume"
+                  required={!resumeFile}
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
