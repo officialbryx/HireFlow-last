@@ -10,7 +10,7 @@ const commonPasswords = [
 ];
 
 export const validatePassword = (password) => {
-  const minLength = 12;
+  const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
@@ -19,7 +19,7 @@ export const validatePassword = (password) => {
   const requirements = [
     {
       id: "length",
-      message: "At least 12 characters long",
+      message: "At least 8 characters long",
       isMet: password.length >= minLength,
     },
     {

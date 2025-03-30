@@ -269,7 +269,7 @@ const JobPosts = () => {
                     </div>
                     <div className="flex flex-col gap-3 md:items-end w-full md:w-auto">
                       <button
-                        className="bg-blue-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm flex items-center justify-center w-full md:w-auto"
+                        className="bg-blue-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm flex items-center justify-center w-full md:w-[140px] whitespace-nowrap"
                         onClick={() =>
                           handleApply(selectedJob.company_name, selectedJob.id)
                         }
