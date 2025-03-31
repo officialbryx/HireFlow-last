@@ -1,4 +1,5 @@
 import torch
+import os
 from openai import OpenAI
 from typing import Dict, Any
 
@@ -12,8 +13,7 @@ print(f"Using device: {device}")
 
 # Configure DeepSeek client
 client = OpenAI(
-    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4",  
-    base_url="https://api.deepseek.com/v1"  
+    api_key=os.getenv("OPENAI_API_KEY")
 )
 
 def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
