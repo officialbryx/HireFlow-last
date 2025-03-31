@@ -11,7 +11,7 @@ else:
     device = torch.device("cpu")
 print(f"Using device: {device}")
 
-# Configure DeepSeek client
+# Configure OpenAI client with proper initialization
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
@@ -87,8 +87,7 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=1500,
-            stream=False
+            max_tokens=1500
         )
 
         return {
