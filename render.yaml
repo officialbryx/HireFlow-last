@@ -3,7 +3,7 @@ services:
     type: web
     env: python
     buildCommand: cd backend && pip install --no-cache-dir -r requirements.txt
-    startCommand: cd backend && gunicorn app:app
+    startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
@@ -13,6 +13,8 @@ services:
         sync: false
       - key: SUPABASE_KEY
         sync: false
+      - key: PORT
+        value: 10000
 
   - name: hireflow-web
     type: web
