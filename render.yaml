@@ -15,6 +15,10 @@ services:
         sync: false
       - key: PORT
         value: 10000
+      - key: OPENAI_API_VERSION
+        value: "2024-02-15"
+      - key: OPENAI_ORGANIZATION
+        sync: false
 
   - name: hireflow-web
     type: web

@@ -11,9 +11,10 @@ else:
     device = torch.device("cpu")
 print(f"Using device: {device}")
 
-# Configure OpenAI client with proper initialization
+# Configure Deepseek client
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4",
+    base_url="https://api.deepseek.com/v1"
 )
 
 def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
@@ -82,10 +83,16 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
         Use only plain text with numbers for sections. Avoid any special characters or formatting.
         """
 
-        # Generate HR-focused analysis
+        # Generate HR-focused analysis using Deepseek
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an experienced HR professional analyzing job applications."
+                },
+                {"role": "user", "content": prompt}
+            ],
             temperature=0.7,
             max_tokens=1500
         )
