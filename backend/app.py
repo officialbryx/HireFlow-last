@@ -8,22 +8,27 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://hireflow-web.onrender.com", "http://localhost:5173"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Accept"],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": False,
-        "max_age": 600
-    }
-})
 
+# Enable CORS for all routes
+CORS(app)
+
+# Additional CORS headers
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = 'https://hireflow-web.onrender.com'
+    header['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    header['Access-Control-Allow-Headers'] = 'Content-Type'
+    header['Access-Control-Max-Age'] = '3600'
+    return response
+
+# Pre-flight request handler
+@app.route('/api/evaluate', methods=['OPTIONS'])
+def handle_options():
+    response = make_response()
+    response.headers['Access-Control-Allow-Origin'] = 'https://hireflow-web.onrender.com'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
 UPLOAD_FOLDER = 'uploads'

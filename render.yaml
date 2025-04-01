@@ -19,8 +19,10 @@ services:
         value: https://api.deepseek.com/v1
       - key: CORS_ORIGINS
         value: "https://hireflow-web.onrender.com,http://localhost:5173"
+      - key: CORS_ORIGIN
+        value: https://hireflow-web.onrender.com
       - key: FLASK_ENV
-        value: "production"
+        value: production
 
   - name: hireflow-web
     type: web
