@@ -198,13 +198,13 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       formData.append("resume", resumeFile);
 
       const response = await axios.post(
-        "http://localhost:5000/api/evaluate",
+        `${import.meta.env.VITE_API_URL}/api/evaluate`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          timeout: 120000, // Increase timeout to 2 minutes
+          timeout: 120000, // 2 minutes timeout
         }
       );
 
