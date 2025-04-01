@@ -8,7 +8,14 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://localhost:5173",
+            "https://hireflow-web.onrender.com"
+        ]
+    }
+})
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -109,6 +116,6 @@ def evaluate():
             'message': 'An error occurred during processing'
         }), 500
 
-if __name__ == '__main__':
-    app.config['TIMEOUT'] = 120  # Set server timeout to 2 minutes
-    app.run(debug=True, port=5000)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
