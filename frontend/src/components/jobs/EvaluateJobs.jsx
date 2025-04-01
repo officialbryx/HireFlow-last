@@ -192,23 +192,23 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     setError(null);
     setResults(null);
 
+    const apiUrl =
+      import.meta.env.VITE_API_URL || "https://hireflow-api.onrender.com";
+    console.log("Using API URL:", apiUrl); // Debug log
+
     try {
       const formData = new FormData();
       formData.append("jobPost", jobPost);
       formData.append("resume", resumeFile);
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/evaluate`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-          withCredentials: false,
-          timeout: 180000, // 3 minutes timeout
-        }
-      );
+      const response = await axios.post(`${apiUrl}/api/evaluate`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
+        withCredentials: false,
+        timeout: 300000, // 5 minutes timeout
+      });
 
       if (response.data.error) {
         throw new Error(response.data.error);
@@ -216,12 +216,11 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
       setResults(response.data);
     } catch (err) {
-      console.error("Analysis error:", err);
+      console.error("Full error details:", err); // Debug log
       let errorMessage = "Error processing request. Please try again.";
 
       if (err.code === "ERR_NETWORK") {
-        errorMessage =
-          "Cannot connect to server. Please check your internet connection or try again later.";
+        errorMessage = `Server connection failed. API URL: ${apiUrl}. Please try again later.`;
       } else if (err.response?.data?.error) {
         errorMessage = err.response.data.error;
       } else if (err.message) {

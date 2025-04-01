@@ -9,13 +9,11 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "http://localhost:5173",
-            "https://hireflow-web.onrender.com"
-        ],
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+    r"/*": {  # Allow all routes
+        "origins": ["*"],  # Allow all origins
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Accept"],
+        "supports_credentials": False
     }
 })
 

@@ -7,18 +7,16 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
       - key: PORT
         value: 10000
-      - key: OPENAI_API_VERSION
-        value: "2024-02-15"
-      - key: OPENAI_ORGANIZATION
-        sync: false
+      - key: OPENAI_API_KEY
+        value: sk-3c492431b34d413db1e3f4f2f126b0e4
+      - key: SUPABASE_URL
+        value: https://amkjtemaecxqfrwtskha.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFta2p0ZW1hZWN4cWZyd3Rza2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxODgyOTksImV4cCI6MjA1NTc2NDI5OX0.zI5hbm9CZtmVMmGf2zU41Jly1xEl0_65vQ-KEUQr2Qw
+      - key: OPENAI_API_BASE
+        value: https://api.deepseek.com/v1
 
   - name: hireflow-web
     type: web
@@ -27,8 +25,8 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_SUPABASE_URL
-        sync: false
+        value: https://amkjtemaecxqfrwtskha.supabase.co
       - key: VITE_SUPABASE_ANON_KEY
-        sync: false
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFta2p0ZW1hZWN4cWZyd3Rza2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxODgyOTksImV4cCI6MjA1NTc2NDI5OX0.zI5hbm9CZtmVMmGf2zU41Jly1xEl0_65vQ-KEUQr2Qw
       - key: VITE_API_URL
-        sync: false
+        value: https://hireflow-api.onrender.com
