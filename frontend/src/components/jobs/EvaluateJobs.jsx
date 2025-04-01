@@ -203,8 +203,10 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Accept: "application/json",
           },
-          timeout: 120000, // 2 minutes timeout
+          withCredentials: false,
+          timeout: 180000, // 3 minutes timeout
         }
       );
 
@@ -215,11 +217,18 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       setResults(response.data);
     } catch (err) {
       console.error("Analysis error:", err);
-      setError(
-        err.response?.data?.error ||
-          err.message ||
-          "Error processing request. Please try again."
-      );
+      let errorMessage = "Error processing request. Please try again.";
+
+      if (err.code === "ERR_NETWORK") {
+        errorMessage =
+          "Cannot connect to server. Please check your internet connection or try again later.";
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
       setResults(null);
     } finally {
       setIsLoading(false);

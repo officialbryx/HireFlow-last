@@ -13,7 +13,9 @@ CORS(app, resources={
         "origins": [
             "http://localhost:5173",
             "https://hireflow-web.onrender.com"
-        ]
+        ],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
