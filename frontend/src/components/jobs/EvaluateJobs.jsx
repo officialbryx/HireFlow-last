@@ -205,9 +205,13 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         headers: {
           "Content-Type": "multipart/form-data",
           Accept: "application/json",
+          Origin: window.location.origin,
         },
         withCredentials: false,
         timeout: 300000, // 5 minutes timeout
+        validateStatus: function (status) {
+          return status >= 200 && status < 500;
+        },
       });
 
       if (response.data.error) {
@@ -220,7 +224,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       let errorMessage = "Error processing request. Please try again.";
 
       if (err.code === "ERR_NETWORK") {
-        errorMessage = `Server connection failed. API URL: ${apiUrl}. Please try again later.`;
+        errorMessage = `CORS or Network Error. Please try again later. Details: ${err.message}`;
       } else if (err.response?.data?.error) {
         errorMessage = err.response.data.error;
       } else if (err.message) {
