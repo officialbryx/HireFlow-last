@@ -192,46 +192,26 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     setError(null);
     setResults(null);
 
-    const apiUrl =
-      import.meta.env.VITE_API_URL || "https://hireflow-api.onrender.com";
-    console.log("Using API URL:", apiUrl);
-
     try {
       const formData = new FormData();
       formData.append("jobPost", jobPost);
       formData.append("resume", resumeFile);
 
-      // Using Axios with better error handling
-      const response = await axios.post(`${apiUrl}/api/evaluate`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-        },
-        withCredentials: true,
-        timeout: 300000, // 5 minutes
-      });
-
-      if (response.data.error) {
-        throw new Error(response.data.error);
-      }
+      const response = await axios.post(
+        "https://hireflow-backend-obv1.onrender.com/api/evaluate",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: false, // Changed this to false
+        }
+      );
 
       setResults(response.data);
     } catch (err) {
-      console.error("Full error details:", err);
-
-      let errorMessage = "Error processing request. Please try again.";
-
-      if (err.code === "ERR_NETWORK") {
-        errorMessage =
-          "Server connection error (CORS issue). Contact administrator or check console for details.";
-      } else if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-      setResults(null);
+      console.error("Error:", err);
+      setError("Server connection error. Please try again.");
     } finally {
       setIsLoading(false);
     }
