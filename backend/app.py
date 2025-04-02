@@ -9,14 +9,8 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Simple CORS configuration
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://hireflow-web.onrender.com"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"],
-    }
-})
+# Allow everything
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Health check endpoint
 @app.route('/')
@@ -34,26 +28,21 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/api/evaluate', methods=['POST'])
+@app.route('/api/evaluate', methods=['GET', 'POST', 'OPTIONS'])
 def evaluate():
-    # Add CORS headers directly to response
+    # Accept all methods
     if request.method == "OPTIONS":
         return {"success": True}, 200
 
     try:
-        # Set CORS headers for the actual response too
-        response = None
-        
         if 'resume' not in request.files:
-            response = jsonify({'error': 'No resume file provided'})
-            return response, 400
+            return jsonify({'error': 'No resume file provided'}), 400
         
         file = request.files['resume']
         job_post = request.form.get('jobPost')
         
         if not job_post:
-            response = jsonify({'error': 'No job post provided'})
-            return response, 400
+            return jsonify({'error': 'No job post provided'}), 400
             
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -123,16 +112,14 @@ def evaluate():
                     os.remove(filepath)
                 raise Exception(f"Processing error: {str(e)}")
             
-        response = jsonify({'error': 'Invalid file type'})
-        return response, 400
+        return jsonify({'error': 'Invalid file type'}), 400
         
     except Exception as e:
-        response = jsonify({
+        return jsonify({
             'error': str(e),
             'status': 'failed',
             'message': 'An error occurred during processing'
-        })
-        return response, 500
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
