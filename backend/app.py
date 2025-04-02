@@ -9,13 +9,24 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Enable CORS with render.com frontend domain only
+# Update CORS configuration to properly handle preflight requests and include both allowed domains
 CORS(app,
-     origins=["https://hireflow-web.onrender.com"],
+     origins=["https://hireflow-web.onrender.com", "http://localhost:5173"],  # Add localhost for development
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["POST", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+     methods=["GET", "POST", "OPTIONS"],
+     expose_headers=["Content-Type", "Authorization"],
      max_age=3600)
+
+# Additional CORS handling for preflight requests
+@app.route('/api/evaluate', methods=['OPTIONS'])
+def handle_options():
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Origin', 'https://hireflow-web.onrender.com')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # Health check endpoint
 @app.route('/')
@@ -36,14 +47,19 @@ def allowed_file(filename):
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
     try:
+        # Set CORS headers for the actual response too
+        response = None
+        
         if 'resume' not in request.files:
-            return jsonify({'error': 'No resume file provided'}), 400
+            response = jsonify({'error': 'No resume file provided'})
+            return response, 400
         
         file = request.files['resume']
         job_post = request.form.get('jobPost')
         
         if not job_post:
-            return jsonify({'error': 'No job post provided'}), 400
+            response = jsonify({'error': 'No job post provided'})
+            return response, 400
             
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -91,7 +107,7 @@ def evaluate():
                 # Clean up and return response
                 os.remove(filepath)
                 
-                return jsonify({
+                response = jsonify({
                     'job_analysis': job_requirements,
                     'resume_analysis': resume_analysis,
                     'comparison': comparison,
@@ -106,20 +122,23 @@ def evaluate():
                     },
                     'resume_text': text
                 })
+                return response
                 
             except Exception as e:
                 if os.path.exists(filepath):
                     os.remove(filepath)
                 raise Exception(f"Processing error: {str(e)}")
             
-        return jsonify({'error': 'Invalid file type'}), 400
+        response = jsonify({'error': 'Invalid file type'})
+        return response, 400
         
     except Exception as e:
-        return jsonify({
+        response = jsonify({
             'error': str(e),
             'status': 'failed',
             'message': 'An error occurred during processing'
-        }), 500
+        })
+        return response, 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
