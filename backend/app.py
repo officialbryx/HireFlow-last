@@ -9,24 +9,13 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Update CORS configuration to properly handle preflight requests and include both allowed domains
+# Enable CORS with render.com frontend domain only
 CORS(app,
-     origins=["https://hireflow-web.onrender.com", "http://localhost:5173"],  # Add localhost for development
+     origins=["https://hireflow-web.onrender.com"],
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
-     methods=["GET", "POST", "OPTIONS"],
-     expose_headers=["Content-Type", "Authorization"],
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["POST", "OPTIONS"],
      max_age=3600)
-
-# Additional CORS handling for preflight requests
-@app.route('/api/evaluate', methods=['OPTIONS'])
-def handle_options():
-    response = make_response()
-    response.headers.add('Access-Control-Allow-Origin', 'https://hireflow-web.onrender.com')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
 
 # Health check endpoint
 @app.route('/')
