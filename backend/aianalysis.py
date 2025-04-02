@@ -5,17 +5,22 @@ from typing import Dict, Any
 
 # Configure GPU settings
 if torch.cuda.is_available():
-    torch.cuda.set_device(0)  # Use first GPU
+    torch.cuda.set_device(0)
     device = torch.device("cuda")
 else:
     device = torch.device("cpu")
 print(f"Using device: {device}")
 
-# Configure Deepseek client
-client = OpenAI(
-    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4",
-    base_url="https://api.deepseek.com/v1"
-)
+# Initialize OpenAI client with environment variables
+try:
+    client = OpenAI()
+    # Set the API key after initialization
+    client.api_key = "sk-3c492431b34d413db1e3f4f2f126b0e4"
+    # Set base URL after initialization
+    client.base_url = "https://api.deepseek.com/v1"
+except Exception as e:
+    print(f"Error initializing OpenAI client: {str(e)}")
+    raise
 
 def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
     """
