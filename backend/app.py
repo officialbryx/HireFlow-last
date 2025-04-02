@@ -9,26 +9,42 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Enable CORS for all routes
-CORS(app)
+# Get allowed origins from environment variable
+ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hireflow-web.onrender.com,http://localhost:5173').split(',')
 
-# Additional CORS headers
+# Enable CORS with specific configuration
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ALLOWED_ORIGINS,
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "max_age": 3600
+    }
+})
+
+# Modify CORS headers
 @app.after_request
 def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = 'https://hireflow-web.onrender.com'
-    header['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    header['Access-Control-Allow-Headers'] = 'Content-Type'
-    header['Access-Control-Max-Age'] = '3600'
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Access-Control-Max-Age'] = '3600'
     return response
 
-# Pre-flight request handler
+# Modify pre-flight request handler
 @app.route('/api/evaluate', methods=['OPTIONS'])
 def handle_options():
     response = make_response()
-    response.headers['Access-Control-Allow-Origin'] = 'https://hireflow-web.onrender.com'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     return response
 
 UPLOAD_FOLDER = 'uploads'

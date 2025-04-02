@@ -204,8 +204,9 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       const response = await axios.post(`${apiUrl}/api/evaluate`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Accept: "application/json",
         },
-        withCredentials: false,
+        withCredentials: true, // Enable credentials
         timeout: 300000, // 5 minutes
       });
 
@@ -219,7 +220,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       let errorMessage = "Error processing request. Please try again.";
 
       if (err.code === "ERR_NETWORK") {
-        errorMessage = "Server connection error. Please try again later.";
+        errorMessage =
+          "Server connection error. Please check your internet connection and try again.";
       } else if (err.response?.data?.error) {
         errorMessage = err.response.data.error;
       } else if (err.message) {

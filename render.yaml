@@ -23,12 +23,30 @@ services:
         value: https://hireflow-web.onrender.com
       - key: FLASK_ENV
         value: production
+      - key: FLASK_APP
+        value: app.py
+      - key: SECURE_HEADERS
+        value: "true"
 
   - name: hireflow-web
     type: web
     env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_SUPABASE_URL
         value: https://amkjtemaecxqfrwtskha.supabase.co
@@ -36,3 +54,5 @@ services:
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFta2p0ZW1hZWN4cWZyd3Rza2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxODgyOTksImV4cCI6MjA1NTc2NDI5OX0.zI5hbm9CZtmVMmGf2zU41Jly1xEl0_65vQ-KEUQr2Qw
       - key: VITE_API_URL
         value: https://hireflow-api.onrender.com
+      - key: VITE_ENABLE_CORS
+        value: "true"
