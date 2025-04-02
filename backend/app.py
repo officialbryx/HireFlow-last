@@ -9,18 +9,19 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Enable CORS with render.com frontend domain only
-CORS(app,
-     origins=["https://hireflow-web.onrender.com"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["POST", "OPTIONS"],
-     max_age=3600)
+# Simple CORS configuration
+CORS(app, resources={
+    r"/*": {
+        "origins": ["https://hireflow-web.onrender.com"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+    }
+})
 
 # Health check endpoint
 @app.route('/')
 def health():
-    return 'Hireflow API is running!', 200
+    return 'API is running', 200
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -35,6 +36,10 @@ def allowed_file(filename):
 
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
+    # Add CORS headers directly to response
+    if request.method == "OPTIONS":
+        return {"success": True}, 200
+
     try:
         # Set CORS headers for the actual response too
         response = None
