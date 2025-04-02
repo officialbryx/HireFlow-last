@@ -9,25 +9,19 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Get allowed origins from environment variable
-ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hireflow-web.onrender.com').split(',')
-
-# Enable CORS with specific configuration
-CORS(app, resources={
-    r"/api/*": {
-        "origins": ALLOWED_ORIGINS,
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "max_age": 3600
-    }
-})
+# Enable CORS with render.com frontend domain only
+CORS(app,
+     origins=["https://hireflow-web.onrender.com"],
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["POST", "OPTIONS"],
+     max_age=3600)
 
 # Modify CORS headers
 @app.after_request
 def after_request(response):
     origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
+    if origin == "https://hireflow-web.onrender.com":
         response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
@@ -40,7 +34,7 @@ def after_request(response):
 def handle_options():
     response = make_response()
     origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
+    if origin == "https://hireflow-web.onrender.com":
         response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
