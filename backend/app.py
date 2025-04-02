@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 # Get allowed origins from environment variable
-ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hireflow-web.onrender.com,http://localhost:5173').split(',')
+ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hireflow-web.onrender.com').split(',')
 
 # Enable CORS with specific configuration
 CORS(app, resources={

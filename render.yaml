@@ -17,8 +17,6 @@ services:
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFta2p0ZW1hZWN4cWZyd3Rza2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxODgyOTksImV4cCI6MjA1NTc2NDI5OX0.zI5hbm9CZtmVMmGf2zU41Jly1xEl0_65vQ-KEUQr2Qw
       - key: OPENAI_API_BASE
         value: https://api.deepseek.com/v1
-      - key: CORS_ORIGINS
-        value: "https://hireflow-web.onrender.com,http://localhost:5173"
       - key: CORS_ORIGIN
         value: https://hireflow-web.onrender.com
       - key: FLASK_ENV
