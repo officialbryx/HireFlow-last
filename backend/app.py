@@ -17,29 +17,10 @@ CORS(app,
      methods=["POST", "OPTIONS"],
      max_age=3600)
 
-# Modify CORS headers
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    if origin == "https://hireflow-web.onrender.com":
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        response.headers['Access-Control-Max-Age'] = '3600'
-    return response
-
-# Modify pre-flight request handler
-@app.route('/api/evaluate', methods=['OPTIONS'])
-def handle_options():
-    response = make_response()
-    origin = request.headers.get('Origin')
-    if origin == "https://hireflow-web.onrender.com":
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    return response
+# Health check endpoint
+@app.route('/')
+def health():
+    return 'Hireflow API is running!', 200
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
