@@ -137,7 +137,7 @@ const ApplicantsList = ({
                 <option value="all">All Statuses</option>
                 <option value="shortlisted">Shortlisted</option>  {/* New option */}
                 <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
+                <option value="accepted">Accepted</option>
                 <option value="rejected">Rejected</option>
                 <option value="interview">Interview</option>
               </select>
@@ -187,7 +187,7 @@ const ApplicantsList = ({
                       {applicant.personal_info?.given_name} {applicant.personal_info?.family_name}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {applicant.company || "No company"}
+                      {applicant.job_title || "Unknown position"} • {applicant.company || "No company"}
                     </p>
                     <span className="text-xs text-gray-400 block mt-1">
                       {formatDate(applicant.created_at)}

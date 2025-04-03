@@ -106,7 +106,7 @@ const ApplicantDetails = ({
               {personal_info.given_name} {personal_info.family_name}
             </h2>
             <p className="text-gray-600">
-              Applied to: <span className="font-medium">{company}</span>
+              Applied for: <span className="font-medium">{selectedApplicant.job_title || "Unknown position"}</span> at <span className="font-medium">{company}</span>
             </p>
             <div className="flex items-center mt-1 text-sm text-gray-500">
               <span>Applied on {formatDate(created_at)}</span>

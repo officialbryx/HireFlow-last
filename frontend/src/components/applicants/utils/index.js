@@ -17,7 +17,7 @@ export const getPublicUrl = (resumeUrl) => {
 export const getBadgeColor = (status) => {
     switch (status) {
       case "pending": return "bg-amber-100 text-amber-800";
-      case "approved": return "bg-emerald-100 text-emerald-800";
+      case "accepted": return "bg-emerald-100 text-emerald-800";
       case "rejected": return "bg-rose-100 text-rose-800";
       case "interview": return "bg-blue-100 text-blue-800"; // Added missing status
       default: return "bg-gray-100 text-gray-800";
