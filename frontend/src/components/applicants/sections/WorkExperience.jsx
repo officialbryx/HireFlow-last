@@ -56,19 +56,23 @@ export const WorkExperience = ({
 
       {previousEmployment?.previously_employed && (
         <div className="mt-6 pt-6 border-t">
-          <h4 className="font-medium text-gray-700 mb-2">
-            Previous Employment at {company}
-          </h4>
-          {previousEmployment.employee_id && (
-            <p className="text-sm text-gray-600">
-              Employee ID: {previousEmployment.employee_id}
-            </p>
-          )}
-          {previousEmployment.manager && (
-            <p className="text-sm text-gray-600">
-              Previous Manager: {previousEmployment.manager}
-            </p>
-          )}
+          <div className="flex items-center gap-2">
+            <h4 className="font-medium text-gray-700">
+              Previous Employment at {company}:
+            </h4>
+            {!previousEmployment.employee_id && !previousEmployment.manager ? (
+              <span className="text-sm text-gray-600">None</span>
+            ) : (
+              <div className="text-sm text-gray-600">
+                {previousEmployment.employee_id && (
+                  <p>Employee ID: {previousEmployment.employee_id}</p>
+                )}
+                {previousEmployment.manager && (
+                  <p>Previous Manager: {previousEmployment.manager}</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -94,6 +94,10 @@ const Companies = () => {
           </h2>
           <p className="text-gray-600 font-medium">
             Showing{" "}
+            <span className="text-blue-600">
+              {Math.min(currentCompanies.length, companiesPerPage)}
+            </span>{" "}
+            out of{" "}
             <span className="text-blue-600">{filteredCompanies.length}</span>{" "}
             companies
           </p>

@@ -1,45 +1,63 @@
-import { 
-  ChatBubbleLeftRightIcon, 
-  CheckCircleIcon, 
-  XCircleIcon 
+import {
+  ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
 
-const QuestionItem = ({ question, answer, isRequired, isValid }) => {
-  // Determine if the answer is yes/no
-  const isYesNoQuestion = typeof answer === 'string' && 
-    (answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'no');
-  
-  const isYes = isYesNoQuestion && answer.toLowerCase() === 'yes';
-  const isNo = isYesNoQuestion && answer.toLowerCase() === 'no';
+const QuestionItem = ({ question, answer, isValid }) => {
+  const isYesNoQuestion =
+    typeof answer === "string" &&
+    (answer.toLowerCase() === "yes" || answer.toLowerCase() === "no");
+
+  const isYes = isYesNoQuestion && answer.toLowerCase() === "yes";
+  const isNo = isYesNoQuestion && answer.toLowerCase() === "no";
+
+  // Capitalize first letter of answer
+  const formattedAnswer = answer
+    ? answer.charAt(0).toUpperCase() + answer.slice(1).toLowerCase()
+    : "";
 
   return (
     <div className="flex items-start gap-3 pb-4 last:pb-0">
-      <div className={isYes ? "text-emerald-500" : isNo ? "text-rose-500" : (isValid ? "text-emerald-500" : "text-rose-500")}>
+      <div
+        className={
+          isYes
+            ? "text-emerald-500"
+            : isNo
+            ? "text-rose-500"
+            : isValid
+            ? "text-emerald-500"
+            : "text-rose-500"
+        }
+      >
         {isYes ? (
           <CheckCircleIcon className="h-5 w-5" />
         ) : isNo ? (
           <XCircleIcon className="h-5 w-5" />
+        ) : isValid ? (
+          <CheckCircleIcon className="h-5 w-5" />
         ) : (
-          isValid ? <CheckCircleIcon className="h-5 w-5" /> : <XCircleIcon className="h-5 w-5" />
+          <XCircleIcon className="h-5 w-5" />
         )}
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <h4 className="font-medium text-gray-900">{question}</h4>
-          {isRequired && (
-            <span className="px-2 py-0.5 bg-rose-50 text-rose-700 text-xs font-medium rounded-full">
-              Required
-            </span>
-          )}
         </div>
         <p className="text-sm text-gray-600">
-          {answer ? (
-            <span className={`font-medium ${
-              isYes ? 'text-emerald-600' : 
-              isNo ? 'text-rose-600' : 
-              (isValid ? 'text-emerald-600' : 'text-rose-600')
-            }`}>
-              {answer}
+          {formattedAnswer ? (
+            <span
+              className={`font-medium ${
+                isYes
+                  ? "text-emerald-600"
+                  : isNo
+                  ? "text-rose-600"
+                  : isValid
+                  ? "text-emerald-600"
+                  : "text-rose-600"
+              }`}
+            >
+              {formattedAnswer}
             </span>
           ) : (
             <span className="italic text-gray-400">No answer provided</span>
@@ -62,15 +80,30 @@ export const ScreeningQuestions = ({ questions = {} }) => {
     );
   }
 
-  // Transform questions object into array for easier mapping
-  const questionsList = Object.entries(questions).map(([question, details]) => ({
-    question: question
-      .replace(/([A-Z])/g, ' $1')
-      .trim()
-      .replace(/^./, str => str.toUpperCase()),
-    answer: typeof details === 'object' ? details.answer : details,
-    isRequired: details.required || false,
-    isValid: details.valid !== undefined ? details.valid : true
+  // Question mapping from IDs to full text
+  const questionTextMap = {
+    previouslyProcessed:
+      "Have you been previously employed by this company (If you are a current employee, please apply on the Workday site instead)",
+    previouslyProcessedWithCompany:
+      "Was your application previously processed with this company?",
+    directlyEmployed: "Have you been directly employed by this company?",
+    relativesInCompany:
+      "Do you have relatives working with this company, any of the company subsidiaries, or other companies?",
+    relativesInIndustry:
+      "Do you have any relatives working with other related industry companies?",
+    currentEmployerBond: "Do you have a bond with your current employer?",
+    nonCompete: "Do you have a non-compete clause?",
+    filipinoCitizen: "Are you a Filipino / dual Filipino citizen?",
+    internationalStudies:
+      "Are you / will you be undergoing international studies?",
+    applyVisa: "Are you applying for a VISA?",
+  };
+
+  // Transform questions object into array with full question text
+  const questionsList = Object.entries(questions).map(([id, details]) => ({
+    question: questionTextMap[id] || id,
+    answer: typeof details === "object" ? details.answer : details,
+    isValid: details.valid !== undefined ? details.valid : true,
   }));
 
   return (
@@ -86,32 +119,10 @@ export const ScreeningQuestions = ({ questions = {} }) => {
             <QuestionItem
               question={q.question}
               answer={q.answer}
-              isRequired={q.isRequired}
               isValid={q.isValid}
             />
           </div>
         ))}
-      </div>
-
-      {/* Summary section */}
-      <div className="mt-6 pt-6 border-t">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600">
-            Required questions answered: {
-              questionsList.filter(q => q.isRequired && q.isValid).length
-            }/{questionsList.filter(q => q.isRequired).length}
-          </span>
-          <span className={`px-2 py-1 rounded-full font-medium ${
-            questionsList.every(q => !q.isRequired || q.isValid)
-              ? 'bg-emerald-50 text-emerald-700'
-              : 'bg-amber-50 text-amber-700'
-          }`}>
-            {questionsList.every(q => !q.isRequired || q.isValid)
-              ? 'All Required Questions Answered'
-              : 'Missing Required Answers'
-          }
-          </span>
-        </div>
       </div>
     </div>
   );
