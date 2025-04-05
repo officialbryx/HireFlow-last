@@ -198,4 +198,46 @@ export const api = {
       throw error;
     }
   },
+
+  async checkEmailExists(email) {
+    try {
+      // Try to sign up with the email to see if it exists
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        // Use a random password since we're just checking email existence
+        password: Math.random().toString(36) + Date.now().toString(36),
+      });
+
+      // If we get a user object with identities.length === 0, the email exists
+      if (data?.user?.identities?.length === 0) {
+        // Email exists, now get the user type from profiles if needed
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("email", email)
+          .single();
+
+        return {
+          data: {
+            email: email,
+            user_type: profileData?.user_type,
+            exists: true,
+          },
+        };
+      }
+
+      // If we get here, the email doesn't exist
+      return { data: null };
+    } catch (error) {
+      if (error.message?.includes("email already")) {
+        return {
+          data: {
+            email: email,
+            exists: true,
+          },
+        };
+      }
+      throw error;
+    }
+  },
 };
