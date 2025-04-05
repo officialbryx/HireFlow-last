@@ -4,11 +4,11 @@ import { PersonalInfo } from "./sections/PersonalInfo";
 import { WorkExperience } from "./sections/WorkExperience";
 import { Education } from "./sections/Education";
 import { SkillsAndPresence } from "./sections/SkillsAndPresence";
-import { ResumeAnalysis } from "./sections/ResumeAnalysis";
 import { ScreeningQuestions } from "./sections/ScreeningQuestions";
 import StatusControls from "./StatusControls";
 import { applicationsApi } from "../../services/api/applicationsApi";
 import { useToast } from "../../hooks/useToast";
+import { EvaluateJobs } from "./sections/EvaluateJobs";
 
 const ApplicantDetails = ({
   selectedApplicant,
@@ -54,7 +54,7 @@ const ApplicantDetails = ({
 
   const tabs = [
     { id: "details", label: "Applicant Details" },
-    { id: "resume", label: "Resume Analysis" },
+    { id: "evaluate", label: "Evaluate Resume" },
     { id: "screening", label: "Screening Questions" },
   ];
 
@@ -106,7 +106,11 @@ const ApplicantDetails = ({
               {personal_info.given_name} {personal_info.family_name}
             </h2>
             <p className="text-gray-600">
-              Applied for: <span className="font-medium">{selectedApplicant.job_title || "Unknown position"}</span> at <span className="font-medium">{company}</span>
+              Applied for:{" "}
+              <span className="font-medium">
+                {selectedApplicant.job_title || "Unknown position"}
+              </span>{" "}
+              at <span className="font-medium">{company}</span>
             </p>
             <div className="flex items-center mt-1 text-sm text-gray-500">
               <span>Applied on {formatDate(created_at)}</span>
@@ -231,10 +235,10 @@ const ApplicantDetails = ({
               websites={websites}
             />
           </div>
-        ) : activeTab === "resume" ? (
-          <ResumeAnalysis
-            analysis={analysis}
-            handleViewResume={resume_url ? handleResumeClick : null}
+        ) : activeTab === "evaluate" ? (
+          <EvaluateJobs
+            selectedApplicant={selectedApplicant}
+            resume_url={resume_url}
           />
         ) : (
           <ScreeningQuestions questions={application_questions} />

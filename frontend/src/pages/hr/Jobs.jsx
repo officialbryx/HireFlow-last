@@ -14,8 +14,8 @@ import { useJobModals } from "../../hooks/useJobModals";
 import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
 import ViewApplicants from "../../components/jobs/ViewApplicants2";
-import EvaluateJobs from "../../components/jobs/EvaluateJobs";
 import RankCandidates from "../../components/jobs/RankCandidates";
+import { EvaluateJobs } from "../../components/applicants/sections/EvaluateJobs";
 
 const Jobs = () => {
   const {
@@ -104,9 +104,7 @@ const Jobs = () => {
     const tabParam = searchParams.get("tab");
     if (
       tabParam &&
-      ["view", "create", "archived", "applicants", "evaluate", "rank"].includes(
-        tabParam
-      )
+      ["view", "create", "archived", "applicants", "rank"].includes(tabParam)
     ) {
       setActiveTab(tabParam);
 
@@ -302,23 +300,12 @@ const Jobs = () => {
               >
                 Applicants
               </button>
-              <button
-                onClick={() => setActiveTab("evaluate")}
-                className={`${
-                  activeTab === "evaluate"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Evaluate Jobs
-              </button>
             </nav>
           </div>
 
           {/* Search and Filter */}
           {activeTab !== "create" &&
             activeTab !== "applicants" &&
-            activeTab !== "evaluate" &&
             activeTab !== "rank" && (
               <div className="mb-6">
                 <div className="flex flex-col md:flex-row gap-4">
@@ -384,7 +371,6 @@ const Jobs = () => {
                 onClearFilters={() => setJobIdFilter(null)}
               />
             )}
-            {activeTab === "evaluate" && <EvaluateJobs />}
             {/* Add this line to render the RankCandidates component */}
             {activeTab === "rank" && <RankCandidates />}
           </div>

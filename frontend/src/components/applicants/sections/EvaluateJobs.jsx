@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { jobsApi } from "../../services/api/jobsApi";
-import { applicationsApi } from "../../services/api/applicationsApi";
+import { jobsApi } from "../../../services/api/jobsApi";
+import { applicationsApi } from "../../../services/api/applicationsApi";
 
-const EvaluateJobs = () => {
+export const EvaluateJobs = ({ selectedApplicant, resume_url }) => {
   // Existing state
   const [jobPost, setJobPost] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
@@ -180,6 +180,32 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     }
   };
 
+  // Auto-populate the candidate's resume if available
+  useEffect(() => {
+    const populateResume = async () => {
+      if (resume_url) {
+        try {
+          setLoadingCandidate(true);
+          const blob = await applicationsApi.downloadResume(resume_url);
+          const resumeFileName = resume_url.split("/").pop() || "resume.pdf";
+          const file = new File([blob], resumeFileName, {
+            type: "application/pdf",
+          });
+          setResumeFile(file);
+        } catch (err) {
+          console.error("Error downloading resume:", err);
+          setError(
+            "Failed to download candidate's resume. Please try again or upload manually."
+          );
+        } finally {
+          setLoadingCandidate(false);
+        }
+      }
+    };
+
+    populateResume();
+  }, [resume_url]);
+
   // Reset application selection when job changes
   useEffect(() => {
     setSelectedApplicationId("");
@@ -274,7 +300,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-gray-50 min-h-screen">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white min-h-screen">
       {isLoading && <LoadingSpinner />}
 
       <div className="text-center mb-10">
@@ -917,5 +943,3 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     </div>
   );
 };
-
-export default EvaluateJobs;
