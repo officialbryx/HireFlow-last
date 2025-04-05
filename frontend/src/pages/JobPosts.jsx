@@ -239,186 +239,194 @@ const JobPosts = () => {
 
             {/* Right Column - Job Details */}
             <div className="w-full lg:w-3/5">
-              {selectedJob ? (
-                <div className="bg-white p-6 md:p-8 rounded-xl shadow-md">
-                  {/* Job Header */}
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-                    <div className="flex gap-6">
-                      <div className="flex-shrink-0 bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-center">
-                        <img
-                          src={
-                            selectedJob.company_logo_url ||
-                            "/default-company-logo.png"
-                          }
-                          alt={selectedJob.company_name}
-                          className="w-16 h-16 object-contain"
-                        />
+              {selectedJob && (
+                <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white p-6 md:p-8 rounded-xl shadow-md max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                      <div className="flex gap-6">
+                        <div className="flex-shrink-0 bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-center">
+                          <img
+                            src={
+                              selectedJob.company_logo_url ||
+                              "/default-company-logo.png"
+                            }
+                            alt={selectedJob.company_name}
+                            className="w-16 h-16 object-contain"
+                          />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">
+                            {selectedJob.job_title}
+                          </h2>
+                          <p className="text-lg text-gray-700 font-medium">
+                            {selectedJob.company_name}
+                          </p>
+                          <div className="mt-2 flex items-center text-gray-600">
+                            <MapPinIcon className="h-5 w-5 mr-2" />
+                            {selectedJob.location}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          {selectedJob.job_title}
-                        </h2>
-                        <p className="text-lg text-gray-700 font-medium">
-                          {selectedJob.company_name}
-                        </p>
-                        <div className="mt-2 flex items-center text-gray-600">
-                          <MapPinIcon className="h-5 w-5 mr-2" />
-                          {selectedJob.location}
+                      <div className="flex flex-col gap-3 md:items-end w-full md:w-auto">
+                        <button
+                          className="bg-blue-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm flex items-center justify-center w-full md:w-[140px] whitespace-nowrap"
+                          onClick={() =>
+                            handleApply(
+                              selectedJob.company_name,
+                              selectedJob.id
+                            )
+                          }
+                        >
+                          Apply Now
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Job Highlights */}
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg">
+                      <div className="flex items-center">
+                        <BriefcaseIcon className="h-6 w-6 mr-3 text-blue-600" />
+                        <div>
+                          <p className="text-gray-500 text-sm">Job Type</p>
+                          <p className="font-medium">
+                            {selectedJob.employment_type}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <CurrencyDollarIcon className="h-6 w-6 mr-3 text-blue-600" />
+                        <div>
+                          <p className="text-gray-500 text-sm">Salary Range</p>
+                          <p className="font-medium">
+                            {selectedJob.salary_range || "Not specified"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <UserGroupIcon className="h-6 w-6 mr-3 text-blue-600" />
+                        <div>
+                          <p className="text-gray-500 text-sm">
+                            Applicants Needed
+                          </p>
+                          <p className="font-medium">
+                            {selectedJob.applicants_needed}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-3 md:items-end w-full md:w-auto">
-                      <button
-                        className="bg-blue-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm flex items-center justify-center w-full md:w-[140px] whitespace-nowrap"
-                        onClick={() =>
-                          handleApply(selectedJob.company_name, selectedJob.id)
-                        }
-                      >
-                        Apply Now
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Job Highlights */}
-                  <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg">
-                    <div className="flex items-center">
-                      <BriefcaseIcon className="h-6 w-6 mr-3 text-blue-600" />
-                      <div>
-                        <p className="text-gray-500 text-sm">Job Type</p>
-                        <p className="font-medium">
-                          {selectedJob.employment_type}
-                        </p>
+                    {/* Skills */}
+                    <div className="mt-6">
+                      <h4 className="text-lg font-semibold mb-3">
+                        Required Skills
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedJob.job_skill.map((skill, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium"
+                          >
+                            {skill.skill}
+                          </span>
+                        ))}
+                        {selectedJob.job_skill.length === 0 && (
+                          <p className="text-gray-500">
+                            No specific skills listed
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center">
-                      <CurrencyDollarIcon className="h-6 w-6 mr-3 text-blue-600" />
-                      <div>
-                        <p className="text-gray-500 text-sm">Salary Range</p>
-                        <p className="font-medium">
-                          {selectedJob.salary_range || "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <UserGroupIcon className="h-6 w-6 mr-3 text-blue-600" />
-                      <div>
-                        <p className="text-gray-500 text-sm">
-                          Applicants Needed
-                        </p>
-                        <p className="font-medium">
-                          {selectedJob.applicants_needed}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Skills */}
-                  <div className="mt-6">
-                    <h4 className="text-lg font-semibold mb-3">
-                      Required Skills
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedJob.job_skill.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium"
-                        >
-                          {skill.skill}
-                        </span>
-                      ))}
-                      {selectedJob.job_skill.length === 0 && (
-                        <p className="text-gray-500">
-                          No specific skills listed
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Job Description */}
-                  <div className="mt-8">
-                    <h4 className="text-xl font-semibold mb-4 text-gray-800">
-                      About The Job
-                    </h4>
-                    <div className="prose prose-slate max-w-none">
-                      <p className="text-gray-600 mb-6 leading-relaxed">
-                        {selectedJob.company_description}
-                      </p>
-                    </div>
-
-                    {selectedJob.responsibilities.length > 0 && (
-                      <div className="bg-blue-50 rounded-lg p-5 mt-6">
-                        <h5 className="font-semibold mb-3 text-blue-900 flex items-center">
-                          <ClockIcon className="h-5 w-5 mr-2" />
-                          Key Responsibilities:
-                        </h5>
-                        <ul className="space-y-2">
-                          {selectedJob.responsibilities.map((item, index) => (
-                            <li
-                              key={index}
-                              className="text-gray-700 flex items-start"
-                            >
-                              <span className="inline-block h-2 w-2 rounded-full bg-blue-600 mt-2 mr-2"></span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {selectedJob.qualifications.length > 0 && (
-                      <div className="bg-slate-50 rounded-lg p-5 mt-6">
-                        <h5 className="font-semibold mb-3 text-gray-800 flex items-center">
-                          <BriefcaseIcon className="h-5 w-5 mr-2" />
-                          Qualifications:
-                        </h5>
-                        <ul className="space-y-2">
-                          {selectedJob.qualifications.map((item, index) => (
-                            <li
-                              key={index}
-                              className="text-gray-700 flex items-start"
-                            >
-                              <span className="inline-block h-2 w-2 rounded-full bg-slate-500 mt-2 mr-2"></span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Company Info */}
-                    <div className="mt-8 border-t border-gray-100 pt-6">
-                      <h4 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-                        <UserGroupIcon className="h-6 w-6 mr-2 text-gray-600" />
-                        About the Company
+                    {/* Job Description */}
+                    <div className="mt-8">
+                      <h4 className="text-xl font-semibold mb-4 text-gray-800">
+                        About The Job
                       </h4>
                       <div className="prose prose-slate max-w-none">
-                        <p className="text-gray-600 leading-relaxed">
-                          {selectedJob.about_company}
+                        <p className="text-gray-600 mb-6 leading-relaxed">
+                          {selectedJob.company_description}
                         </p>
                       </div>
-                    </div>
 
-                    {/* Application Instructions */}
-                    <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold mb-3 text-blue-800">
-                        Ready to Apply?
-                      </h4>
-                      <p className="text-gray-700 mb-4">
-                        Click the apply button and submit your application. Make
-                        sure your profile is up to date.
-                      </p>
-                      <button
-                        className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm"
-                        onClick={() =>
-                          handleApply(selectedJob.company_name, selectedJob.id)
-                        }
-                      >
-                        Apply for this Position
-                      </button>
+                      {selectedJob.responsibilities.length > 0 && (
+                        <div className="bg-blue-50 rounded-lg p-5 mt-6">
+                          <h5 className="font-semibold mb-3 text-blue-900 flex items-center">
+                            <ClockIcon className="h-5 w-5 mr-2" />
+                            Key Responsibilities:
+                          </h5>
+                          <ul className="space-y-2">
+                            {selectedJob.responsibilities.map((item, index) => (
+                              <li
+                                key={index}
+                                className="text-gray-700 flex items-start"
+                              >
+                                <span className="inline-block h-2 w-2 rounded-full bg-blue-600 mt-2 mr-2"></span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {selectedJob.qualifications.length > 0 && (
+                        <div className="bg-slate-50 rounded-lg p-5 mt-6">
+                          <h5 className="font-semibold mb-3 text-gray-800 flex items-center">
+                            <BriefcaseIcon className="h-5 w-5 mr-2" />
+                            Qualifications:
+                          </h5>
+                          <ul className="space-y-2">
+                            {selectedJob.qualifications.map((item, index) => (
+                              <li
+                                key={index}
+                                className="text-gray-700 flex items-start"
+                              >
+                                <span className="inline-block h-2 w-2 rounded-full bg-slate-500 mt-2 mr-2"></span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Company Info */}
+                      <div className="mt-8 border-t border-gray-100 pt-6">
+                        <h4 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                          <UserGroupIcon className="h-6 w-6 mr-2 text-gray-600" />
+                          About the Company
+                        </h4>
+                        <div className="prose prose-slate max-w-none">
+                          <p className="text-gray-600 leading-relaxed">
+                            {selectedJob.about_company}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Application Instructions */}
+                      <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+                        <h4 className="text-lg font-semibold mb-3 text-blue-800">
+                          Ready to Apply?
+                        </h4>
+                        <p className="text-gray-700 mb-4">
+                          Click the apply button and submit your application.
+                          Make sure your profile is up to date.
+                        </p>
+                        <button
+                          className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm"
+                          onClick={() =>
+                            handleApply(
+                              selectedJob.company_name,
+                              selectedJob.id
+                            )
+                          }
+                        >
+                          Apply for this Position
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+              {!selectedJob && (
                 <div className="bg-white p-12 rounded-xl shadow-md flex flex-col items-center justify-center text-center">
                   <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mb-4">
                     <BriefcaseIcon className="h-10 w-10 text-blue-500" />

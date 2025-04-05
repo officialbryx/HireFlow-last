@@ -19,9 +19,9 @@ const About = () => {
       image: "/naz.jpg",
       description:
         "Crafting pixel-perfect user experiences with a touch of magic. Turns coffee into code and dreams into functional interfaces.",
-      linkedin: "https://linkedin.com/in/lance-endaya",
-      github: "https://github.com/lance-endaya",
-      email: "lanceendaya@email.com",
+      linkedin: "https://www.linkedin.com/in/bien-robie-naz-318817344/",
+      github: "https://github.com/Nebiuse",
+      email: "qbrbnaz@tip.edu.ph",
     },
     {
       name: "Ymnwl Faurillo",
@@ -30,7 +30,7 @@ const About = () => {
       description: "?",
       linkedin: "https://www.merriam-webster.com/dictionary/useless",
       github: "https://www.merriam-webster.com/dictionary/useless",
-      email: "https://www.merriam-webster.com/dictionary/useless",
+      email: "ididntcontribute@gmail.com",
     },
   ];
 

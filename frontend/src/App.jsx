@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import LandingPage from "./pages/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import Companies from "./pages/Companies";
 import JobPosts from "./pages/JobPosts";
 import CreateJobPost from "./pages/hr/CreateJobPost";
 import Apply from "./pages/Apply";
@@ -75,6 +76,8 @@ const App = () => {
       document.title = "Privacy Policy | HireFlow";
     } else if (location.pathname === "/cookies") {
       document.title = "Cookie Policy | HireFlow";
+    } else if (location.pathname === "/companies") {
+      document.title = "Companies | HireFlow";
     }
   }, [location]);
 
@@ -103,8 +106,12 @@ const App = () => {
         <Route path="/hr/faq" element={<FAQ />} /> {/* HR FAQ */}
         <Route path="/hr/notifications" element={<Notifications />} />
         <Route path="/applications" element={<MyApplications />} />
-        <Route path="/applications/notifications" element={<ApplicationNotifications />} />
+        <Route
+          path="/applications/notifications"
+          element={<ApplicationNotifications />}
+        />
         <Route path="/applications/:id" element={<ApplicationDetails />} />
+        <Route path="/companies" element={<Companies />} />
       </Routes>
       {/* Enable this for cache debugging*/}
       <ReactQueryDevtools initialIsOpen={false} />
