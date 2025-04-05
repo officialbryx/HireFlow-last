@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { companiesData } from "../data/companyData";
@@ -23,6 +23,11 @@ const Companies = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const companiesPerPage = 6;
+
+  // Add useEffect to reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const filteredCompanies = companiesData.filter(
     (company) =>
