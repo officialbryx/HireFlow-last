@@ -57,7 +57,6 @@ console.log('Job archived check:', {
   const getStatusBadge = (status) => {
     switch(status) {
       case 'accepted':
-      case 'approved':
         return 'bg-green-100 text-green-800 border border-green-300';
       case 'rejected':
         return 'bg-red-100 text-red-800 border border-red-300';
@@ -101,6 +100,7 @@ console.log('Job archived check:', {
                       <option value="interview">Interview stage</option>
                       <option value="accepted">Accepted</option>
                       <option value="rejected">Rejected</option>
+                      <option value="withdrawn">Withdrawn</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                       <FunnelIcon className="h-4 w-4" />
