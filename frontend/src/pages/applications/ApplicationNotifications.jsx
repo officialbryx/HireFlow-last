@@ -135,17 +135,19 @@ const ApplicationNotifications = () => {
     switch(type) {
       case 'accepted':
       case 'approved':
-        return "Congratulations! Wait for HR to contact you about next steps.";
+        return "Application accepted. Expect communication regarding onboarding procedures shortly.";
       case 'interview':
-        return "You've been selected for an interview. HR will reach out to schedule a time.";
+        return "Interview stage reached. Prepare for upcoming interview scheduling communication.";
       case 'rejected':
-        return "Thank you for your interest. We encourage you to apply for other opportunities.";
+        return "Application not selected. Consider exploring other positions aligned with your qualifications.";
       case 'shortlisted':
-        return "Your application has been shortlisted and is being reviewed by the hiring team.";
+        return "Application shortlisted. Currently under further evaluation by the hiring committee.";
       case 'pending':
-        return "Your application is being reviewed. Check back for updates.";
+        return "Under initial review. Status updates will be provided as your application progresses.";
+      case 'withdrawn':
+        return "Application successfully withdrawn. No further action required.";
       default:
-        return "Check your application page for more details.";
+        return "View application details for complete status information.";
     }
   };
 
