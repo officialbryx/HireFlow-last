@@ -17,15 +17,15 @@ const StatusControls = ({
   const getStatusNotificationMessage = (status) => {
     switch(status) {
       case 'pending':
-        return `Your application for ${jobTitle} has been marked as pending review.`;
+        return `Your application for ${jobTitle} is currently under review by our hiring team. We appreciate your patience during this process.`;
       case 'accepted':
-        return `Congratulations! Your application for ${jobTitle} has been accepted.`;
+        return `We are pleased to inform you that your application for ${jobTitle} has been accepted. A representative will contact you shortly with further details regarding the next steps in the hiring process.`;
       case 'interview':
-        return `Good news! We'd like to schedule an interview for your application to ${jobTitle}.`;
+        return `We would like to invite you to interview for the ${jobTitle} position. Our hiring team will contact you soon to schedule a convenient time for the interview.`;
       case 'rejected':
-        return `Thank you for your interest in ${jobTitle}. Unfortunately, we've decided not to move forward with your application at this time.`;
+        return `Thank you for your interest in the ${jobTitle} position. After careful consideration, we regret to inform you that we have decided to pursue other candidates whose qualifications better align with our current requirements. We appreciate your time and wish you success in your career.`;
       default:
-        return `Your application status for ${jobTitle} has been updated to ${status}.`;
+        return `Your application status for ${jobTitle} has been updated to ${status}. Please check your dashboard for more details.`;
     }
   };
 

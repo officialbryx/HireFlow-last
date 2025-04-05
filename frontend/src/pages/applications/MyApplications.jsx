@@ -54,10 +54,14 @@ console.log('Job archived check:', {
     active: applications?.job_posting?.active
   });
 
+  // Add function to detect withdrawn applications
+  const isWithdrawn = (application) => {
+    return application.status === 'withdrawn';
+  };
+
   const getStatusBadge = (status) => {
     switch(status) {
       case 'accepted':
-      case 'approved':
         return 'bg-green-100 text-green-800 border border-green-300';
       case 'rejected':
         return 'bg-red-100 text-red-800 border border-red-300';
@@ -101,6 +105,7 @@ console.log('Job archived check:', {
                       <option value="interview">Interview stage</option>
                       <option value="accepted">Accepted</option>
                       <option value="rejected">Rejected</option>
+                      <option value="withdrawn">Withdrawn</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                       <FunnelIcon className="h-4 w-4" />
@@ -150,11 +155,14 @@ console.log('Job archived check:', {
                         ref={application.id === highlightedAppId ? highlightedRowRef : null}
                         className={`hover:bg-gray-50 ${
                           application.id === highlightedAppId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                        } ${isJobArchived(application) ? 'bg-gray-50' : ''}`}
+                        } ${isJobArchived(application) || isWithdrawn(application) ? 'bg-gray-50' : ''}`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className={`text-sm font-medium ${isJobArchived(application) ? 'text-gray-500' : 'text-gray-900'}`}>
+                            <div 
+                              className={`text-sm font-medium truncate max-w-[220px] ${isJobArchived(application) || isWithdrawn(application) ? 'text-gray-500' : 'text-gray-900'}`}
+                              title={application.job_posting?.job_title} // Show full title on hover
+                            >
                               {application.job_posting?.job_title}
                             </div>
                             {isJobArchived(application) && (
@@ -162,10 +170,15 @@ console.log('Job archived check:', {
                                 Archived
                               </span>
                             )}
+                            {isWithdrawn(application) && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                Withdrawn
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm ${isJobArchived(application) ? 'text-gray-400' : 'text-gray-500'}`}>
+                          <div className={`text-sm ${isJobArchived(application) || isWithdrawn(application) ? 'text-gray-400' : 'text-gray-500'}`}>
                             {application.job_posting?.company_name}
                           </div>
                         </td>
@@ -173,10 +186,12 @@ console.log('Job archived check:', {
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             isJobArchived(application) 
                               ? 'bg-gray-100 text-gray-600 border border-gray-200' 
-                              : getStatusBadge(application.status)
+                              : isWithdrawn(application)
+                                ? 'bg-slate-100 text-slate-600 border border-slate-200'
+                                : getStatusBadge(application.status)
                           }`}>
                             {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                            {isJobArchived(application) && " (Job Archived)"}
+                            {isJobArchived(application)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -188,7 +203,7 @@ console.log('Job archived check:', {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Link 
                             to={`/applications/${application.id}`} 
-                            className={`${isJobArchived(application) ? 'text-gray-400 hover:text-gray-600' : 'text-blue-600 hover:text-blue-900'}`}
+                            className={`${isJobArchived(application) || isWithdrawn(application) ? 'text-gray-400 hover:text-gray-600' : 'text-blue-600 hover:text-blue-900'}`}
                           >
                             View Details
                           </Link>
