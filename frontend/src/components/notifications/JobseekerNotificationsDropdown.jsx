@@ -71,7 +71,7 @@ const JobseekerNotificationsDropdown = () => {
   const getNotificationTypeColor = (type) => {
     switch(type) {
       case 'accepted': return 'bg-green-500';
-      case 'pending': return 'bg-amber-500';  // Same as accepted
+      case 'pending': return 'bg-amber-500';  
       case 'rejected': return 'bg-red-500';
       case 'shortlisted': return 'bg-blue-500';
       case 'interview': return 'bg-purple-500'; // New purple color for interviews

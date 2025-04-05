@@ -152,9 +152,12 @@ console.log('Job archived check:', {
                           application.id === highlightedAppId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                         } ${isJobArchived(application) ? 'bg-gray-50' : ''}`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className={`text-sm font-medium ${isJobArchived(application) ? 'text-gray-500' : 'text-gray-900'}`}>
+                            <div 
+                              className={`text-sm font-medium truncate max-w-[220px] ${isJobArchived(application) ? 'text-gray-500' : 'text-gray-900'}`}
+                              title={application.job_posting?.job_title} // Show full title on hover
+                            >
                               {application.job_posting?.job_title}
                             </div>
                             {isJobArchived(application) && (

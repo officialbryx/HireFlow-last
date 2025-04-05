@@ -495,5 +495,53 @@ export const applicationsApi = {
       console.error('Error fetching my applications:', error);
       return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
-  }
+  },
+
+  withdrawApplication: async (applicationId) => {
+    try {
+      console.log(`Withdrawing application ${applicationId}`);
+      
+      // Update application status to 'withdrawn'
+      const { data, error } = await supabase
+        .from('applications')
+        .update({ 
+          status: 'withdrawn',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+        
+      if (error) throw error;
+      
+      // Create notification for the employer about withdrawal
+      const { data: appData } = await supabase
+        .from('applications')
+        .select(`
+          applicant_id,
+          job_posting_id,
+          job_posting:job_posting_id (
+            job_title,
+            creator_id
+          )
+        `)
+        .eq('id', applicationId)
+        .single();
+        
+      if (appData && appData.job_posting) {
+        await supabase
+          .from('notifications')
+          .insert({
+            job_posting_id: appData.job_posting_id,
+            application_id: applicationId,
+            recipient_id: appData.job_posting.creator_id, // Send to employer
+            message: `An applicant has withdrawn their application for ${appData.job_posting.job_title}`,
+            type: 'withdrawn'
+          });
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error withdrawing application:', error);
+      throw error;
+    }
+  },
 };
