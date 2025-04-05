@@ -536,17 +536,6 @@ const ForgotPassword = () => {
             </form>
           )}
         </div>
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Need help?{" "}
-            <a
-              href="#"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Contact support
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );
