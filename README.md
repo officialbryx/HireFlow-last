@@ -79,19 +79,6 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 python app.py
 
-3. Set up environment variables:
-
-Create .env file in frontend directory
-Add Supabase credentials
-
-4. Run the application
-
-Frontend
-npm run dev
-
-Backend
-python app.py
-
 Contributing
 Pull requests are welcome. For major changes, please open an issue first.
 
