@@ -40,6 +40,16 @@ const ApplicationDetails = () => {
     return application?.job_posting?.status === 'archived' 
   };
 
+  // Add function to detect withdrawn applications
+  const isWithdrawn = () => {
+    return application?.status === 'withdrawn';
+  };
+
+  // Update isInactive to check for either archived or withdrawn
+  const isInactive = () => {
+    return isJobArchived() || isWithdrawn();
+  };
+
   const getStatusBadge = (status) => {
     switch(status) {
       case 'accepted':
@@ -215,11 +225,11 @@ const ApplicationDetails = () => {
           
           <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl">
             {/* Header with job title and status */}
-            <div className={`px-8 py-6 border-b border-gray-200 ${isJobArchived() ? 'bg-gray-50' : 'bg-gradient-to-r from-white to-gray-50'}`}>
+            <div className={`px-8 py-6 border-b border-gray-200 ${isInactive() ? 'bg-gray-50' : 'bg-gradient-to-r from-white to-gray-50'}`}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="flex items-center">
-                    <h1 className={`text-2xl font-bold ${isJobArchived() ? 'text-gray-500' : 'text-gray-900'}`}>
+                    <h1 className={`text-2xl font-bold ${isInactive() ? 'text-gray-500' : 'text-gray-900'}`}>
                       {application?.job_posting?.job_title}
                     </h1>
                   </div>
@@ -234,6 +244,11 @@ const ApplicationDetails = () => {
                       <XMarkIcon className="h-5 w-5 mr-1.5" />
                       Archived
                     </span>
+                  ) : isWithdrawn() ? (
+                    <span className="px-4 py-2 inline-flex text-md leading-5 font-semibold rounded-full bg-slate-100 text-slate-800 border border-slate-300">
+                      <XMarkIcon className="h-5 w-5 mr-1.5" />
+                      Withdrawn
+                    </span>
                   ) : (
                     <span className={`px-4 py-2 inline-flex text-md leading-5 font-semibold rounded-full ${getStatusBadge(application?.status)}`}>
                       {application?.status && application.status.charAt(0).toUpperCase() + application.status.slice(1)}
@@ -244,7 +259,7 @@ const ApplicationDetails = () => {
             </div>
 
             {/* Application Progress Timeline */}
-            {!isJobArchived() && applicationStep !== -1 && (
+            {!isInactive() && applicationStep !== -1 && (
               <div className="px-8 py-5 border-b border-gray-200 bg-white">
                 <h2 className="text-md font-medium text-gray-700 mb-4">Application Progress</h2>
                 <div className="relative">
@@ -273,6 +288,7 @@ const ApplicationDetails = () => {
             {/* Application status message with better styling */}
             <div className={`px-8 py-6 border-b ${
               isJobArchived() ? 'bg-gray-50 border-gray-200' : 
+              isWithdrawn() ? 'bg-slate-50 border-slate-200' :
               application?.status === 'rejected' ? 'bg-red-50 border-red-100' :
               application?.status === 'accepted' || application?.status === 'approved' ? 'bg-green-50 border-green-100' :
               'bg-blue-50 border-blue-100'
@@ -281,6 +297,8 @@ const ApplicationDetails = () => {
                 <div className="flex-shrink-0 mr-3">
                   {isJobArchived() ? (
                     <XMarkIcon className="h-6 w-6 text-gray-500" />
+                  ) : isWithdrawn() ? (
+                    <XMarkIcon className="h-6 w-6 text-slate-500" />
                   ) : (
                     getStatusIcon(application?.status)
                   )}
@@ -288,11 +306,13 @@ const ApplicationDetails = () => {
                 <div>
                   <h3 className={`text-md font-semibold ${
                     isJobArchived() ? 'text-gray-700' : 
+                    isWithdrawn() ? 'text-slate-700' :
                     application?.status === 'rejected' ? 'text-red-700' :
                     application?.status === 'accepted' || application?.status === 'approved' ? 'text-green-700' :
                     'text-blue-700'
                   }`}>
                     {isJobArchived() ? 'Job Archived' : 
+                     isWithdrawn() ? 'Application Withdrawn' :
                      application?.status === 'rejected' ? 'Application Not Selected' :
                      application?.status === 'accepted' || application?.status === 'approved' ? 'Application Accepted' :
                      application?.status === 'shortlisted' ? 'Application Shortlisted' :
@@ -302,18 +322,31 @@ const ApplicationDetails = () => {
                   </h3>
                   <p className={`text-sm mt-1 ${
                     isJobArchived() ? 'text-gray-600' : 
+                    isWithdrawn() ? 'text-slate-600' :
                     application?.status === 'rejected' ? 'text-red-600' :
                     application?.status === 'accepted' || application?.status === 'approved' ? 'text-green-600' :
                     'text-blue-600'
                   }`}>
-                    {getStatusMessage(application?.status)}
+                    {isWithdrawn() ? 
+                      "You have withdrawn this application. The employer has been notified, and this position is no longer being considered for you." : 
+                      getStatusMessage(application?.status)
+                    }
                   </p>
                   
                   {/* Add estimated time info for pending status */}
                   {application?.status === 'pending' && (
-                    <div className="mt-3 flex items-center text-yellow-600 text-xs">
-                      <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin-slow" />
-                      Typical response time: 1-2 weeks
+                    <div className={`mt-3 flex items-center ${
+                      isInactive() ? 'text-gray-400' : 'text-yellow-600'
+                    } text-xs`}>
+                      {isInactive() ? (
+                        <ClockIcon className="h-4 w-4 mr-1" />
+                      ) : (
+                        <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin-slow" />
+                      )}
+                      {isInactive() ? 
+                        "Response time information not available (inactive application)" : 
+                        "Typical response time: 1-2 weeks"
+                      }
                     </div>
                   )}
                 </div>
@@ -420,20 +453,21 @@ const ApplicationDetails = () => {
               <button
                 onClick={() => setShowJobModal(true)}
                 className={`text-sm mr-4 px-4 py-2 rounded-md transition-all ${
-                  isJobArchived() 
+                  isInactive() 
                     ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center' 
                     : 'bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center'
                 }`}
               >
-                {isJobArchived() && (
+                {isInactive() && (
                   <span className="inline-block w-3 h-3 rounded-full bg-gray-300 mr-1.5"></span>
                 )}
                 View Job Details {isJobArchived() && '(Archived)'}
               </button>
               
-              {/* Only show withdraw button if not already rejected/accepted and not archived */}
+              {/* Only show withdraw button if not already rejected/accepted/withdrawn and not archived */}
               {application?.status !== 'rejected' && 
                application?.status !== 'accepted' && 
+               application?.status !== 'withdrawn' &&
                !isJobArchived() && (
                 <button
                   className={`text-sm bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-md transition-all flex items-center ${isWithdrawing ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -457,6 +491,7 @@ const ApplicationDetails = () => {
               {/* Show disabled withdraw button if job is archived */}
               {application?.status !== 'rejected' && 
                application?.status !== 'accepted' && 
+               application?.status !== 'withdrawn' &&
                isJobArchived() && (
                 <button
                   disabled
@@ -466,14 +501,22 @@ const ApplicationDetails = () => {
                   Cannot Withdraw (Job Archived)
                 </button>
               )}
+
+              {/* Show message for already withdrawn applications */}
+              {isWithdrawn() && (
+                <div className="text-sm text-slate-500 px-4 py-2 rounded-md flex items-center">
+                  <CheckCircleIcon className="h-4 w-4 mr-1.5" />
+                  Application Withdrawn
+                </div>
+              )}
             </div>
           </div>
 
           {/* Add Next Steps section for non-rejected applications */}
-          {application?.status !== 'rejected' && !isJobArchived() && (
+          {application?.status !== 'rejected' && application?.status !== 'withdrawn' && !isJobArchived() && (
             <div className="mt-6 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
               <div className="px-8 py-6 border-b border-gray-200 bg-indigo-50">
-                <h2 className="text-lg font-semibold text-indigo-800">What's Next?</h2>
+                <h2 className="text-lg font-semibold text-indigo-800">What&apos;s Next?</h2>
               </div>
               <div className="px-8 py-6">
                 {application?.status === 'pending' && (
@@ -484,7 +527,7 @@ const ApplicationDetails = () => {
                     <div>
                       <h3 className="font-medium text-gray-900">Your application is being reviewed</h3>
                       <p className="mt-1 text-sm text-gray-600">
-                        We recommend you continue exploring other opportunities while you wait. Don't forget to set up job alerts to stay updated on similar positions.
+                        We recommend you continue exploring other opportunities while you wait. Don&apos;t forget to set up job alerts to stay updated on similar positions.
                       </p>
                     </div>
                   </div>
