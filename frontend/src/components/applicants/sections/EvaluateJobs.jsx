@@ -4,86 +4,34 @@ import { jobsApi } from "../../../services/api/jobsApi";
 import { applicationsApi } from "../../../services/api/applicationsApi";
 
 export const EvaluateJobs = ({ selectedApplicant, resume_url }) => {
-  // Existing state
+  // State variables
   const [jobPost, setJobPost] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-
-  // New state for job and application selection
-  const [jobs, setJobs] = useState([]);
-  const [selectedJobId, setSelectedJobId] = useState("");
-  const [applications, setApplications] = useState([]);
-  const [selectedApplicationId, setSelectedApplicationId] = useState("");
-  const [loadingJobs, setLoadingJobs] = useState(false);
-  const [loadingApplications, setLoadingApplications] = useState(false);
-  const [loadingCandidate, setLoadingCandidate] = useState(false);
-
-  // State for toggling technical analysis visibility
   const [showTechnicalAnalysis, setShowTechnicalAnalysis] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
-  // Fetch all available jobs on component mount
+  // Auto-populate data on component mount
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoadingJobs(true);
-        const fetchedJobs = await jobsApi.getAllJobPostings(true);
-        setJobs(fetchedJobs);
-      } catch (err) {
-        console.error("Error fetching jobs:", err);
-        setError("Failed to load jobs. Please try again.");
-      } finally {
-        setLoadingJobs(false);
-      }
-    };
-
-    fetchJobs();
-  }, []);
-
-  // Fetch applications when a job is selected
-  useEffect(() => {
-    const fetchApplications = async () => {
-      if (!selectedJobId) {
-        setApplications([]);
+    const populateData = async () => {
+      if (!selectedApplicant || !selectedApplicant.job_posting_id) {
         return;
       }
 
       try {
-        setLoadingApplications(true);
-        const fetchedApplications = await applicationsApi.getApplicationsByJob(
-          selectedJobId
-        );
-        setApplications(fetchedApplications);
-      } catch (err) {
-        console.error("Error fetching applications:", err);
-        setError("Failed to load applications. Please try again.");
-      } finally {
-        setLoadingApplications(false);
-      }
-    };
+        setLoadingData(true);
 
-    fetchApplications();
-  }, [selectedJobId]);
-
-  // Auto-populate job description when a job is selected
-  useEffect(() => {
-    const populateJobDetails = async () => {
-      if (!selectedJobId) {
-        setJobPost("");
-        return;
-      }
-
-      try {
-        const jobDetails = await jobsApi.getJobPostingDetails(selectedJobId);
+        // Load job posting details
+        const jobId = selectedApplicant.job_posting_id;
+        const jobDetails = await jobsApi.getJobPostingDetails(jobId);
 
         // Format the job posting as a complete description
-        const responsibilities =
-          jobDetails.job_responsibility?.map((r) => r.responsibility) || [];
-        const qualifications =
-          jobDetails.job_qualification?.map((q) => q.qualification) || [];
-        const skills = jobDetails.job_skill?.map((s) => s.skill) || [];
+        const responsibilities = jobDetails.job_responsibility?.map(r => r.responsibility) || [];
+        const qualifications = jobDetails.job_qualification?.map(q => q.qualification) || [];
+        const skills = jobDetails.job_skill?.map(s => s.skill) || [];
 
         const formattedJobPost = `
 Job Title: ${jobDetails.job_title}
@@ -93,124 +41,47 @@ Employment Type: ${jobDetails.employment_type}
 Salary Range: ${jobDetails.salary_range || "Not specified"}
 
 About the Company:
-${
-  jobDetails.about_company ||
-  jobDetails.company_description ||
-  "No company description provided."
-}
+${jobDetails.about_company || jobDetails.company_description || "No company description provided."}
 
 Job Description:
-${jobDetails.company_description || "No job description provided."}
+${jobDetails.job_description || "No job description provided."}
 
 Responsibilities:
-${
-  responsibilities.length > 0
-    ? responsibilities.map((r) => `- ${r}`).join("\n")
-    : "Not specified"
-}
+${responsibilities.length > 0 ? responsibilities.map(r => `- ${r}`).join("\n") : "Not specified"}
 
 Qualifications:
-${
-  qualifications.length > 0
-    ? qualifications.map((q) => `- ${q}`).join("\n")
-    : "Not specified"
-}
+${qualifications.length > 0 ? qualifications.map(q => `- ${q}`).join("\n") : "Not specified"}
 
 Skills Required:
-${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
+${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
         `.trim();
 
         setJobPost(formattedJobPost);
+
+        // Load resume if available
+        if (resume_url) {
+          try {
+            const blob = await applicationsApi.downloadResume(resume_url);
+            const resumeFileName = resume_url.split("/").pop() || "resume.pdf";
+            const file = new File([blob], resumeFileName, {
+              type: "application/pdf",
+            });
+            setResumeFile(file);
+          } catch (err) {
+            console.error("Error downloading resume:", err);
+            setError("Failed to download candidate's resume. Please try uploading it manually.");
+          }
+        }
       } catch (err) {
-        console.error("Error fetching job details:", err);
-        setError("Failed to load job details. Please try again.");
+        console.error("Error loading applicant data:", err);
+        setError("Failed to load job details. Please try again or enter them manually.");
+      } finally {
+        setLoadingData(false);
       }
     };
 
-    populateJobDetails();
-  }, [selectedJobId]);
-
-  // Handle resume population when an application is selected
-  const handleApplicationSelect = async (applicationId) => {
-    setSelectedApplicationId(applicationId);
-    if (!applicationId) {
-      setResumeFile(null);
-      return;
-    }
-
-    try {
-      setLoadingCandidate(true); // Use loadingCandidate instead of isLoading
-      const application = await applicationsApi.getApplicationDetails(
-        applicationId
-      );
-
-      if (application.resume_url) {
-        try {
-          // Download the resume file
-          const blob = await applicationsApi.downloadResume(
-            application.resume_url
-          );
-
-          // Create a File object from the blob
-          const resumeFileName =
-            application.resume_url.split("/").pop() || "resume.pdf";
-          const file = new File([blob], resumeFileName, {
-            type: "application/pdf",
-          });
-
-          setResumeFile(file);
-        } catch (downloadErr) {
-          console.error("Error downloading resume:", downloadErr);
-          setError(
-            "Failed to download candidate's resume. Please try again or upload manually."
-          );
-          setResumeFile(null);
-        }
-      } else {
-        setError(
-          "This candidate doesn't have a resume file. Please upload one manually."
-        );
-        setResumeFile(null);
-      }
-    } catch (err) {
-      console.error("Error fetching application details:", err);
-      setError("Failed to load candidate details. Please try again.");
-    } finally {
-      setLoadingCandidate(false);
-    }
-  };
-
-  // Auto-populate the candidate's resume if available
-  useEffect(() => {
-    const populateResume = async () => {
-      if (resume_url) {
-        try {
-          setLoadingCandidate(true);
-          const blob = await applicationsApi.downloadResume(resume_url);
-          const resumeFileName = resume_url.split("/").pop() || "resume.pdf";
-          const file = new File([blob], resumeFileName, {
-            type: "application/pdf",
-          });
-          setResumeFile(file);
-        } catch (err) {
-          console.error("Error downloading resume:", err);
-          setError(
-            "Failed to download candidate's resume. Please try again or upload manually."
-          );
-        } finally {
-          setLoadingCandidate(false);
-        }
-      }
-    };
-
-    populateResume();
-  }, [resume_url]);
-
-  // Reset application selection when job changes
-  useEffect(() => {
-    setSelectedApplicationId("");
-    setResumeFile(null);
-  }, [selectedJobId]);
+    populateData();
+  }, [selectedApplicant, resume_url]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -230,7 +101,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          timeout: 120000, // Increase timeout to 2 minutes
+          timeout: 120000, // 2 minutes timeout
         }
       );
 
@@ -243,8 +114,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       console.error("Analysis error:", err);
       setError(
         err.response?.data?.error ||
-          err.message ||
-          "Error processing request. Please try again."
+        err.message ||
+        "Error processing request. Please try again."
       );
       setResults(null);
     } finally {
@@ -252,6 +123,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     }
   };
 
+  // File handling functions
   const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -270,7 +142,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
   };
 
   const handleDrop = (e) => {
-    e.preventDefault();
+    e.preventPreventDefault();
     e.stopPropagation();
     setIsDragging(false);
 
@@ -290,10 +162,10 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       <div className="bg-white p-6 rounded-lg shadow-xl text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-4 text-gray-700 font-medium">
-          Analyzing resume and job post...
+          {isLoading ? "Analyzing resume and job post..." : "Loading applicant data..."}
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          This may take up to 2 minutes
+          {isLoading ? "This may take up to 2 minutes" : "Please wait"}
         </p>
       </div>
     </div>
@@ -301,116 +173,36 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white min-h-screen">
-      {isLoading && <LoadingSpinner />}
+      {(isLoading || loadingData) && <LoadingSpinner />}
 
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-gray-800">
           Resume-Job Match Evaluator
         </h1>
         <p className="text-gray-600 mt-2">
-          Compare your resume against job requirements for a detailed
-          compatibility analysis
+          Analyze how well this candidate's resume matches the job requirements
         </p>
       </div>
 
-      {/* Job and Candidate Selection Section */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Select Job and Candidate
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Job Selection */}
-            <div>
-              <label
-                htmlFor="job-select"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Select Job Posting
-              </label>
-              <div className="relative">
-                {loadingJobs ? (
-                  <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
-                ) : (
-                  <select
-                    id="job-select"
-                    value={selectedJobId}
-                    onChange={(e) => setSelectedJobId(e.target.value)}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                  >
-                    <option value="">-- Select a Job Posting --</option>
-                    {jobs.map((job) => (
-                      <option key={job.id} value={job.id}>
-                        {job.job_title} - {job.company_name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            </div>
-
-            {/* Application Selection (only shows if job is selected) */}
-            <div>
-              <label
-                htmlFor="application-select"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Select Candidate
-              </label>
-              <div className="relative">
-                {!selectedJobId ? (
-                  <select
-                    disabled
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-gray-100 text-gray-500 sm:text-sm rounded-md cursor-not-allowed"
-                  >
-                    <option>-- Select a job first --</option>
-                  </select>
-                ) : loadingApplications ? (
-                  <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
-                ) : (
-                  <select
-                    id="application-select"
-                    value={selectedApplicationId}
-                    onChange={(e) => handleApplicationSelect(e.target.value)}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                    disabled={loadingCandidate}
-                  >
-                    <option value="">
-                      {loadingCandidate
-                        ? "Loading candidate resume..."
-                        : "-- Select a Candidate --"}
-                    </option>
-                    {applications.length === 0 ? (
-                      <option disabled>No candidates found for this job</option>
-                    ) : (
-                      applications.map((app) => (
-                        <option key={app.id} value={app.id}>
-                          {app.personal_info?.given_name || ""}{" "}
-                          {app.personal_info?.family_name || ""}
-                          {!app.personal_info?.given_name &&
-                            !app.personal_info?.family_name &&
-                            "Unnamed Candidate"}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                )}
-              </div>
-            </div>
+      {/* Applicant Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 bg-blue-100 rounded-full p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
-
-          {selectedJobId && selectedApplicationId && (
-            <div className="mt-4 text-sm text-green-600">
-              <p>
-                ✓ Job and candidate selected. Form fields have been populated
-                automatically.
-              </p>
-            </div>
-          )}
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Evaluating candidate:</h3>
+            <p className="text-blue-700 font-semibold">
+              {selectedApplicant?.personal_info?.given_name} {selectedApplicant?.personal_info?.family_name} 
+              <span className="font-normal ml-1">for position:</span> {selectedApplicant?.job_posting?.job_title || selectedApplicant?.job_title}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Existing Form Content */}
+      {/* Form Content */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -441,11 +233,11 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                 className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                 value={jobPost}
                 onChange={(e) => setJobPost(e.target.value)}
-                placeholder="Paste job description here..."
+                placeholder="Job description will be automatically loaded..."
                 required
               />
               <p className="text-sm text-gray-500">
-                Include complete job requirements for best results
+                You can edit this description if needed for better analysis
               </p>
             </div>
 
@@ -500,30 +292,55 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                   aria-label="Upload resume"
                   required={!resumeFile}
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-12 w-12 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-                <p className="mt-4 text-sm text-gray-500">
-                  {resumeFile
-                    ? resumeFile.name
-                    : "Drag and drop your resume or click to browse"}
-                </p>
+                {resumeFile ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <p className="mt-4 text-sm text-gray-700 font-medium">
+                      Resume loaded: {resumeFile.name}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      You can replace it with another file if needed
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <p className="mt-4 text-sm text-gray-500">
+                      {loadingData ? "Loading resume..." : "Drag and drop your resume or click to browse"}
+                    </p>
+                  </>
+                )}
                 <label
                   htmlFor="resume-upload"
                   className="mt-4 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-medium cursor-pointer hover:bg-blue-100 transition duration-200"
                 >
-                  Choose File
+                  {resumeFile ? "Replace File" : "Choose File"}
                 </label>
                 <p className="mt-2 text-xs text-gray-500">
                   Supported format: PDF
@@ -536,7 +353,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
           <div className="mt-8 flex justify-center">
             <button
               type="submit"
-              disabled={isLoading || !jobPost || !resumeFile}
+              disabled={isLoading || loadingData || !jobPost || !resumeFile}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 shadow-md"
             >
               {isLoading ? "Analyzing..." : "Evaluate Match"}
