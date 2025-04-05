@@ -105,6 +105,18 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
+      const { data } = await api.checkEmailExists(formData.email);
+
+      if (data?.exists) {
+        setModalStatus("error");
+        setModalMessage(
+          "An account with this email already exists. Please use a different email address or sign in."
+        );
+        setShowModal(true);
+        setIsLoading(false);
+        return;
+      }
+
       const submitData = { ...formData };
       delete submitData.confirmPassword;
       await api.signup(submitData);
@@ -117,9 +129,16 @@ const Signup = () => {
       setShowModal(true);
     } catch (err) {
       setModalStatus("error");
-      setModalMessage(
-        err.message || "An error occurred during signup. Please try again."
-      );
+      // Check if the error is specifically about existing email
+      if (err.message?.toLowerCase().includes("email already exists")) {
+        setModalMessage(
+          "An account with this email already exists. Please use a different email address or sign in."
+        );
+      } else {
+        setModalMessage(
+          err.message || "An error occurred during signup. Please try again."
+        );
+      }
       setShowModal(true);
       setError(err.message);
     } finally {
