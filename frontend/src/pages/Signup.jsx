@@ -487,18 +487,6 @@ const Signup = () => {
                 )}
               </button>
             </div>
-
-            <div className="text-xs text-center text-gray-500 mt-2">
-              By clicking "Agree & Join", you agree to HireFlow's
-              <br />
-              <a href="/terms" className="text-blue-600 hover:text-blue-800">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="/privacy" className="text-blue-600 hover:text-blue-800">
-                Privacy Policy
-              </a>
-            </div>
           </form>
 
           <div className="mt-6">
