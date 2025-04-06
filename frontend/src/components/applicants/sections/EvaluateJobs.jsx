@@ -29,9 +29,11 @@ export const EvaluateJobs = ({ selectedApplicant, resume_url }) => {
         const jobDetails = await jobsApi.getJobPostingDetails(jobId);
 
         // Format the job posting as a complete description
-        const responsibilities = jobDetails.job_responsibility?.map(r => r.responsibility) || [];
-        const qualifications = jobDetails.job_qualification?.map(q => q.qualification) || [];
-        const skills = jobDetails.job_skill?.map(s => s.skill) || [];
+        const responsibilities =
+          jobDetails.job_responsibility?.map((r) => r.responsibility) || [];
+        const qualifications =
+          jobDetails.job_qualification?.map((q) => q.qualification) || [];
+        const skills = jobDetails.job_skill?.map((s) => s.skill) || [];
 
         const formattedJobPost = `
 Job Title: ${jobDetails.job_title}
@@ -41,19 +43,31 @@ Employment Type: ${jobDetails.employment_type}
 Salary Range: ${jobDetails.salary_range || "Not specified"}
 
 About the Company:
-${jobDetails.about_company || jobDetails.company_description || "No company description provided."}
+${
+  jobDetails.about_company ||
+  jobDetails.company_description ||
+  "No company description provided."
+}
 
 Job Description:
 ${jobDetails.job_description || "No job description provided."}
 
 Responsibilities:
-${responsibilities.length > 0 ? responsibilities.map(r => `- ${r}`).join("\n") : "Not specified"}
+${
+  responsibilities.length > 0
+    ? responsibilities.map((r) => `- ${r}`).join("\n")
+    : "Not specified"
+}
 
 Qualifications:
-${qualifications.length > 0 ? qualifications.map(q => `- ${q}`).join("\n") : "Not specified"}
+${
+  qualifications.length > 0
+    ? qualifications.map((q) => `- ${q}`).join("\n")
+    : "Not specified"
+}
 
 Skills Required:
-${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
+${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         `.trim();
 
         setJobPost(formattedJobPost);
@@ -69,12 +83,16 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
             setResumeFile(file);
           } catch (err) {
             console.error("Error downloading resume:", err);
-            setError("Failed to download candidate's resume. Please try uploading it manually.");
+            setError(
+              "Failed to download candidate's resume. Please try uploading it manually."
+            );
           }
         }
       } catch (err) {
         console.error("Error loading applicant data:", err);
-        setError("Failed to load job details. Please try again or enter them manually.");
+        setError(
+          "Failed to load job details. Please try again or enter them manually."
+        );
       } finally {
         setLoadingData(false);
       }
@@ -114,8 +132,8 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
       console.error("Analysis error:", err);
       setError(
         err.response?.data?.error ||
-        err.message ||
-        "Error processing request. Please try again."
+          err.message ||
+          "Error processing request. Please try again."
       );
       setResults(null);
     } finally {
@@ -162,7 +180,9 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
       <div className="bg-white p-6 rounded-lg shadow-xl text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-4 text-gray-700 font-medium">
-          {isLoading ? "Analyzing resume and job post..." : "Loading applicant data..."}
+          {isLoading
+            ? "Analyzing resume and job post..."
+            : "Loading applicant data..."}
         </p>
         <p className="text-sm text-gray-500 mt-2">
           {isLoading ? "This may take up to 2 minutes" : "Please wait"}
@@ -188,15 +208,31 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
         <div className="flex items-center">
           <div className="flex-shrink-0 bg-blue-100 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-blue-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">Evaluating candidate:</h3>
+            <h3 className="text-sm font-medium text-blue-800">
+              Evaluating candidate:
+            </h3>
             <p className="text-blue-700 font-semibold">
-              {selectedApplicant?.personal_info?.given_name} {selectedApplicant?.personal_info?.family_name} 
-              <span className="font-normal ml-1">for position:</span> {selectedApplicant?.job_posting?.job_title || selectedApplicant?.job_title}
+              {selectedApplicant?.personal_info?.given_name}{" "}
+              {selectedApplicant?.personal_info?.family_name}
+              <span className="font-normal ml-1">for position:</span>{" "}
+              {selectedApplicant?.job_posting?.job_title ||
+                selectedApplicant?.job_title}
             </p>
           </div>
         </div>
@@ -332,7 +368,9 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
                       />
                     </svg>
                     <p className="mt-4 text-sm text-gray-500">
-                      {loadingData ? "Loading resume..." : "Drag and drop your resume or click to browse"}
+                      {loadingData
+                        ? "Loading resume..."
+                        : "Drag and drop your resume or click to browse"}
                     </p>
                   </>
                 )}
@@ -511,7 +549,7 @@ ${skills.length > 0 ? skills.map(s => `- ${s}`).join("\n") : "Not specified"}
                     />
                   </svg>
                   <h3 className="text-xl font-bold text-gray-800 ml-2">
-                    AI Analysis Insights
+                    JobBERT Insights
                   </h3>
                 </div>
 
