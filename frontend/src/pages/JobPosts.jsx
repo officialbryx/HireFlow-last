@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { useJobs } from "../hooks/useJobs";
 import {
   MagnifyingGlassIcon,
@@ -11,6 +12,14 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
 import { formatDistanceToNow, parseISO } from "date-fns";
+
+const JobPostsWithErrorBoundary = () => {
+  return (
+    <ErrorBoundary>
+      <JobPosts />
+    </ErrorBoundary>
+  );
+};
 
 const JobPosts = () => {
   const { jobs: jobListings, isLoading, error } = useJobs(false);
@@ -440,4 +449,4 @@ const JobPosts = () => {
   );
 };
 
-export default JobPosts;
+export default JobPostsWithErrorBoundary;
