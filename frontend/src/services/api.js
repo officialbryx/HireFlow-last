@@ -240,4 +240,15 @@ export const api = {
       throw error;
     }
   },
+
+  getCsrfToken: () => {
+    return document.cookie.match(new RegExp('(^| )csrf-token=([^;]+)'))?.[2];
+  },
+  
+  setRequestHeaders: () => {
+    return {
+      'X-CSRF-Token': this.getCsrfToken(),
+      'Content-Type': 'application/json',
+    };
+  }
 };

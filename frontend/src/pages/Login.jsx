@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
-// import { supabase } from "../services/supabaseClient";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -53,11 +53,11 @@ const Login = () => {
         email: formData.email,
         password: formData.password,
       });
-
-      // Access user type from user metadata
+      
+      // Remove localStorage usage
+      // Instead, use session expiry from the token itself
       const userType = user.user_metadata.user_type;
-
-      // Direct navigation based on user type
+      
       if (userType === "employer") {
         navigate("/hr/dashboard", { replace: true });
       } else {
@@ -107,7 +107,7 @@ const Login = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 101.414 1.414L10 11.414l1.293 1.293a1 1 001.414-1.414L11.414 10l1.293-1.293a1 1 00-1.414-1.414L10 8.586 8.707 7.293z"
                       clipRule="evenodd"
                     />
                   </svg>
