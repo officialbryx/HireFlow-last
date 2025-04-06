@@ -105,21 +105,16 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await api.checkEmailExists(formData.email);
+      await api.signup({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        userType: formData.userType
+      });
 
-      if (data?.exists) {
-        setModalStatus("error");
-        setModalMessage(
-          "An account with this email already exists. Please use a different email address or sign in."
-        );
-        setShowModal(true);
-        setIsLoading(false);
-        return;
-      }
-
-      const submitData = { ...formData };
-      delete submitData.confirmPassword;
-      await api.signup(submitData);
+      // Success handling remains the same since cookies are handled by Supabase
       setModalStatus("success");
       setModalMessage(
         `Your account has been created! Please check your email for a 
@@ -169,8 +164,35 @@ const Signup = () => {
 
   const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
+  const handleReturn = () => {
+    navigate(-1); // Goes back one step in history
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Return Button */}
+      <button
+        onClick={handleReturn}
+        className="absolute top-4 left-4 inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-300 group"
+      >
+        <span className="bg-white p-2 rounded-full shadow-sm mr-2 group-hover:shadow-md transition-all duration-300">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </span>
+        <span className="font-medium">Go Back</span>
+      </button>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <img
@@ -463,7 +485,7 @@ const Signup = () => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z"
                       clipRule="evenodd"
                     />
                   </svg>

@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { api } from "../services/api";
 
-
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -73,8 +72,35 @@ const Login = () => {
     }
   };
 
+  const handleReturn = () => {
+    navigate(-1); // Goes back one step in history
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 via-white to-blue-50">
+      {/* Return Button */}
+      <button
+        onClick={handleReturn}
+        className="absolute top-4 left-4 inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-300 group"
+      >
+        <span className="bg-white p-2 rounded-full shadow-sm mr-2 group-hover:shadow-md transition-all duration-300">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </span>
+        <span className="font-medium">Go Back</span>
+      </button>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
