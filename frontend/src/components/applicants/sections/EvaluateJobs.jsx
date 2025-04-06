@@ -473,22 +473,31 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 shadow-sm">
+              <div
+                className={`bg-gradient-to-br ${
+                  results.comparison.overall_match.qualified
+                    ? "from-green-50 to-green-100"
+                    : "from-red-50 to-red-100"
+                } rounded-xl p-6 shadow-sm`}
+              >
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-purple-800">
-                    Experience Match
+                  <h4
+                    className={`font-semibold ${
+                      results.comparison.overall_match.qualified
+                        ? "text-green-800"
+                        : "text-red-800"
+                    }`}
+                  >
+                    XGBoost Match
                   </h4>
-                  <span className="bg-purple-200 text-purple-800 text-xs px-2 py-1 rounded-full">
-                    Qualification
-                  </span>
                 </div>
                 <div className="mt-4">
                   <div className="flex items-center">
-                    {results.comparison.experience_match.sufficient ? (
+                    {results.comparison.overall_match.qualified ? (
                       <>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 text-purple-600"
+                          className="h-8 w-8 text-green-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -500,15 +509,15 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        <p className="text-2xl font-bold text-purple-600 ml-2">
-                          Sufficient
+                        <p className="text-2xl font-bold text-green-600 ml-2">
+                          Qualified
                         </p>
                       </>
                     ) : (
                       <>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 text-red-500"
+                          className="h-8 w-8 text-red-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -520,8 +529,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                           />
                         </svg>
-                        <p className="text-2xl font-bold text-red-500 ml-2">
-                          Insufficient
+                        <p className="text-2xl font-bold text-red-600 ml-2">
+                          Unqualified
                         </p>
                       </>
                     )}

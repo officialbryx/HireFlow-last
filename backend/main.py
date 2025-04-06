@@ -641,19 +641,18 @@ def calculate_similarity(embedding1, embedding2):
     return cosine_similarity(embedding1, embedding2)[0][0]
 
 def compare_requirements(job_req, resume_info):
-    """Enhanced comparison with adjusted weights and thresholds"""
+    """Enhanced comparison with XGBoost-style binary classification"""
     results = {
         "skill_match": {"match_percentage": 0, "missing": []},
-        "education_match": {"sufficient": False},
-        "experience_match": {"sufficient": False, "gap_years": 0},
         "overall_match": {"score": 0, "qualified": False}
     }
+    
     # Calculate weights
     weights = {
-        "skills": 0.4,
-        "education": 0.3,
-        "experience": 0.3
+        "skills": 0.6,
+        "education": 0.4
     }
+    
     # Compare skills
     required_skills = set([s.lower() for s in job_req["skills"]["hard_skills"].keys()])
     candidate_skills = set([s.lower() for s in resume_info["skills"]["hard_skills"].keys()])
@@ -661,30 +660,18 @@ def compare_requirements(job_req, resume_info):
     results["skill_match"]["match_percentage"] = len(matched_skills) / len(required_skills) * 100 if required_skills else 100
     results["skill_match"]["missing"] = list(required_skills - candidate_skills)
 
-    # Compare education
-    required_levels = set(job_req["education"]["levels"])
-    candidate_levels = set(resume_info["education"]["levels"])
-    results["education_match"]["sufficient"] = bool(required_levels & candidate_levels)
-
-    # Compare experience
-    required_years = job_req["experience"]["years"]
-    resume_years = resume_info["experience"]["years"]
-    results["experience_match"]["sufficient"] = resume_years >= required_years
-    results["experience_match"]["gap_years"] = max(0, required_years - resume_years)
-
-    # Calculate weighted score
+    # Calculate score based on skills and education
     skill_score = results["skill_match"]["match_percentage"] / 100
-    education_score = 1.0 if results["education_match"]["sufficient"] else 0.4
-    experience_score = 1.0 if results["experience_match"]["sufficient"] else min(resume_years / required_years if required_years > 0 else 1.0, 0.8)
+    education_score = 1.0 if any(level in ["Bachelor's", "Master's", "PhD"] for level in resume_info["education"]["levels"]) else 0.5
 
     total_score = (
         skill_score * weights["skills"] +
-        education_score * weights["education"] +
-        experience_score * weights["experience"]
+        education_score * weights["education"]
     ) * 100
 
     results["overall_match"]["score"] = total_score
-    results["overall_match"]["qualified"] = total_score >= 65
+    results["overall_match"]["qualified"] = total_score >= 70  # Binary classification threshold
+    
     return results
 
 if __name__ == "__main__":
@@ -751,5 +738,5 @@ if __name__ == "__main__":
             print("\n Education Requirements Not Met:")
             print("   No formal education details detected in resume")
 
-        if not comparison_results['experience_match']['sufficient']:
-            print(f"\n Experience Gap: {comparison_results['experience_match']['gap_years']} years short of requirement")
+        if not comparison_results['overall_match']['qualified']:
+            print("\n Experience Requirements Not Met:")
