@@ -164,8 +164,9 @@ const Signup = () => {
 
   const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
+ // Replace the existing handleReturn function
   const handleReturn = () => {
-    navigate(-1); // Goes back one step in history
+    navigate('/', { replace: true }); // Navigate to landing page
   };
 
   return (

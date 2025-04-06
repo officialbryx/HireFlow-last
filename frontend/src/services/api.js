@@ -191,8 +191,10 @@ export const api = {
   async logout() {
     try {
       const { error } = await supabase.auth.signOut();
+      // Wait a moment for the auth state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
       if (error) throw error;
-      return true;
+      return { success: true };
     } catch (error) {
       console.error("Logout error:", error);
       throw error;
