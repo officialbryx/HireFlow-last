@@ -26,7 +26,7 @@ const cookieStorage = {
       // Enforce security flags
       cookieString += `; samesite=Strict`;
       cookieString += `; secure`; // Always require HTTPS
-      cookieString += `; max-age=${60 * 60 * 8}`; // 8 hour expiry
+      cookieString += `; max-age=${60 * 30}`; // 30 minutes (or use 60 * 60 for 1 hour)
       
       document.cookie = cookieString;
     } catch (error) {
@@ -46,6 +46,12 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
     storageKey: 'sb-auth-token',
     flowType: 'pkce', // Use PKCE flow for added security
-    debug: import.meta.env.VITE_MODE === 'development'
+    debug: import.meta.env.VITE_MODE === 'development',
+    // Add session lifetime configuration
+    cookieOptions: {
+      lifetime: 60 * 30, // 30 minutes in seconds (or 60 * 60 for 1 hour)
+      sameSite: 'strict',
+      secure: true
+    }
   }
 });
