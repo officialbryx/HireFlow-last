@@ -150,7 +150,8 @@ const JobseekerNotificationsDropdown = () => {
                                 notification.type
                               )}`}
                             >
-                              {notification.type}
+                              {notification.type.charAt(0).toUpperCase() +
+                                notification.type.slice(1)}
                             </span>
                           )}
                         </div>
