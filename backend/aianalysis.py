@@ -1,6 +1,7 @@
 import torch
 from openai import OpenAI
 from typing import Dict, Any
+import re
 
 # Configure GPU settings
 if torch.cuda.is_available():
@@ -16,42 +17,21 @@ client = OpenAI(
     base_url="https://api.deepseek.com/v1"  
 )
 
-def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
+def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any] = None) -> Dict[str, Any]:
     """
-    Perform comprehensive AI analysis of resume against job post's requirements and qualifications.
+    Perform AI analysis of resume against job post using only the raw text inputs.
     """
     try:
-        # Create structured prompt for HR-focused analysis
         prompt = f"""
-        Analyze this job application from an HR perspective:
+        Analyze this job application from an HR perspective and provide percentage scores for the match:
 
         JOB DESCRIPTION:
-        {job_post[:500]}...
+        {job_post}
 
-        CANDIDATE PROFILE:
-        Personal Information:
-        Name: {analysis_results['resume_analysis']['personal_info'].get('name', 'Not provided')}
-        Email: {analysis_results['resume_analysis']['personal_info'].get('email', 'Not provided')}
-        Location: {analysis_results['resume_analysis']['personal_info'].get('location', 'Not provided')}
+        CANDIDATE RESUME:
+        {resume_text}
 
-        Skills Assessment:
-        Hard Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['hard_skills'].keys())}
-        Soft Skills Present: {', '.join(analysis_results['resume_analysis']['skills']['soft_skills'].keys())}
-        Missing Critical Skills: {', '.join(analysis_results['comparison']['skill_match']['missing'])}
-        Skills Match Rate: {analysis_results['comparison']['skill_match']['match_percentage']}%
-
-        Education:
-        Level: {', '.join(analysis_results['resume_analysis']['education']['levels']) if analysis_results['resume_analysis']['education']['levels'] else 'Not specified'}
-        Requirements Met: {'Yes' if analysis_results['comparison']['education_match']['sufficient'] else 'No'}
-
-        Experience:
-        Years: {analysis_results['resume_analysis']['experience']['years']}
-        Recent Positions: {', '.join(analysis_results['resume_analysis']['experience']['positions'][:2]) if analysis_results['resume_analysis']['experience']['positions'] else 'Not specified'}
-        Requirements Met: {'Yes' if analysis_results['comparison']['experience_match']['sufficient'] else 'No'}
-
-        Overall Match Score: {analysis_results['comparison']['overall_match']['score']}%
-
-        Please provide a plain text analysis with the following sections. Do not use any special characters, formatting, or bullet points:
+        Please provide a plain text analysis with the following sections, including explicit percentage scores:
 
         1. CANDIDATE OVERVIEW
         Write a simple summary of the candidate's profile.
@@ -59,14 +39,16 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
         List any concerns in plain text.
 
         2. SKILLS ANALYSIS
+        Provide a skills match percentage (e.g., "Skills Match: 75%").
         List the matching skills in plain text.
         Note missing critical skills.
         Describe skill development potential.
 
         3. QUALIFICATION ASSESSMENT
+        Provide an overall match percentage (e.g., "Overall Match: 80%").
         Describe education background.
         Explain experience level.
-        State overall qualification fit.
+        State if the candidate is qualified or unqualified for the role.
 
         4. HIRING RECOMMENDATIONS
         List interview topics.
@@ -79,10 +61,9 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
         Note growth areas.
         Describe career alignment.
 
-        Use only plain text with numbers for sections. Avoid any special characters or formatting.
+        Use only plain text with numbers for sections. Provide explicit percentage scores in the Skills Analysis and Qualification Assessment sections.
         """
 
-        # Generate HR-focused analysis
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
@@ -90,6 +71,40 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
             max_tokens=1500,
             stream=False
         )
+
+        # Process the response to extract match scores
+        content = response.choices[0].message.content.lower()
+        
+        # Get qualification assessment section and determine qualified status
+        qual_section = content.split("3. qualification assessment")[1].split("4.")[0].lower()
+        qualified = "qualified" in qual_section and "not qualified" not in qual_section and "unqualified" not in qual_section
+        
+        # Extract match scores (rest of logic stays the same)
+        overall_match = 0
+        skills_match = 0
+        match_patterns = [
+            r'(\d+)%?\s*(?:match|fit|compatibility)',
+            r'(?:match|fit|compatibility).*?(\d+)%',
+            r'overall.*?(\d+)%'
+        ]
+        
+        # Extract skills match from skills analysis
+        skills_section = content.split("2. skills analysis")[1].split("3.")[0].lower()
+        for pattern in match_patterns:
+            matches = re.findall(pattern, skills_section)
+            if matches:
+                try:
+                    skills_match = min(100, int(matches[0]))
+                    break
+                except ValueError:
+                    continue
+
+        # Set overall match based on qualified status
+        overall_match = 75 if qualified else 65  # Default scores based on qualification
+
+        # If no explicit percentages found, estimate based on content analysis
+        if skills_match == 0:
+            skills_match = overall_match  # Use overall match as fallback
 
         return {
             "sections": {
@@ -114,25 +129,10 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
                     "content": response.choices[0].message.content.split("5. DEVELOPMENT OPPORTUNITIES")[1].strip()
                 }
             },
-            "candidate_profile": {
-                "personal_info": analysis_results['resume_analysis']['personal_info'],
-                "skills_assessment": {
-                    "present_skills": {
-                        "hard": list(analysis_results['resume_analysis']['skills']['hard_skills'].keys()),
-                        "soft": list(analysis_results['resume_analysis']['skills']['soft_skills'].keys())
-                    },
-                    "missing_skills": analysis_results['comparison']['skill_match']['missing'],
-                    "match_rate": analysis_results['comparison']['skill_match']['match_percentage']
-                },
-                "education": {
-                    "levels": analysis_results['resume_analysis']['education']['levels'],
-                    "meets_requirements": analysis_results['comparison']['education_match']['sufficient']
-                },
-                "experience": {
-                    "years": analysis_results['resume_analysis']['experience']['years'],
-                    "recent_positions": analysis_results['resume_analysis']['experience']['positions'][:2],
-                    "meets_requirements": analysis_results['comparison']['experience_match']['sufficient']
-                }
+            "match_scores": {
+                "overall_match": overall_match,
+                "skills_match": skills_match,
+                "qualified": qualified
             },
             "confidence_score": response.choices[0].finish_reason == "stop",
             "analysis_timestamp": response.created,

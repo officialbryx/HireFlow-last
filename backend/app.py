@@ -79,12 +79,26 @@ def evaluate():
                 # Clean up and return response
                 os.remove(filepath)
                 
+                # Ensure we have valid match scores
+                match_scores = ai_insights.get('match_scores', {})
+                overall_match = match_scores.get('overall_match', 0)
+                skills_match = match_scores.get('skills_match', 0)
+                qualified = match_scores.get('qualified', False)
+
                 return jsonify({
                     'job_analysis': job_requirements,
                     'resume_analysis': resume_analysis,
-                    'comparison': comparison,
+                    'comparison': {
+                        'skill_match': {
+                            'match_percentage': skills_match,
+                            'missing': comparison['skill_match']['missing']
+                        },
+                        'overall_match': {
+                            'score': overall_match,
+                            'qualified': qualified
+                        }
+                    },
                     'ai_insights': ai_insights,
-                    'device_used': ai_insights.get('device_used', 'CPU'),
                     'console_output': {
                         'skills': resume_analysis.get('skills', {}),
                         'education': resume_analysis.get('education', {}),

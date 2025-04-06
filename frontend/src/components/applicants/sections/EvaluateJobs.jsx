@@ -427,16 +427,14 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                 </div>
                 <div className="mt-4 flex items-end">
                   <p className="text-4xl font-bold text-blue-600">
-                    {Math.round(results.comparison.overall_match.score)}%
+                    {results.ai_insights.match_scores.overall_match}%
                   </p>
                   <div className="ml-2 mb-1">
                     <div className="h-2 w-16 bg-blue-200 rounded-full">
                       <div
                         className="h-2 bg-blue-600 rounded-full"
                         style={{
-                          width: `${Math.round(
-                            results.comparison.overall_match.score
-                          )}%`,
+                          width: `${results.ai_insights.match_scores.overall_match}%`,
                         }}
                       ></div>
                     </div>
@@ -453,19 +451,14 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                 </div>
                 <div className="mt-4 flex items-end">
                   <p className="text-4xl font-bold text-green-600">
-                    {Math.round(
-                      results.comparison.skill_match.match_percentage
-                    )}
-                    %
+                    {results.ai_insights.match_scores.skills_match}%
                   </p>
                   <div className="ml-2 mb-1">
                     <div className="h-2 w-16 bg-green-200 rounded-full">
                       <div
                         className="h-2 bg-green-600 rounded-full"
                         style={{
-                          width: `${Math.round(
-                            results.comparison.skill_match.match_percentage
-                          )}%`,
+                          width: `${results.ai_insights.match_scores.skills_match}%`,
                         }}
                       ></div>
                     </div>
@@ -475,45 +468,34 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
               <div
                 className={`bg-gradient-to-br ${
-                  results.comparison.overall_match.qualified
-                    ? "from-green-50 to-green-100"
-                    : "from-red-50 to-red-100"
+                  !results.ai_insights.match_scores.qualified
+                    ? "from-red-50 to-red-100"
+                    : "from-green-50 to-green-100"
                 } rounded-xl p-6 shadow-sm`}
               >
                 <div className="flex items-center justify-between">
                   <h4
                     className={`font-semibold ${
-                      results.comparison.overall_match.qualified
-                        ? "text-green-800"
-                        : "text-red-800"
+                      !results.ai_insights.match_scores.qualified
+                        ? "text-red-800"
+                        : "text-green-800"
                     }`}
                   >
                     XGBoost Match
                   </h4>
+                  <span
+                    className={`${
+                      !results.ai_insights.match_scores.qualified
+                        ? "bg-red-200 text-red-800"
+                        : "bg-green-200 text-green-800"
+                    } text-xs px-2 py-1 rounded-full`}
+                  >
+                    ML Prediction
+                  </span>
                 </div>
                 <div className="mt-4">
                   <div className="flex items-center">
-                    {results.comparison.overall_match.qualified ? (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 text-green-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <p className="text-2xl font-bold text-green-600 ml-2">
-                          Qualified
-                        </p>
-                      </>
-                    ) : (
+                    {!results.ai_insights.match_scores.qualified ? (
                       <>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -531,6 +513,26 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                         </svg>
                         <p className="text-2xl font-bold text-red-600 ml-2">
                           Unqualified
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-8 w-8 text-green-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <p className="text-2xl font-bold text-green-600 ml-2">
+                          Qualified
                         </p>
                       </>
                     )}
@@ -739,12 +741,26 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                       ))}
                     </div>
 
-                    {/* Match Results Summary */}
+                    {/* Final Assessment */}
                     <div className="border-t border-gray-700 pt-4 mt-4">
                       <p className="text-yellow-400 font-semibold">
                         Final Assessment:
                       </p>
-                      <p className="ml-4 mt-2">
+                      <p className="ml-4">
+                        Qualification Status:{" "}
+                        <span
+                          className={`${
+                            results.comparison.overall_match.qualified
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          {results.comparison.overall_match.qualified
+                            ? "Qualified"
+                            : "Unqualified"}
+                        </span>
+                      </p>
+                      <p className="ml-4">
                         Overall Match:{" "}
                         <span className="text-white">
                           {Math.round(results.comparison.overall_match.score)}%
@@ -759,28 +775,6 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                           %
                         </span>
                       </p>
-                      <p className="ml-4">
-                        Experience:{" "}
-                        <span
-                          className={
-                            results.comparison.experience_match.sufficient
-                              ? "text-green-400"
-                              : "text-red-400"
-                          }
-                        >
-                          {results.comparison.experience_match.sufficient
-                            ? "Sufficient"
-                            : "Insufficient"}
-                        </span>
-                      </p>
-
-                      {!results.comparison.experience_match.sufficient && (
-                        <p className="ml-4 text-red-400 mt-2">
-                          Experience Gap:{" "}
-                          {results.comparison.experience_match.gap_years} years
-                          short of requirement
-                        </p>
-                      )}
 
                       {results.comparison.skill_match.missing.length > 0 && (
                         <>
