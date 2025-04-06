@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { BellIcon } from '@heroicons/react/24/outline';
-import { Link } from 'react-router-dom';
-import { notificationsApi } from '../../services/api/notificationsApi';
-import { formatDistanceToNow, parseISO } from 'date-fns';
+import { useState, useRef, useEffect } from "react";
+import { BellIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
+import { notificationsApi } from "../../services/api/notificationsApi";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 const JobseekerNotificationsDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,20 +24,23 @@ const JobseekerNotificationsDropdown = () => {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       notificationsApi.unsubscribeFromChannel(channel);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const fetchNotifications = async () => {
     try {
-      const response = await notificationsApi.getNotifications({ page: 1, pageSize: 5 });
+      const response = await notificationsApi.getNotifications({
+        page: 1,
+        pageSize: 5,
+      });
       setNotifications(response?.data || []);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -46,15 +49,15 @@ const JobseekerNotificationsDropdown = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter(n => !n.read);
+      const unreadNotifications = notifications.filter((n) => !n.read);
       await Promise.all(
-        unreadNotifications.map(notification => 
+        unreadNotifications.map((notification) =>
           notificationsApi.markAsRead(notification.id)
         )
       );
       await fetchNotifications();
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.error("Error marking all notifications as read:", error);
     }
   };
 
@@ -63,25 +66,32 @@ const JobseekerNotificationsDropdown = () => {
       const parsedDate = parseISO(date);
       return formatDistanceToNow(parsedDate, { addSuffix: true });
     } catch (error) {
-      console.error('Date formatting error:', error);
-      return 'Invalid date';
+      console.error("Date formatting error:", error);
+      return "Invalid date";
     }
   };
 
   const getNotificationTypeColor = (type) => {
-    switch(type) {
-      case 'accepted': return 'bg-green-500';
-      case 'pending': return 'bg-amber-500';  
-      case 'rejected': return 'bg-red-500';
-      case 'shortlisted': return 'bg-blue-500';
-      case 'interview': return 'bg-purple-500'; // New purple color for interviews
-      case 'status_change': return 'bg-blue-400'; // Light blue for status changes
-      default: return 'bg-gray-500';
+    switch (type) {
+      case "accepted":
+        return "bg-green-500";
+      case "pending":
+        return "bg-amber-500";
+      case "rejected":
+        return "bg-red-500";
+      case "shortlisted":
+        return "bg-blue-500";
+      case "interview":
+        return "bg-purple-500"; // New purple color for interviews
+      case "status_change":
+        return "bg-blue-400"; // Light blue for status changes
+      default:
+        return "bg-gray-500";
     }
   };
 
   const notificationsList = Array.isArray(notifications) ? notifications : [];
-  const unreadCount = notificationsList.filter(n => !n.read).length;
+  const unreadCount = notificationsList.filter((n) => !n.read).length;
   const displayedNotifications = notificationsList;
 
   return (
@@ -89,7 +99,7 @@ const JobseekerNotificationsDropdown = () => {
       {/* Match this button to NavItem styling */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex flex-col items-center px-3 py-2 text-gray-500 hover:text-black"
+        className="relative flex flex-col items-center px-1 py-2 text-gray-500 hover:text-black"
       >
         <div className="relative flex items-center justify-center">
           <BellIcon className="h-5 w-5" />
@@ -105,7 +115,9 @@ const JobseekerNotificationsDropdown = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50">
           <div className="px-4 py-2 border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-900">My Application Updates</h3>
+            <h3 className="text-sm font-semibold text-gray-900">
+              My Application Updates
+            </h3>
           </div>
 
           <div className="max-h-96 overflow-y-auto">
@@ -114,7 +126,7 @@ const JobseekerNotificationsDropdown = () => {
                 <div
                   key={notification.id}
                   className={`block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 ${
-                    notification.read ? 'bg-gray-50' : ''
+                    notification.read ? "bg-gray-50" : ""
                   }`}
                 >
                   <Link
@@ -133,7 +145,11 @@ const JobseekerNotificationsDropdown = () => {
                             {notification.job_posting?.job_title}
                           </p>
                           {notification.type && (
-                            <span className={`text-xs px-2 py-1 rounded-full text-white ${getNotificationTypeColor(notification.type)}`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full text-white ${getNotificationTypeColor(
+                                notification.type
+                              )}`}
+                            >
                               {notification.type}
                             </span>
                           )}
@@ -163,7 +179,7 @@ const JobseekerNotificationsDropdown = () => {
 
           <div className="px-4 py-2 border-t border-gray-200 flex items-center justify-between">
             <Link
-              to="/applications/notifications"  // Change from "/applications/history"
+              to="/applications/notifications" // Change from "/applications/history"
               onClick={() => setIsOpen(false)}
               className="text-sm text-blue-600 hover:text-blue-800"
             >

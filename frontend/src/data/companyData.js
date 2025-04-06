@@ -2,7 +2,7 @@ export const companiesData = [
   {
     id: 1,
     name: "Accenture Philippines",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Accenture.svg",
+    logo: "/accenture.png",
     industry: "Information Technology & Services",
     location: "Taguig City, Philippines",
     employees: "72,000+",
@@ -21,7 +21,7 @@ export const companiesData = [
   {
     id: 2,
     name: "BDO Unibank",
-    logo: "https://upload.wikimedia.org/wikipedia/en/c/cf/BDO_Unibank_%28logo%29.svg",
+    logo: "/bdo.png",
     industry: "Banking & Financial Services",
     location: "Makati City, Philippines",
     employees: "38,000+",
@@ -40,7 +40,7 @@ export const companiesData = [
   {
     id: 3,
     name: "PLDT Inc.",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/2/2d/PLDT_2016_Logo.svg",
+    logo: "/pldt.jpg",
     industry: "Telecommunications",
     location: "Makati City, Philippines",
     employees: "18,000+",
@@ -59,7 +59,7 @@ export const companiesData = [
   {
     id: 4,
     name: "Monde Nissin Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/8/85/Monde_Nissin_logo.svg",
+    logo: "/monde.png",
     industry: "Food & Beverages",
     location: "Makati City, Philippines",
     employees: "15,000+",
@@ -78,7 +78,7 @@ export const companiesData = [
   {
     id: 5,
     name: "San Miguel Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/9/9f/San_Miguel_Corporation_logo.svg",
+    logo: "/sanmig.png",
     industry: "Conglomerate",
     location: "Mandaluyong City, Philippines",
     employees: "48,000+",
@@ -97,7 +97,7 @@ export const companiesData = [
   {
     id: 6,
     name: "Ayala Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/3/35/Ayala_Corporation_Logo.svg",
+    logo: "/ayala.png",
     industry: "Conglomerate",
     location: "Makati City, Philippines",
     employees: "45,000+",
@@ -116,7 +116,7 @@ export const companiesData = [
   {
     id: 7,
     name: "Jollibee Foods Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/8/89/Jollibee_2011_logo.svg",
+    logo: "/jollibee.png",
     industry: "Food & Beverages",
     location: "Pasig City, Philippines",
     employees: "30,000+",
@@ -135,7 +135,7 @@ export const companiesData = [
   {
     id: 8,
     name: "Globe Telecom",
-    logo: "https://upload.wikimedia.org/wikipedia/en/1/1f/Globe_Telecom_logo.svg",
+    logo: "/globe.png",
     industry: "Telecommunications",
     location: "Taguig City, Philippines",
     employees: "8,000+",
@@ -154,7 +154,7 @@ export const companiesData = [
   {
     id: 9,
     name: "Meralco (Manila Electric Company)",
-    logo: "https://upload.wikimedia.org/wikipedia/en/6/6a/Meralco_logo.svg",
+    logo: "/meralco.png",
     industry: "Utilities",
     location: "Pasig City, Philippines",
     employees: "5,000+",
@@ -173,7 +173,7 @@ export const companiesData = [
   {
     id: 10,
     name: "SM Investments Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/4/40/SM_Investments_Corporation_logo.svg",
+    logo: "/sminvest.jpeg",
     industry: "Conglomerate",
     location: "Pasay City, Philippines",
     employees: "65,000+",
@@ -192,7 +192,7 @@ export const companiesData = [
   {
     id: 11,
     name: "UnionBank of the Philippines",
-    logo: "https://upload.wikimedia.org/wikipedia/en/e/e7/UnionBank_logo_2018.svg",
+    logo: "/union.jpg",
     industry: "Banking & Financial Services",
     location: "Pasig City, Philippines",
     employees: "6,000+",
@@ -211,7 +211,7 @@ export const companiesData = [
   {
     id: 12,
     name: "Robinsons Land Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/8/8e/Robinsons_Land_Corporation_logo.svg",
+    logo: "/robinson.png",
     industry: "Real Estate",
     location: "Pasig City, Philippines",
     employees: "3,000+",
@@ -230,7 +230,7 @@ export const companiesData = [
   {
     id: 13,
     name: "Megaworld Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Megaworld_Corporation_logo.svg",
+    logo: "/megaworld.png",
     industry: "Real Estate",
     location: "Taguig City, Philippines",
     employees: "5,000+",
@@ -249,7 +249,7 @@ export const companiesData = [
   {
     id: 14,
     name: "Security Bank Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/4/45/Security_Bank_logo.svg",
+    logo: "/securitybank.jpg",
     industry: "Banking & Financial Services",
     location: "Makati City, Philippines",
     employees: "5,500+",
@@ -268,7 +268,7 @@ export const companiesData = [
   {
     id: 15,
     name: "ABS-CBN Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/8/8a/ABS-CBN_Corporation_Logo.svg",
+    logo: "/abs_cbn_logo.jpg",
     industry: "Media & Entertainment",
     location: "Quezon City, Philippines",
     employees: "4,000+",
@@ -287,7 +287,7 @@ export const companiesData = [
   {
     id: 16,
     name: "GMA Network Inc.",
-    logo: "https://upload.wikimedia.org/wikipedia/en/3/3f/GMA_Network_Logo.svg",
+    logo: "/gma.png",
     industry: "Media & Entertainment",
     location: "Quezon City, Philippines",
     employees: "3,000+",
@@ -306,7 +306,7 @@ export const companiesData = [
   {
     id: 17,
     name: "Aboitiz Power Corporation",
-    logo: "https://upload.wikimedia.org/wikipedia/en/b/b7/Aboitiz_Power_logo.svg",
+    logo: "/aboitiz.jpg",
     industry: "Energy",
     location: "Taguig City, Philippines",
     employees: "3,500+",
@@ -325,7 +325,7 @@ export const companiesData = [
   {
     id: 18,
     name: "Manulife Philippines",
-    logo: "https://upload.wikimedia.org/wikipedia/en/d/d2/Manulife_logo.svg",
+    logo: "/manulife.png",
     industry: "Insurance & Financial Services",
     location: "Makati City, Philippines",
     employees: "2,000+",
@@ -344,7 +344,7 @@ export const companiesData = [
   {
     id: 19,
     name: "Cebu Pacific Air",
-    logo: "https://upload.wikimedia.org/wikipedia/en/b/b5/Cebu_Pacific_Logo.svg",
+    logo: "/cebu.png",
     industry: "Aviation",
     location: "Pasay City, Philippines",
     employees: "4,000+",
@@ -363,7 +363,7 @@ export const companiesData = [
   {
     id: 20,
     name: "Philippine Airlines",
-    logo: "https://upload.wikimedia.org/wikipedia/en/d/d4/Philippine_Airlines_logo.svg",
+    logo: "/philippineair.png",
     industry: "Aviation",
     location: "Pasay City, Philippines",
     employees: "6,000+",
@@ -382,7 +382,7 @@ export const companiesData = [
   {
     id: 21,
     name: "Sprout Solutions",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Sprout_Solutions_logo.png",
+    logo: "/sprout.png",
     industry: "HR Tech / SaaS",
     location: "Taguig City, Philippines",
     employees: "300+",
@@ -401,7 +401,7 @@ export const companiesData = [
   {
     id: 22,
     name: "Kumu",
-    logo: "https://upload.wikimedia.org/wikipedia/en/7/74/Kumu_app_logo.png",
+    logo: "/kumuph.jpg",
     industry: "Social Media / Livestreaming",
     location: "Mandaluyong City, Philippines",
     employees: "200+",
@@ -420,7 +420,7 @@ export const companiesData = [
   {
     id: 23,
     name: "NextPay",
-    logo: "https://nextpay.world/images/logo.svg",
+    logo: "/nextpay.jpg",
     industry: "Fintech",
     location: "Makati City, Philippines",
     employees: "50+",
@@ -439,7 +439,7 @@ export const companiesData = [
   {
     id: 24,
     name: "PayMongo",
-    logo: "https://upload.wikimedia.org/wikipedia/en/f/fd/PayMongo_logo.svg",
+    logo: "/paymongo.png",
     industry: "Fintech / Payments",
     location: "Makati City, Philippines",
     employees: "100+",
@@ -458,7 +458,7 @@ export const companiesData = [
   {
     id: 25,
     name: "Great Deals E-commerce Corporation",
-    logo: "https://greatdealscorp.com/wp-content/uploads/2022/09/great-deals-ecommerce-corp.png",
+    logo: "/greatdeals.jpg",
     industry: "E-commerce Tech / Logistics",
     location: "Pasig City, Philippines",
     employees: "1,000+",
@@ -477,7 +477,7 @@ export const companiesData = [
   {
     id: 26,
     name: "Advance",
-    logo: "https://advance.ph/static/media/advance-logo-dark.91a46f33.svg",
+    logo: "/advancetechlending_logo.jpg",
     industry: "Fintech / Salary Advance",
     location: "Makati City, Philippines",
     employees: "50+",
@@ -496,7 +496,7 @@ export const companiesData = [
   {
     id: 27,
     name: "Zennya Health",
-    logo: "https://zennya.com/assets/images/logo-dark.svg",
+    logo: "/zennya.png",
     industry: "Health Tech / Mobile Health",
     location: "Taguig City, Philippines",
     employees: "100+",
@@ -515,7 +515,7 @@ export const companiesData = [
   {
     id: 28,
     name: "Kalibrr",
-    logo: "https://upload.wikimedia.org/wikipedia/en/0/0c/Kalibrr_logo.svg",
+    logo: "/kalibrr.png",
     industry: "HR Tech / Recruitment",
     location: "Makati City, Philippines",
     employees: "150+",
@@ -534,7 +534,7 @@ export const companiesData = [
   {
     id: 29,
     name: "Upmesh",
-    logo: "https://upmesh.io/assets/logo.png",
+    logo: "/upmesh.jpg",
     industry: "E-commerce / Livestream Tech",
     location: "Philippines / Singapore",
     employees: "80+",
@@ -553,7 +553,7 @@ export const companiesData = [
   {
     id: 30,
     name: "QBO Innovation Hub",
-    logo: "https://qbo.com.ph/wp-content/uploads/2020/11/QBO-logo-dark.png",
+    logo: "/qbo.png",
     industry: "Startup Incubator / Tech Ecosystem",
     location: "Makati City, Philippines",
     employees: "25+",
