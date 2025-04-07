@@ -481,17 +481,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                         : "text-green-800"
                     }`}
                   >
-                    XGBoost Match
+                    XGBoost Prediction
                   </h4>
-                  <span
-                    className={`${
-                      !results.ai_insights.match_scores.qualified
-                        ? "bg-red-200 text-red-800"
-                        : "bg-green-200 text-green-800"
-                    } text-xs px-2 py-1 rounded-full`}
-                  >
-                    ML Prediction
-                  </span>
                 </div>
                 <div className="mt-4">
                   <div className="flex items-center">
