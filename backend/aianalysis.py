@@ -17,9 +17,123 @@ client = OpenAI(
     base_url="https://api.deepseek.com/v1"  
 )
 
-def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any] = None) -> Dict[str, Any]:
+def analyze_technical_details(job_post: str, resume_text: str) -> Dict[str, Any]:
     """
-    Perform AI analysis of resume against job post using only the raw text inputs.
+    Perform technical analysis to extract structured information from resume and job post.
+    """
+    try:
+        # Initialize sections dictionary
+        sections = {
+            'personal_info': {
+                'name': '',
+                'email': '',
+                'location': '',
+                'phone': ''
+            },
+            'skills': {
+                'hard_skills': {},
+                'soft_skills': {},
+                'missing_skills': []
+            },
+            'experience': {
+                'years': 'Entry Level',
+                'positions': [],
+                'industries': []
+            }
+        }
+
+        # Extract personal information directly from resume text
+        if "Email Address:" in resume_text:
+            sections['personal_info']['email'] = resume_text.split("Email Address:")[1].split("\n")[0].strip()
+        if "Address:" in resume_text:
+            sections['personal_info']['location'] = resume_text.split("Address:")[1].split("\n")[0].strip()
+        if "Cellular No.:" in resume_text:
+            sections['personal_info']['phone'] = resume_text.split("Cellular No.:")[1].split("\n")[0].strip()
+        
+        # Extract name (usually at the start of the resume)
+        name_line = resume_text.split("\n")[0].strip()
+        sections['personal_info']['name'] = name_line
+
+        # Extract Hard Skills
+        hard_skills = {}
+        # Programming Languages
+        if "Programming Languages:" in resume_text:
+            prog_langs = resume_text.split("Programming Languages:")[1].split("\n")[0].strip()
+            for lang in prog_langs.split(","):
+                lang = lang.strip()
+                if lang:
+                    hard_skills[lang] = hard_skills.get(lang, 0) + 1
+
+        # Frameworks & Libraries
+        if "Frameworks & Libraries:" in resume_text:
+            frameworks = resume_text.split("Frameworks & Libraries:")[1].split("\n")[0].strip()
+            for framework in frameworks.split(","):
+                framework = framework.strip()
+                if framework:
+                    hard_skills[framework] = hard_skills.get(framework, 0) + 1
+
+        # Databases
+        if "Databases:" in resume_text:
+            databases = resume_text.split("Databases:")[1].split("\n")[0].strip()
+            for db in databases.split(","):
+                db = db.strip()
+                if db:
+                    hard_skills[db] = hard_skills.get(db, 0) + 1
+
+        # Development skills
+        if "Development:" in resume_text:
+            dev_skills = resume_text.split("Development:")[1].split("\n")[0].strip()
+            for skill in dev_skills.split(","):
+                skill = skill.strip()
+                if skill:
+                    hard_skills[skill] = hard_skills.get(skill, 0) + 1
+
+        sections['skills']['hard_skills'] = hard_skills
+
+        # Extract Soft Skills
+        soft_skills = {}
+        if "OTHER SKILLS" in resume_text:
+            other_skills_section = resume_text.split("OTHER SKILLS")[1].split("REFERENCES")[0]
+            skill_lines = other_skills_section.split("\n")
+            for line in skill_lines:
+                line = line.strip()
+                if line and not line.startswith("OTHER SKILLS"):
+                    soft_skills[line] = 1
+
+        sections['skills']['soft_skills'] = soft_skills
+
+        # Compare with job requirements to find missing skills
+        required_skills = []
+        if "Skills Required:" in job_post:
+            skills_section = job_post.split("Skills Required:")[1].split("\n")
+            for line in skills_section:
+                if line.strip().startswith("-"):
+                    skill = line.strip("- ").strip()
+                    required_skills.append(skill)
+
+        # Find missing skills
+        all_candidate_skills = set([k.lower() for k in hard_skills.keys()] + [k.lower() for k in soft_skills.keys()])
+        missing_skills = [skill for skill in required_skills if skill.lower() not in all_candidate_skills]
+        sections['skills']['missing_skills'] = missing_skills
+
+        # Extract experience from projects
+        if "DESIGN PROJECTS COMPLETED" in resume_text:
+            projects_section = resume_text.split("DESIGN PROJECTS COMPLETED")[1].split("KNOWLEDGE")[0]
+            projects = [line.strip() for line in projects_section.split("\n") if line.strip() and ":" in line]
+            sections['experience']['positions'] = projects
+
+        return sections
+
+    except Exception as e:
+        print(f"Error in technical analysis: {str(e)}")
+        return {
+            "error": str(e),
+            "technical_analysis": "Technical analysis failed. Please try again later."
+        }
+
+def analyze_hr_with_ai(job_post: str, resume_text: str) -> Dict[str, Any]:
+    """
+    Perform HR analysis of resume against job post using only the raw text inputs.
     """
     try:
         prompt = f"""
@@ -149,6 +263,32 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
             "analysis_timestamp": response.created,
             "model_version": response.model,
             "device_used": str(device)
+        }
+
+    except Exception as e:
+        print(f"Error in HR analysis: {str(e)}")
+        return {
+            "error": str(e),
+            "hr_analysis": "HR analysis failed. Please try again later.",
+            "confidence_score": 0,
+            "device_used": str(device)
+        }
+
+def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    Perform AI analysis of resume against job post using only the raw text inputs.
+    """
+    try:
+        # Get HR analysis results
+        hr_results = analyze_hr_with_ai(job_post, resume_text)
+        
+        # Get technical analysis results
+        technical_results = analyze_technical_details(job_post, resume_text)
+
+        # Combine results
+        return {
+            **hr_results,
+            "technical_analysis": technical_results
         }
 
     except Exception as e:
