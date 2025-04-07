@@ -93,7 +93,7 @@ export const applicationsApi = {
       if (filters.creator_id) {
         // 1. Get all job posting IDs created by this user
         const { data: userJobs, error: jobsError } = await supabase
-          .from('job_postings')
+          .from('job_posting')
           .select('id')
           .eq('creator_id', filters.creator_id);
         
