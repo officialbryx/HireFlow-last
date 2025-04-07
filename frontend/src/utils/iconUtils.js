@@ -5,7 +5,7 @@ import {
   FunnelIcon,             // Filtering and Navigation
   ChartBarIcon,           // Analytics and Reporting
   DocumentTextIcon,       // Resume Analysis
-  EnvelopeIcon,           // Communication Tools
+  BellIcon,               // Notifications
   Cog6ToothIcon,          // Account and Settings
   QuestionMarkCircleIcon  // Fallback
 } from '@heroicons/react/24/outline';
@@ -19,7 +19,7 @@ export function getIconByName(iconName) {
     filter: FunnelIcon,
     chart: ChartBarIcon,        // Added for Analytics and Reporting
     document: DocumentTextIcon, // Added for Resume Analysis
-    mail: EnvelopeIcon,         // Added for Communication Tools
+    bell: BellIcon,             // Added for Notifications
     settings: Cog6ToothIcon,    // Added for Account and Settings
     
     // Fallback

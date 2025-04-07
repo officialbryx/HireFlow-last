@@ -150,6 +150,14 @@ export const faqData = [
         a: 'The skills match percentage shows how well a candidate\'s skills align with the job requirements. A higher percentage indicates a stronger skills match for the specific position.'
       },
       {
+        q: 'How do I use the AI resume-job match evaluator?',
+        a: 'Access the evaluator from an applicant\'s profile by clicking the "Evaluate" button. The tool automatically loads the job description and applicant\'s resume. After analysis, you\'ll see overall match scores, skills compatibility, and AI-generated insights about the candidate\'s fit for the position.'
+      },
+      {
+        q: 'What do the different match scores represent?',
+        a: 'The system provides several scores: Overall Match (general compatibility), Skills Match (technical qualifications alignment), and Experience Match (relevance of past roles). These scores help you quickly assess different aspects of candidate suitability.'
+      },
+      {
         q: 'Can I trust the automated resume analysis?',
         a: 'The AI analysis is designed to help streamline initial screening but should not replace human judgment. Always review the actual resume and consider factors that might not be captured by automated analysis.'
       },
@@ -160,32 +168,36 @@ export const faqData = [
       {
         q: 'How are experience and education scores calculated?',
         a: 'Experience scores consider relevance of prior roles, duration, and recency. Education scores evaluate degree level, field relevance, and institution based on job requirements.'
+      },
+      {
+        q: 'How can I see the detailed technical analysis of a match?',
+        a: 'Click the "Show Technical Analysis" button in the results section to view the detailed parsing of both the resume and job description, including extracted skills, experience, and education details that were used in the matching algorithm.'
       }
     ]
   },
   {
-    title: 'Communication Tools',
-    icon: "mail",
+    title: 'Notifications',
+    icon: "bell",
     questions: [
       {
-        q: 'How do I send emails to applicants?',
-        a: 'From the applicant details view, click the "Contact" button to open the email composer. You can use templates or write custom messages, and track all communications in the activity log.'
+        q: 'How do I access my notifications?',
+        a: 'Click on the bell icon in the top navigation bar or go to the Notifications page to view all your notifications.'
       },
       {
-        q: 'Where can I find email templates?',
-        a: 'Go to the Settings section and select "Email Templates" to view, edit, or create templates for different stages of the hiring process (acknowledgment, interview invitation, rejection, offer, etc.).'
+        q: 'How do I filter notifications?',
+        a: 'Use the dropdown filter on the Notifications page to view all notifications, only unread notifications, or only read notifications.'
       },
       {
-        q: 'Can I schedule interviews through the platform?',
-        a: 'Yes, when changing an applicant\'s status to "Interview," you\'ll be prompted to schedule the interview. This creates a calendar event and sends an invitation to both the applicant and interviewers.'
+        q: 'How do I mark notifications as read?',
+        a: 'Hover over any notification and click the checkmark button that appears to toggle its read status. You can also click "Mark all as read" at the top of the page to mark all notifications as read at once.'
       },
       {
-        q: 'How do I send bulk messages to multiple applicants?',
-        a: 'In the Applicants view, use the checkboxes to select multiple candidates, then click "Bulk Actions" and choose "Send Email" to message them all at once using a template or custom message.'
+        q: 'What types of notifications will I receive?',
+        a: 'You\'ll receive notifications about new job applicants, status changes to applications, interview schedules, and system alerts related to your job postings.'
       },
       {
-        q: 'Can other team members see my communications with applicants?',
-        a: 'Yes, all emails and messages are logged in the applicant\'s activity history for transparency and collaboration among team members.'
+        q: 'How do I navigate to the content a notification is about?',
+        a: 'Click on any notification to be taken directly to the relevant page. For example, clicking on an applicant notification will take you to that applicant\'s details in the Jobs page with the Applicants tab selected.'
       }
     ]
   },
@@ -194,24 +206,24 @@ export const faqData = [
     icon: "settings",
     questions: [
       {
-        q: 'How do I update my company information?',
-        a: 'Go to Settings > Company Profile to update your company name, logo, description, and contact information. This information appears on job postings and communications with applicants.'
+        q: 'How do I access my account settings?',
+        a: 'Click on your profile picture in the top-right corner and select "Settings" from the dropdown menu to access your account settings page.'
       },
       {
-        q: 'How do I manage user permissions?',
-        a: 'In Settings > User Management, you can add team members, assign roles (admin, recruiter, hiring manager), and set permissions for viewing, editing, or approving different aspects of the hiring process.'
+        q: 'How do I update my personal information?',
+        a: 'Go to Settings > Profile to update your name, email, phone number, and other personal details. Keep your contact information current to receive important notifications.'
       },
       {
-        q: 'How do I customize the application form?',
-        a: 'Go to Settings > Application Forms to create or modify the questions candidates answer when applying. You can add custom fields, make questions required, or create job-specific application forms.'
+        q: 'How do I change my password?',
+        a: 'In Settings > Security, you can update your password. For security, choose a strong password that includes a mix of letters, numbers, and special characters.'
       },
       {
-        q: 'How do I integrate with other HR systems?',
-        a: 'In Settings > Integrations, you can connect HireFlow with your HRIS, calendar, email systems, and job boards for seamless data flow across your recruitment ecosystem.'
+        q: 'How do I customize my dashboard view?',
+        a: 'In Settings > Preferences, you can customize which metrics appear on your dashboard and set default filters for various views in the application.'
       },
       {
-        q: 'How do I change my notification preferences?',
-        a: 'Go to Settings > Notifications to control when and how you receive alerts about new applications, status changes, messages, and other recruitment activities.'
+        q: 'How do I manage my notification settings?',
+        a: 'Go to Settings > Notifications to control which events trigger notifications and how you receive them (in-app, email, or both).'
       }
     ]
   }
