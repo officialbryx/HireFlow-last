@@ -79,7 +79,7 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
         qual_section = content.split("3. qualification assessment")[1].split("4.")[0].lower()
         qualified = "qualified" in qual_section and "not qualified" not in qual_section and "unqualified" not in qual_section
         
-        # Extract match scores (rest of logic stays the same)
+        # Extract match scores
         overall_match = 0
         skills_match = 0
         match_patterns = [
@@ -88,7 +88,21 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
             r'overall.*?(\d+)%'
         ]
         
-        # Extract skills match from skills analysis
+        # First try to extract overall match from qualification assessment section
+        for pattern in match_patterns:
+            matches = re.findall(pattern, qual_section)
+            if matches:
+                try:
+                    overall_match = min(100, int(matches[0]))
+                    break
+                except ValueError:
+                    continue
+
+        # If no overall match found in qualification section, use default based on qualification
+        if overall_match == 0:
+            overall_match = 75 if qualified else 65
+
+        # Extract skills match from skills analysis section
         skills_section = content.split("2. skills analysis")[1].split("3.")[0].lower()
         for pattern in match_patterns:
             matches = re.findall(pattern, skills_section)
@@ -99,12 +113,9 @@ def analyze_with_ai(job_post: str, resume_text: str, analysis_results: Dict[str,
                 except ValueError:
                     continue
 
-        # Set overall match based on qualified status
-        overall_match = 75 if qualified else 65  # Default scores based on qualification
-
-        # If no explicit percentages found, estimate based on content analysis
+        # If no explicit skills match found, use overall match as fallback
         if skills_match == 0:
-            skills_match = overall_match  # Use overall match as fallback
+            skills_match = overall_match
 
         return {
             "sections": {
