@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+
 
 /**
  * Analyzes a resume for relevant skills, experience, and matches to a job description

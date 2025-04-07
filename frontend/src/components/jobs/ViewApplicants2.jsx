@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { pdfjs } from "react-pdf";
 import { applicationsApi } from "../../services/api/applicationsApi";
+import { supabase } from "../../services/supabaseClient"; // Add this import
 import ApplicantsList from "../applicants/ApplicantsList";
 import ApplicantDetails from "../applicants/ApplicantDetails";
 import PdfModal from "../applicants/modals/PdfModal";
@@ -26,9 +27,21 @@ export default function ViewApplicants({
   const [jobFilter, setJobFilter] = useState(jobIdFilter);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(5); // Edit to increase number of displayed applicants per page
+  const [userId, setUserId] = useState(null);
 
   // Get query client instance
   const queryClient = useQueryClient();
+
+  // Get current user ID
+  useEffect(() => {
+    async function getCurrentUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user && !error) {
+        setUserId(data.user.id);
+      }
+    }
+    getCurrentUser();
+  }, []);
 
   // Update filters from props
   useEffect(() => {
@@ -52,6 +65,7 @@ export default function ViewApplicants({
     companyFilter,
     jobFilter,
     searchTerm,
+    userId, // Add userId to the query key so it refreshes when user changes
   ];
 
   // Fetch applicants with React Query
@@ -68,6 +82,7 @@ export default function ViewApplicants({
         company: companyFilter !== "all" ? companyFilter : null,
         job_id: jobFilter || null,
         search: searchTerm || null,
+        creator_id: userId, // Add creator_id to filter by job owner
       };
 
       // This assumes you've updated applicationsApi.fetchApplications to support pagination
@@ -80,6 +95,7 @@ export default function ViewApplicants({
     },
     keepPreviousData: true, // Keep showing previous data while new data is loading
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!userId, // Only run query when userId is available
   });
 
   // Extract data from query result
@@ -105,6 +121,7 @@ export default function ViewApplicants({
             company: companyFilter !== "all" ? companyFilter : null,
             job_id: jobFilter || null,
             search: searchTerm || null,
+            creator_id: userId, // Add creator_id to filter by job owner
           };
           return applicationsApi.fetchApplications(
             currentPage + 1,
@@ -115,7 +132,7 @@ export default function ViewApplicants({
         staleTime: 5 * 60 * 1000,
       });
     }
-  }, [currentPage, totalPages, queryClient, applicantsQueryKey]);
+  }, [currentPage, totalPages, queryClient, applicantsQueryKey, userId]);
 
   // Reset pagination when filters change
   useEffect(() => {

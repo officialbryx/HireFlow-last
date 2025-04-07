@@ -14,7 +14,7 @@ import { useJobModals } from "../../hooks/useJobModals";
 import { useSearchParams } from "react-router-dom";
 import { jobsApi } from "../../services/api/jobsApi";
 import ViewApplicants from "../../components/jobs/ViewApplicants2";
-import { EvaluateJobs } from "../../components/applicants/sections/EvaluateJobs";
+
 
 const Jobs = () => {
   const {

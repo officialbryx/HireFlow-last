@@ -2,6 +2,18 @@ import { supabase } from '../supabaseClient';
 import { analyzeResume } from '../resumeAnalysis';
 
 export const applicationsApi = {
+  // Add this new method to get current user
+  async getCurrentUser() {
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return data?.user || null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  },
+
   async submitApplication(applicationData) {
     try {
       // Get current user
@@ -69,7 +81,176 @@ export const applicationsApi = {
 
   async fetchApplications(page = 1, limit = 20, filters = {}) {
     try {
-      // Build the base query
+      // If creator_id is not provided, get the current user
+      if (!filters.creator_id) {
+        const user = await this.getCurrentUser();
+        if (user) {
+          filters.creator_id = user.id;
+        }
+      }
+
+      // If creator_id is provided (either from filters or from getCurrentUser)
+      if (filters.creator_id) {
+        // 1. Get all job posting IDs created by this user
+        const { data: userJobs, error: jobsError } = await supabase
+          .from('job_postings')
+          .select('id')
+          .eq('creator_id', filters.creator_id);
+        
+        if (jobsError) throw jobsError;
+        
+        // If no jobs found, return empty result
+        if (!userJobs || userJobs.length === 0) {
+          return {
+            data: [],
+            count: 0,
+            page,
+            limit,
+            totalPages: 0
+          };
+        }
+        
+        // Extract job IDs to an array
+        const jobIds = userJobs.map(job => job.id);
+        
+        // Build the query with job_posting_id filter
+        let query = supabase
+          .from("applications")
+          .select(`
+            *,
+            job_posting:job_posting_id (
+              job_title,
+              company_name
+            )
+          `, { count: 'exact' });
+        
+        // Filter by the job IDs that belong to this user
+        query = query.in('job_posting_id', jobIds);
+        
+        // Apply other filters if provided
+        if (filters.status) {
+          if (filters.status === 'shortlisted') {
+            query = query.eq('shortlisted', true);
+          } else {
+            query = query.eq('status', filters.status);
+          }
+        }
+        
+        if (filters.company) {
+          query = query.eq('company', filters.company);
+        }
+        
+        if (filters.job_id) {
+          query = query.eq('job_posting_id', filters.job_id);
+        }
+        
+        // For search functionality with creator_id filter
+        if (filters.search) {
+          // Get all applications for jobs created by this user
+          const { data: allUserApps, error: allAppsError } = await supabase
+            .from("applications")
+            .select(`
+              *,
+              job_posting:job_posting_id (
+                job_title,
+                company_name
+              )
+            `)
+            .in('job_posting_id', jobIds)
+            .order('created_at', { ascending: false });
+          
+          if (allAppsError) throw allAppsError;
+          
+          // Client-side search on these applications
+          const searchTerm = filters.search.toLowerCase();
+          const filteredData = allUserApps.filter(app => {
+            // Search logic remains the same
+            if (app.company?.toLowerCase().includes(searchTerm)) return true;
+            
+            const personalInfo = app.personal_info || {};
+            if (personalInfo.given_name?.toLowerCase().includes(searchTerm)) return true;
+            if (personalInfo.family_name?.toLowerCase().includes(searchTerm)) return true;
+            if (personalInfo.email?.toLowerCase().includes(searchTerm)) return true;
+            
+            const workExperience = Array.isArray(app.work_experience) ? app.work_experience : [];
+            if (workExperience.some(exp => 
+              exp.job_title?.toLowerCase().includes(searchTerm) || 
+              exp.company?.toLowerCase().includes(searchTerm)
+            )) return true;
+            
+            const skills = Array.isArray(app.skills) ? app.skills : [];
+            if (skills.some(skill => skill.toLowerCase().includes(searchTerm))) return true;
+            
+            return false;
+          });
+          
+          // Manual pagination for search results
+          const startIndex = (page - 1) * limit;
+          const endIndex = startIndex + limit;
+          const paginatedResults = filteredData.slice(startIndex, endIndex);
+          
+          return {
+            data: paginatedResults,
+            count: filteredData.length,
+            page,
+            limit,
+            totalPages: Math.ceil(filteredData.length / limit)
+          };
+        }
+        
+        // Execute query with pagination and get count
+        const { data, error, count: totalCount } = await query
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, (page * limit) - 1);
+
+        if (error) throw error;
+        
+        // Handle no results
+        if (!data || data.length === 0) {
+          return {
+            data: [],
+            count: 0,
+            page,
+            limit,
+            totalPages: 0
+          };
+        }
+        
+        // Transform data (existing transformation code)
+        const transformedData = data.map(app => ({
+          ...app,
+          personal_info: {
+            ...app.personal_info,
+            phone: typeof app.personal_info?.phone === 'object'
+              ? `${app.personal_info.phone.code} ${app.personal_info.phone.number}`
+              : app.personal_info?.phone
+          },
+          contact_info: {
+            ...app.contact_info,
+            phone: typeof app.contact_info?.phone === 'object'
+              ? `${app.contact_info.phone.code} ${app.contact_info.phone.number}`
+              : app.contact_info?.phone
+          },
+          address: app.address || {},
+          work_experience: Array.isArray(app.work_experience) ? app.work_experience : [],
+          education: Array.isArray(app.education) ? app.education : [],
+          skills: Array.isArray(app.skills) ? app.skills : [],
+          websites: Array.isArray(app.websites) ? app.websites : [],
+          application_questions: app.application_questions || {},
+          company: app.job_posting?.company_name || app.company,
+          job_title: app.job_posting?.job_title
+        }));
+
+        return {
+          data: transformedData,
+          count: totalCount || 0,
+          page,
+          limit,
+          totalPages: Math.ceil((totalCount || 0) / limit)
+        };
+      }
+      
+      // Original implementation for when creator_id is not provided
       let query = supabase
         .from("applications")
         .select(`
