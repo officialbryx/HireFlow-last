@@ -27,9 +27,6 @@ def analyze_technical_details(job_post: str, resume_text: str) -> Dict[str, Any]
         Email: [Extract email]
         Phone: [Extract phone]
         Location: [Extract location]
-        LinkedIn: [Extract or write Not specified]
-        Github: [Extract or write Not specified]
-        Portfolio: [Extract or write Not specified]
 
         2. EDUCATION
         Highest Degree: [Extract or write Not specified]
@@ -54,18 +51,15 @@ def analyze_technical_details(job_post: str, resume_text: str) -> Dict[str, Any]
 
         4. SKILLS
         Technical Skills:
-        • [List each technical skill]
-        Software Tools:
-        • [List each tool/software]
+        • [List each technical skill for any job category]
         Soft Skills:
         • [List each soft skill]
 
         5. JOB MATCH ANALYSIS
         Required Skills Match:
-        • [List each required skill and state if present]
+        • [List each required skill from the job post content and state if present]
         Experience Match: [Analyze experience fit]
         Education Match: [Analyze education fit]
-        Location Match: [Analyze location compatibility]
 
         RESUME TEXT:
         {resume_text}
