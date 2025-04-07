@@ -162,6 +162,12 @@ const Apply = () => {
         isValid = myInfoValidation.isValid;
         break;
       case 2:
+        // Check for resume before proceeding with other validations
+        if (!formData.resume) {
+          setFieldErrors({ resume: "Resume is required before proceeding" });
+          isValid = false;
+          break;
+        }
         const myExpValidation = MyExperience.validator.validate(
           formData,
           setFieldErrors

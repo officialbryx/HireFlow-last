@@ -109,6 +109,16 @@ const MyExperienceValidator = {
       }
     });
 
+    // Validate resume
+    if (!formData.resume) {
+      errors["resume"] = "Resume is required";
+    } else if (formData.resume.type !== "application/pdf") {
+      errors["resume"] = "Resume must be in PDF format";
+    } else if (formData.resume.size > 5 * 1024 * 1024) {
+      // 5MB limit
+      errors["resume"] = "Resume file size must be less than 5MB";
+    }
+
     // Update the field errors state
     if (setFieldErrors) {
       setFieldErrors(errors);
@@ -702,24 +712,75 @@ const MyExperience = ({
       <FormSection
         icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
         title="Resume/CV"
-        description="Upload your resume (PDF format)"
+        description="Upload your resume (PDF format only)"
       >
         <div className="space-y-4">
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, resume: e.target.files[0] }))
-            }
-            className="block w-full text-sm text-gray-500
-              file:mr-4 file:py-2.5 file:px-4
-              file:rounded-lg file:border-0
-              file:text-sm file:font-medium
-              file:bg-blue-50 file:text-blue-700
-              hover:file:bg-blue-100
-              transition-all"
-          />
-          <p className="text-sm text-gray-500">Maximum file size: 5MB</p>
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Resume <span className="text-red-500">*</span>
+            </label>
+            <div
+              className={`mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg ${
+                fieldErrors?.resume
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
+              }`}
+            >
+              <div className="space-y-2 text-center">
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="flex text-sm text-gray-600">
+                  <label
+                    htmlFor="resume-upload"
+                    className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                  >
+                    <span>Upload a file</span>
+                    <input
+                      id="resume-upload"
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        setFormData((prev) => ({ ...prev, resume: file }));
+                        if (setFieldErrors) {
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            resume: undefined,
+                          }));
+                        }
+                      }}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-gray-500">PDF up to 5MB</p>
+                {formData.resume && (
+                  <div className="mt-4 text-sm text-green-600 bg-green-50 py-2 px-4 rounded-md">
+                    <p className="font-medium">Selected file:</p>
+                    <p className="mt-1">{formData.resume.name}</p>
+                  </div>
+                )}
+                {fieldErrors?.resume && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {fieldErrors.resume}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </FormSection>
 
