@@ -228,113 +228,76 @@ def extract_skills(text):
     return skills
 
 def extract_education(text):
-    """Enhanced education information extraction with improved PDF handling"""
-    education_patterns = [
-        # Degree patterns
-        r'(?:bachelor|master|phd|doctorate|associate)(?:\s+(?:of|in|degree))?\s+([^.]+)',
-        r'(?:b\.?s\.?|b\.?a\.?|m\.?s\.?|m\.?a\.?|ph\.?d\.?|m\.?b\.?a\.?)\s+(?:in|of)?\s+([^.]+)',
-        r'(?:bachelor|master|doctorate|graduate)\s+degree\s+(?:in|of)?\s+([^.]+)',
-        # School/University patterns
-        r'(?:university|college|institute|school)\s+of\s+([^.]+)',
-        r'graduated\s+from\s+([^.]+)',
-        r'studied\s+(?:at|in)\s+([^.]+)',
-        # Year patterns
-        r'(?:19|20)\d{2}(?:\s*-\s*(?:19|20)\d{2}|\s*-\s*present|\s*-\s*current)?',
-        # GPA patterns
-        r'gpa\s*(?:of)?\s*:?\s*([0-4]\.\d{1,2})',
-        # Certification patterns
-        r'certification\s+in\s+([^.]+)',
-        r'certified\s+([^.]+)'
-    ]
-    # New simple education detection patterns
-    university_pattern = r'(?:University|College|Institute|School)[^,\n]*'
-    degree_pattern = r'(?:Bachelor|Master|Ph\.?D\.?|MBA|B\.S\.|M\.S\.|B\.A\.|M\.A\.|Doctorate|BS|BA|MS|MA)[^,\n]*'
-    year_pattern = r'(?:19|20)\d{2}'
+    """Enhanced education information extraction"""
     education_info = []
-    text_lower = text.lower()
-    degrees = []  # Initialize degrees list
-
-    # First use the complex detection
-    try:
-        sentences = sent_tokenize(text)
-    except:
-        sentences = simple_sentence_split(text)
-
-    # Find all degrees using the degree pattern
-    degrees = re.findall(degree_pattern, text, re.IGNORECASE)
+    text_lines = text.split('\n')
+    current_education = None
     
-    for sentence in sentences:
-        sent_lower = sentence.lower()
-        # Check for education keywords
-        if any(keyword in sent_lower for keyword in education_keywords):
-            # Extract detailed information
-            details = {
-                "text": sentence.strip(),
+    for line in text_lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # Check for education section headers
+        if "EDUCATION" in line.upper():
+            current_education = {}
+            continue
+
+        # Look for school names and degree information
+        if current_education is None:
+            continue
+
+        # Check for university/college names
+        if any(x in line.upper() for x in ["UNIVERSITY", "COLLEGE", "INSTITUTE", "SCHOOL"]):
+            if current_education and any(current_education.values()):
+                education_info.append(current_education)
+            current_education = {
+                "text": line,
+                "school": line,
                 "degree": None,
                 "field": None,
-                "school": None,
                 "year": None,
                 "gpa": None
             }
-            # Extract information using patterns
-            for pattern in education_patterns:
-                matches = re.finditer(pattern, sent_lower, re.IGNORECASE)
-                for match in matches:
-                    if "degree" in sent_lower or any(deg in sent_lower for deg in ["bachelor", "master", "phd"]):
-                        details["degree"] = match.group(0)
-                    elif "university" in sent_lower or "college" in sent_lower:
-                        details["school"] = match.group(0)
-                    elif re.search(r'(?:19|20)\d{2}', match.group(0)):
-                        details["year"] = match.group(0)
-                    elif "gpa" in sent_lower:
-                        details["gpa"] = match.group(1)
-                    else:
-                        details["field"] = match.group(0)
-            if any(details.values()):
-                education_info.append(details)
-    # If no education found with complex detection, try simple detection
-    if not education_info:
-        # Find all universities/colleges
-        universities = re.findall(university_pattern, text, re.IGNORECASE)
-        degrees = re.findall(degree_pattern, text, re.IGNORECASE)
-        years = re.findall(year_pattern, text)
-        # If we found university and degree, create entries
-        if universities and degrees:
-            for i in range(min(len(universities), len(degrees))):
-                details = {
-                    "text": f"{degrees[i]} from {universities[i]}",
-                    "degree": degrees[i].strip(),
-                    "field": None,
-                    "school": universities[i].strip(),
-                    "year": years[i] if i < len(years) else None,
-                    "gpa": None
-                }
-                education_info.append(details)
-    # Detect degree levels
+            continue
+
+        # Extract degree information
+        if any(degree in line.upper() for degree in ["BACHELOR", "BS", "BA", "MASTER", "MS", "PHD", "DOCTORATE"]):
+            if current_education:
+                current_education["degree"] = line
+                if "OF" in line.upper() or "IN" in line.upper():
+                    field = line.split("OF" if "OF" in line.upper() else "IN")[1].strip()
+                    current_education["field"] = field
+
+        # Extract year information
+        year_match = re.search(r'(?:19|20)\d{2}(?:\s*[-–]\s*(?:Present|Current|(?:19|20)\d{2}))?', line)
+        if year_match and current_education:
+            current_education["year"] = year_match.group()
+
+        # Extract GPA if present
+        gpa_match = re.search(r'GPA:?\s*([0-4]\.\d{1,2})', line)
+        if gpa_match and current_education:
+            current_education["gpa"] = gpa_match.group(1)
+
+    # Add the last education entry if exists
+    if current_education and any(current_education.values()):
+        education_info.append(current_education)
+
+    # Determine degree levels
     degree_levels = []
+    text_lower = text.lower()
     if re.search(r'\b(phd|doctorate|doctoral)\b', text_lower):
         degree_levels.append("PhD")
     if re.search(r'\b(master|ms|ma|msc|mtech|mba)\b', text_lower):
         degree_levels.append("Master's")
-    if re.search(r'\b(bachelor|bs|ba|bsc|btech|undergraduate)\b', text_lower):
+    if re.search(r'\b(bachelor|bs|ba|bsc|btech)\b', text_lower):
         degree_levels.append("Bachelor's")
     if re.search(r'\b(diploma|associate|certification)\b', text_lower):
         degree_levels.append("Associate/Diploma")
-    # If we found degrees in our simple scan but no degree levels
-    if degrees and not degree_levels:
-        for degree in degrees:
-            degree_lower = degree.lower()
-            if "phd" in degree_lower or "doctorate" in degree_lower:
-                degree_levels.append("PhD")
-            elif "master" in degree_lower or "ms " in degree_lower or "ma " in degree_lower or "mba" in degree_lower:
-                degree_levels.append("Master's")
-            elif "bachelor" in degree_lower or "bs " in degree_lower or "ba " in degree_lower:
-                degree_levels.append("Bachelor's")
-            elif "associate" in degree_lower or "diploma" in degree_lower:
-                degree_levels.append("Associate/Diploma")
+
     return {
         "details": education_info,
-        "levels": degree_levels
+        "levels": list(set(degree_levels))
     }
 
 # Define job-related constants before extract_experience function
@@ -418,7 +381,6 @@ def extract_experience(text):
 
 def extract_personal_info(text):
     """Extract personal information from resume"""
-    # Initialize personal info dictionary
     personal_info = {
         "name": None,
         "email": None,
@@ -426,31 +388,51 @@ def extract_personal_info(text):
         "location": None,
         "website": None
     }
+    
     # Extract email
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     emails = re.findall(email_pattern, text)
     if emails:
         personal_info["email"] = emails[0]
-    # Extract phone number
+
+    # Extract phone number - improved pattern
     phone_patterns = [
-        r'\b(?:\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b',  # (123) 456-7890, 123-456-7890
-        r'\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b'  # 123-456-7890
+        r'\+?\d{1,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}',  # International format
+        r'\(\d{3}\)\s*\d{3}[-.\s]?\d{4}',  # (123) 456-7890
+        r'\d{3}[-.\s]?\d{3}[-.\s]?\d{4}'    # 123-456-7890
     ]
+    
     for pattern in phone_patterns:
         phones = re.findall(pattern, text)
         if phones:
             personal_info["phone"] = phones[0]
             break
 
-    # Try to extract name using NER
-    doc = nlp(text[:500])  # Only check the beginning of the resume
-    person_entities = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
-    if person_entities:
-        personal_info["name"] = person_entities[0]
-    # Try to extract location
-    locations = [ent.text for ent in doc.ents if ent.label_ == "GPE" or ent.label_ == "LOC"]
-    if locations:
-        personal_info["location"] = locations[0]
+    # Extract location - look for address or location indicators
+    location_patterns = [
+        r'(?:Address|Location|City|Based in):\s*(.*?)(?:\n|$)',
+        r'([A-Za-z\s]+(?:City|Province|State))',
+        r'([A-Za-z\s]+,\s*[A-Za-z\s]+)'  # City, State/Province format
+    ]
+    
+    for pattern in location_patterns:
+        locations = re.findall(pattern, text)
+        if locations:
+            location = locations[0].strip()
+            if len(location) > 3:  # Avoid very short matches
+                personal_info["location"] = location
+                break
+
+    # Extract name from the beginning of the resume
+    lines = text.split('\n')
+    for line in lines[:3]:  # Check first 3 lines
+        line = line.strip()
+        if line and len(line) > 5:  # Name should be more than 5 characters
+            # Avoid lines that look like contact info
+            if not any(x in line.lower() for x in ['@', 'www', 'http', 'tel:', 'email']):
+                personal_info["name"] = line
+                break
+
     return personal_info
 
 def extract_certifications(text):

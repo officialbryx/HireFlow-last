@@ -257,7 +257,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 002 2z"
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
                 </div>
@@ -647,150 +647,267 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
               </button>
 
               {showTechnicalAnalysis && (
-                <div className="mt-4 space-y-6">
-                  {/* Technical Analysis Results */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h4 className="text-lg font-semibold text-indigo-700 mb-4 border-b border-gray-100 pb-2">
-                      Technical Analysis Results
-                    </h4>
-
-                    {/* Personal Information */}
-                    <div className="mb-6">
-                      <h5 className="font-medium text-gray-700 mb-3">
-                        Personal Information:
-                      </h5>
-                      <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                        <div>
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Name:</span>{" "}
-                            {results?.technical_analysis?.personal_info?.name ||
-                              "N/A"}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Email:</span>{" "}
-                            {results?.technical_analysis?.personal_info
-                              ?.email || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Location:</span>{" "}
-                            {results?.technical_analysis?.personal_info
-                              ?.location || "N/A"}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Phone:</span>{" "}
-                            {results?.technical_analysis?.personal_info
-                              ?.phone || "N/A"}
-                          </p>
-                        </div>
+                <div className="mt-4 space-y-6 bg-gray-50 p-6 rounded-xl">
+                  {/* Personal Information */}
+                  {results?.technical_analysis?.personal_info && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Personal Information
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(
+                          results.technical_analysis.personal_info
+                        ).map(
+                          ([key, value]) =>
+                            value && (
+                              <div key={key} className="flex">
+                                <span className="font-medium text-gray-700 w-32">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  {value}
+                                </span>
+                              </div>
+                            )
+                        )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Skills Analysis */}
-                    <div className="mb-6">
-                      <h5 className="font-medium text-gray-700 mb-3">
-                        Skills Analysis:
-                      </h5>
-
-                      {/* Hard Skills */}
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-blue-600 mb-2">
-                          Hard Skills:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(
-                            results?.technical_analysis?.skills?.hard_skills ||
-                              {}
-                          ).map(([skill, count]) => (
-                            <span
-                              key={skill}
-                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm"
-                            >
-                              {skill} ({count})
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Soft Skills */}
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-green-600 mb-2">
-                          Soft Skills:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(
-                            results?.technical_analysis?.skills?.soft_skills ||
-                              {}
-                          ).map(([skill, count]) => (
-                            <span
-                              key={skill}
-                              className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm"
-                            >
-                              {skill} ({count})
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Missing Skills */}
-                      <div>
-                        <p className="text-sm font-medium text-red-600 mb-2">
-                          Missing Required Skills:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {(
-                            results?.technical_analysis?.skills
-                              ?.missing_skills || []
-                          ).map((skill, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
+                  {/* Education */}
+                  {results?.technical_analysis?.education && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Education
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(
+                          results.technical_analysis.education
+                        ).map(([key, value]) => (
+                          <div key={key}>
+                            {Array.isArray(value) ? (
+                              <div className="space-y-2">
+                                <span className="font-medium text-gray-700">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <ul className="ml-4 space-y-1">
+                                  {value.map((item, index) => (
+                                    <li key={index} className="text-gray-600">
+                                      • {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <div className="flex">
+                                <span className="font-medium text-gray-700 w-32">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  {value}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
+                  )}
 
-                    {/* Experience Analysis */}
-                    <div>
-                      <h5 className="font-medium text-gray-700 mb-3">
-                        Experience Analysis:
-                      </h5>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium">Experience Level:</span>{" "}
-                          {results?.technical_analysis?.experience?.years ||
-                            "N/A"}
-                        </p>
-                        <div className="mb-2">
-                          <p className="text-sm font-medium text-gray-600">
-                            Recent Projects/Positions:
-                          </p>
-                          <ul className="list-disc list-inside text-sm text-gray-600">
-                            {(
-                              results?.technical_analysis?.experience
-                                ?.positions || []
-                            ).map((position, index) => (
-                              <li key={index}>{position}</li>
-                            ))}
-                          </ul>
-                        </div>
+                  {/* Experience */}
+                  {results?.technical_analysis?.experience && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Professional Experience
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(
+                          results.technical_analysis.experience
+                        ).map(([key, value]) => (
+                          <div key={key}>
+                            {Array.isArray(value) ? (
+                              <div className="space-y-2">
+                                <span className="font-medium text-gray-700">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <ul className="ml-4 space-y-1">
+                                  {value.map((item, index) => (
+                                    <li key={index} className="text-gray-600">
+                                      • {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <div className="flex">
+                                <span className="font-medium text-gray-700 w-32">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  {value}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Raw Resume Text */}
-                  <div className="bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto">
-                    <p className="text-yellow-400 font-semibold mb-2">
-                      Raw Resume Text:
-                    </p>
-                    <div className="whitespace-pre-wrap text-gray-400">
-                      {results.resume_text}
+                  {/* Skills */}
+                  {results?.technical_analysis?.skills && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Skills
+                      </h4>
+                      <div className="space-y-4">
+                        {Object.entries(results.technical_analysis.skills).map(
+                          ([key, value]) => (
+                            <div key={key}>
+                              {Array.isArray(value) ? (
+                                <div className="space-y-2">
+                                  <span className="font-medium text-gray-700">
+                                    {key
+                                      .split("_")
+                                      .map(
+                                        (word) =>
+                                          word.charAt(0).toUpperCase() +
+                                          word.slice(1)
+                                      )
+                                      .join(" ")}
+                                    :
+                                  </span>
+                                  <div className="flex flex-wrap gap-2">
+                                    {value.map((skill, index) => (
+                                      <span
+                                        key={index}
+                                        className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
+                                      >
+                                        {skill}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex">
+                                  <span className="font-medium text-gray-700 w-32">
+                                    {key
+                                      .split("_")
+                                      .map(
+                                        (word) =>
+                                          word.charAt(0).toUpperCase() +
+                                          word.slice(1)
+                                      )
+                                      .join(" ")}
+                                    :
+                                  </span>
+                                  <span className="text-gray-600 ml-2">
+                                    {value}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Job Match Analysis */}
+                  {results?.technical_analysis?.job_match && (
+                    <div className="bg-white p-6 rounded-xl shadow-sm">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Job Match Analysis
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(
+                          results.technical_analysis.job_match
+                        ).map(([key, value]) => (
+                          <div key={key}>
+                            {Array.isArray(value) ? (
+                              <div className="space-y-2">
+                                <span className="font-medium text-gray-700">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <ul className="ml-4 space-y-1">
+                                  {value.map((item, index) => (
+                                    <li key={index} className="text-gray-600">
+                                      • {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <div className="flex">
+                                <span className="font-medium text-gray-700 w-32">
+                                  {key
+                                    .split("_")
+                                    .map(
+                                      (word) =>
+                                        word.charAt(0).toUpperCase() +
+                                        word.slice(1)
+                                    )
+                                    .join(" ")}
+                                  :
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  {value}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

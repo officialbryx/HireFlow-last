@@ -1,9 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-import io
 import fitz  # PyMuPDF
-from main import analyze_job_requirements, perform_resume_analysis, compare_requirements
 from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
@@ -52,26 +50,11 @@ def evaluate():
                 if not text.strip():
                     raise Exception("No text could be extracted from the PDF")
                 
-                # Perform analysis with error handling
+                # Get AI analysis results
                 try:
-                    job_requirements = analyze_job_requirements(job_post)
-                    resume_analysis = perform_resume_analysis(text)
-                    comparison = compare_requirements(job_requirements, resume_analysis)
-                except Exception as e:
-                    raise Exception(f"Error in analysis: {str(e)}")
-
-                # Get AI insights with error handling
-                try:
-                    analysis_results = {
-                        'job_analysis': job_requirements,
-                        'resume_analysis': resume_analysis,
-                        'comparison': comparison
-                    }
-                    
-                    ai_insights = analyze_with_ai(
+                    ai_results = analyze_with_ai(
                         job_post=job_post,
-                        resume_text=text,
-                        analysis_results=analysis_results
+                        resume_text=text
                     )
                 except Exception as e:
                     raise Exception(f"Error in AI analysis: {str(e)}")
@@ -79,38 +62,19 @@ def evaluate():
                 # Clean up and return response
                 os.remove(filepath)
                 
-                # Ensure we have valid match scores
-                match_scores = ai_insights.get('match_scores', {})
+                # Extract scores from AI results
+                match_scores = ai_results.get('match_scores', {})
                 overall_match = match_scores.get('overall_match', 0)
                 skills_match = match_scores.get('skills_match', 0)
                 qualified = match_scores.get('qualified', False)
 
-                # Combine and return response
+                # Return structured response
                 return jsonify({
-                    'job_analysis': job_requirements,
-                    'resume_analysis': resume_analysis,
-                    'comparison': {
-                        'skill_match': {
-                            'match_percentage': skills_match,
-                            'missing': comparison['skill_match']['missing']
-                        },
-                        'overall_match': {
-                            'score': overall_match,
-                            'qualified': qualified
-                        }
-                    },
                     'ai_insights': {
-                        'sections': ai_insights.get('sections', {}),
-                        'match_scores': ai_insights.get('match_scores', {})
+                        'sections': ai_results.get('sections', {}),
+                        'match_scores': ai_results.get('match_scores', {})
                     },
-                    'technical_analysis': ai_insights.get('technical_analysis', {}),
-                    'console_output': {
-                        'skills': resume_analysis.get('skills', {}),
-                        'education': resume_analysis.get('education', {}),
-                        'experience': resume_analysis.get('experience', {}),
-                        'personal_info': resume_analysis.get('personal_info', {}),
-                        'certifications': resume_analysis.get('certifications', [])
-                    },
+                    'technical_analysis': ai_results.get('technical_analysis', {}),
                     'resume_text': text
                 })
                 
