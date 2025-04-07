@@ -257,7 +257,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 002 2z"
                     />
                   </svg>
                 </div>
@@ -647,149 +647,148 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
               </button>
 
               {showTechnicalAnalysis && (
-                <div className="mt-4 bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto shadow-md">
-                  <div className="flex items-center mb-4 border-b border-gray-700 pb-2">
-                    <div className="flex space-x-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                    <p className="text-white ml-4 text-xs">
-                      analysis_output.log
-                    </p>
-                  </div>
+                <div className="mt-4 space-y-6">
+                  {/* Technical Analysis Results */}
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h4 className="text-lg font-semibold text-indigo-700 mb-4 border-b border-gray-100 pb-2">
+                      Technical Analysis Results
+                    </h4>
 
-                  {/* Input Analysis */}
-                  <div className="mb-6 border-b border-gray-700 pb-4">
-                    <p className="text-yellow-400 font-semibold">
-                      Input Analysis:
-                    </p>
-                    <div className="mt-2">
-                      <p className="text-blue-400 font-semibold">
-                        JobPost Content:
-                      </p>
-                      <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
-                        {jobPost.split("\n").map((line, i) => (
-                          <p key={i}>{line || " "}</p>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <p className="text-blue-400 font-semibold">
-                        Resume Content:
-                      </p>
-                      <div className="ml-4 mt-1 text-gray-400 max-h-40 overflow-y-auto">
-                        {results.resume_text.split("\n").map((line, i) => (
-                          <p key={i}>{line || " "}</p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Analysis Results */}
-                  <div className="space-y-4">
-                    {/* Personal Info */}
-                    <div className="mb-4">
-                      <p className="text-yellow-400 font-semibold">
+                    {/* Personal Information */}
+                    <div className="mb-6">
+                      <h5 className="font-medium text-gray-700 mb-3">
                         Personal Information:
-                      </p>
-                      {results.console_output.personal_info.name && (
-                        <p className="ml-4">
-                          Name:{" "}
-                          <span className="text-white">
-                            {results.console_output.personal_info.name}
-                          </span>
-                        </p>
-                      )}
-                      {results.console_output.personal_info.email && (
-                        <p className="ml-4">
-                          Email:{" "}
-                          <span className="text-white">
-                            {results.console_output.personal_info.email}
-                          </span>
-                        </p>
-                      )}
-                      {results.console_output.personal_info.phone && (
-                        <p className="ml-4">
-                          Phone:{" "}
-                          <span className="text-white">
-                            {results.console_output.personal_info.phone}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Skills */}
-                    <div className="mb-4">
-                      <p className="text-yellow-400 font-semibold"> Skills:</p>
-                      <p className="ml-4 text-cyan-400"> Technical Skills:</p>
-                      {Object.entries(
-                        results.console_output.skills.hard_skills
-                      ).map(([skill], index) => (
-                        <p key={index} className="ml-6 text-white">
-                          - {skill}
-                        </p>
-                      ))}
-
-                      <p className="ml-4 mt-2 text-cyan-400"> Soft Skills:</p>
-                      {Object.entries(
-                        results.console_output.skills.soft_skills
-                      ).map(([skill], index) => (
-                        <p key={index} className="ml-6 text-white">
-                          - {skill}
-                        </p>
-                      ))}
-                    </div>
-
-                    {/* Final Assessment */}
-                    <div className="border-t border-gray-700 pt-4 mt-4">
-                      <p className="text-yellow-400 font-semibold">
-                        Final Assessment:
-                      </p>
-                      <p className="ml-4">
-                        Qualification Status:{" "}
-                        <span
-                          className={`${
-                            results.comparison.overall_match.qualified
-                              ? "text-green-400"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {results.comparison.overall_match.qualified
-                            ? "Qualified"
-                            : "Unqualified"}
-                        </span>
-                      </p>
-                      <p className="ml-4">
-                        Overall Match:{" "}
-                        <span className="text-white">
-                          {Math.round(results.comparison.overall_match.score)}%
-                        </span>
-                      </p>
-                      <p className="ml-4">
-                        Skills Match:{" "}
-                        <span className="text-white">
-                          {Math.round(
-                            results.comparison.skill_match.match_percentage
-                          )}
-                          %
-                        </span>
-                      </p>
-
-                      {results.comparison.skill_match.missing.length > 0 && (
-                        <>
-                          <p className="ml-4 text-yellow-400 mt-2">
-                            Missing Skills:
+                      </h5>
+                      <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                        <div>
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">Name:</span>{" "}
+                            {results?.technical_analysis?.personal_info?.name ||
+                              "N/A"}
                           </p>
-                          {results.comparison.skill_match.missing.map(
-                            (skill, index) => (
-                              <p key={index} className="ml-6 text-red-400">
-                                - {skill}
-                              </p>
-                            )
-                          )}
-                        </>
-                      )}
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">Email:</span>{" "}
+                            {results?.technical_analysis?.personal_info
+                              ?.email || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">Location:</span>{" "}
+                            {results?.technical_analysis?.personal_info
+                              ?.location || "N/A"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">Phone:</span>{" "}
+                            {results?.technical_analysis?.personal_info
+                              ?.phone || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Skills Analysis */}
+                    <div className="mb-6">
+                      <h5 className="font-medium text-gray-700 mb-3">
+                        Skills Analysis:
+                      </h5>
+
+                      {/* Hard Skills */}
+                      <div className="mb-4">
+                        <p className="text-sm font-medium text-blue-600 mb-2">
+                          Hard Skills:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(
+                            results?.technical_analysis?.skills?.hard_skills ||
+                              {}
+                          ).map(([skill, count]) => (
+                            <span
+                              key={skill}
+                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm"
+                            >
+                              {skill} ({count})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Soft Skills */}
+                      <div className="mb-4">
+                        <p className="text-sm font-medium text-green-600 mb-2">
+                          Soft Skills:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(
+                            results?.technical_analysis?.skills?.soft_skills ||
+                              {}
+                          ).map(([skill, count]) => (
+                            <span
+                              key={skill}
+                              className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm"
+                            >
+                              {skill} ({count})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Missing Skills */}
+                      <div>
+                        <p className="text-sm font-medium text-red-600 mb-2">
+                          Missing Required Skills:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {(
+                            results?.technical_analysis?.skills
+                              ?.missing_skills || []
+                          ).map((skill, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Experience Analysis */}
+                    <div>
+                      <h5 className="font-medium text-gray-700 mb-3">
+                        Experience Analysis:
+                      </h5>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium">Experience Level:</span>{" "}
+                          {results?.technical_analysis?.experience?.years ||
+                            "N/A"}
+                        </p>
+                        <div className="mb-2">
+                          <p className="text-sm font-medium text-gray-600">
+                            Recent Projects/Positions:
+                          </p>
+                          <ul className="list-disc list-inside text-sm text-gray-600">
+                            {(
+                              results?.technical_analysis?.experience
+                                ?.positions || []
+                            ).map((position, index) => (
+                              <li key={index}>{position}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Raw Resume Text */}
+                  <div className="bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto">
+                    <p className="text-yellow-400 font-semibold mb-2">
+                      Raw Resume Text:
+                    </p>
+                    <div className="whitespace-pre-wrap text-gray-400">
+                      {results.resume_text}
                     </div>
                   </div>
                 </div>
