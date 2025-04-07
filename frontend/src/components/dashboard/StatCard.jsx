@@ -22,7 +22,8 @@ const StatCard = ({ title, value, icon: Icon, change, changeType, subtitle, onCl
             <span className="text-2xl font-bold text-gray-900">
               {typeof value === 'number' ? value.toLocaleString() : value}
             </span>
-            {change !== undefined && (
+            {/* Only show change indicator if change is not zero */}
+            {change !== undefined && change > 0 && (
               <span className={`
                 inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded-full
                 ${changeType === 'increase' 

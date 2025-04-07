@@ -15,6 +15,15 @@ export const getDashboardMetrics = async () => {
     const activeJobs = jobStats?.filter(j => j.status === 'active').length || 0;
     const archivedJobs = jobStats?.filter(j => j.status === 'archived').length || 0;
 
+    // Get all job IDs created by this user (for filtering applications)
+    const { data: userJobs } = await supabase
+      .from('job_posting')
+      .select('id')
+      .eq('creator_id', user.id);
+    
+    // Extract job IDs to an array
+    const userJobIds = userJobs?.map(job => job.id) || [];
+    
     // Get recent jobs with applicant count
     const { data: recentJobs } = await supabase
       .from('job_posting')
@@ -29,22 +38,77 @@ export const getDashboardMetrics = async () => {
       .order('created_at', { ascending: false })
       .limit(5);
 
-    // Get total applicants count and monthly change
+    // Get total applicants count ONLY for this user's jobs
     const { data: totalApplicants } = await supabase
       .from('applications')
       .select('created_at')
+      .in('job_posting_id', userJobIds)
       .eq('status', 'pending');
 
+    // Get last month's applicants ONLY for this user's jobs
     const { data: lastMonthApplicants } = await supabase
       .from('applications')
       .select('created_at')
+      .in('job_posting_id', userJobIds)
       .gte('created_at', new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString());
 
-    // Get shortlisted candidates count
+    // Get applications from current month
+    const currentMonthStart = new Date();
+    currentMonthStart.setDate(1); // First day of current month
+    currentMonthStart.setHours(0, 0, 0, 0);
+
+    const { data: currentMonthApplicants } = await supabase
+      .from('applications')
+      .select('created_at')
+      .in('job_posting_id', userJobIds)
+      .gte('created_at', currentMonthStart.toISOString());
+
+    // Get applications from previous month
+    const lastMonthStart = new Date();
+    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+    lastMonthStart.setDate(1); // First day of previous month
+    lastMonthStart.setHours(0, 0, 0, 0);
+
+    const lastMonthEnd = new Date();
+    lastMonthEnd.setDate(0); // Last day of previous month
+    lastMonthEnd.setHours(23, 59, 59, 999);
+
+    const { data: previousMonthApplicants } = await supabase
+      .from('applications')
+      .select('created_at')
+      .in('job_posting_id', userJobIds)
+      .gte('created_at', lastMonthStart.toISOString())
+      .lte('created_at', lastMonthEnd.toISOString());
+
+    // Calculate percentage change
+    const currentMonthCount = currentMonthApplicants?.length || 0;
+    const previousMonthCount = previousMonthApplicants?.length || 0;
+
+    let percentageChange = 0;
+    let changeType = 'none'; // Change default to 'none' instead of 'increase'
+
+    if (previousMonthCount > 0) {
+      percentageChange = Math.round(((currentMonthCount - previousMonthCount) / previousMonthCount) * 100);
+      if (percentageChange > 0) {
+        changeType = 'increase';
+      } else if (percentageChange < 0) {
+        changeType = 'decrease';
+        percentageChange = Math.abs(percentageChange); // Make it positive for display
+      }
+    } else if (currentMonthCount > 0) {
+      percentageChange = 100; // If previous month was 0, and current month has applications
+      changeType = 'increase';
+    } else {
+      percentageChange = 0; // No change if both months are 0
+      changeType = 'none';
+    }
+
+    // Get shortlisted candidates count ONLY for this user's jobs
     const { data: shortlisted } = await supabase
       .from('applications')
       .select('id')
-      .eq('status', 'shortlisted');
+      .in('job_posting_id', userJobIds)
+      .eq('shortlisted', true);
 
     // Get popular job roles with applicant counts
     const { data: popularRoles } = await supabase
@@ -72,7 +136,8 @@ export const getDashboardMetrics = async () => {
       })),
       applicantStats: {
         total: totalApplicants?.length || 0,
-        monthlyChange: lastMonthApplicants?.length || 0
+        monthlyChange: percentageChange,
+        changeType: changeType
       },
       shortlistedStats: {
         total: shortlisted?.length || 0
