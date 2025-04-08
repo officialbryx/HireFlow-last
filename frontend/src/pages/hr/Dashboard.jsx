@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -10,7 +10,10 @@ import {
   ClipboardDocumentListIcon,
   ChartBarIcon,
   ArrowPathIcon,
-  ChartPieIcon
+  ChartPieIcon,
+  DocumentArrowDownIcon,
+  DocumentTextIcon,
+  TableCellsIcon
 } from '@heroicons/react/24/outline';
 import { getDashboardMetrics } from '../../services/dashboardMetrics';
 import StatCard from '../../components/dashboard/StatCard';
@@ -23,6 +26,8 @@ const CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [showReportOptions, setShowReportOptions] = useState(false);
+  const printRef = useRef();
   
   const { 
     data: metrics, 
@@ -41,6 +46,69 @@ const Dashboard = () => {
 
   const handleCardClick = (path) => {
     navigate(path);
+  };
+
+  // Export to CSV (Just for Recent Jobs)
+  const exportJobsToCSV = () => {
+    if (!metrics || !metrics.recentJobs) return;
+    
+    // Create CSV headers
+    const headers = ['Job Title', 'Status', 'Applicants', 'Posted Date'];
+    
+    // Map jobs data to CSV rows
+    const jobsData = metrics.recentJobs.map(job => [
+      job.title,
+      job.status,
+      job.applicants_count,
+      new Date(job.created_at).toLocaleDateString()
+    ]);
+    
+    // Combine headers and data
+    const csvContent = [
+      headers.join(','),
+      ...jobsData.map(row => row.join(','))
+    ].join('\n');
+    
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'recent_jobs.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Export app statistics to CSV
+  const exportAppStatsToCSV = () => {
+    if (!metrics || !metrics.applicationStatusData) return;
+    
+    // Create CSV headers and data
+    const headers = ['Status', 'Count', 'Percentage'];
+    const statsData = metrics.applicationStatusData.map(item => [
+      item.status,
+      item.count,
+      metrics.applicantStats.total > 0 
+        ? Math.round((item.count / metrics.applicantStats.total) * 100) + '%'
+        : '0%'
+    ]);
+    
+    // Combine headers and data
+    const csvContent = [
+      headers.join(','),
+      ...statsData.map(row => row.join(','))
+    ].join('\n');
+    
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'application_statistics.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (isLoading) {
@@ -77,7 +145,7 @@ const Dashboard = () => {
       <HRNavbar />
       <div className="pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-8" ref={printRef}>
             {/* Quick Actions with Refresh Button */}
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
@@ -86,7 +154,42 @@ const Dashboard = () => {
                   <ArrowPathIcon className="h-5 w-5 animate-spin text-blue-600" />
                 )}
               </div>
-              <div className="space-x-4">
+              <div className="space-x-4 flex">
+                {/* Reports dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowReportOptions(!showReportOptions)}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+                    Reports
+                    <svg className="ml-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  
+                  {showReportOptions && (
+                    <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                      <div className="py-1">
+                        <button
+                          onClick={exportJobsToCSV}
+                          className="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
+                        >
+                          <TableCellsIcon className="h-5 w-5 mr-2" />
+                          Export Job Listings (CSV)
+                        </button>
+                        <button
+                          onClick={exportAppStatsToCSV}
+                          className="text-gray-700 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
+                        >
+                          <DocumentTextIcon className="h-5 w-5 mr-2" />
+                          Export Application Stats (CSV)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
                 <button
                   onClick={() => refetch()}
                   className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
@@ -95,6 +198,7 @@ const Dashboard = () => {
                   <ArrowPathIcon className={`h-5 w-5 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
                   Refresh
                 </button>
+                
                 <Link
                   to="/hr/jobs?tab=create"
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
