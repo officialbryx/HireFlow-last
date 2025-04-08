@@ -122,6 +122,39 @@ export const getDashboardMetrics = async () => {
       .order('applicant_count', { ascending: false })
       .limit(5);
 
+    // Get application status distribution ONLY for this user's jobs
+    const { data: statusDistribution } = await supabase
+      .from('applications')
+      .select('status, id')
+      .in('job_posting_id', userJobIds);
+    
+    // Count applications by status
+    const statusCounts = {};
+    const statusColors = {
+      pending: 'blue',
+      rejected: 'red',
+      interview: 'yellow',
+      accepted: 'green',
+      withdrawn: 'gray'
+    };
+    
+    statusDistribution?.forEach(app => {
+      if (!statusCounts[app.status]) {
+        statusCounts[app.status] = {
+          count: 0,
+          color: statusColors[app.status] || 'blue'
+        };
+      }
+      statusCounts[app.status].count++;
+    });
+    
+    // Convert to array format for easier rendering
+    const applicationStatusData = Object.keys(statusCounts).map(status => ({
+      status: status,
+      count: statusCounts[status].count,
+      color: statusCounts[status].color
+    })).sort((a, b) => b.count - a.count); // Sort by count in descending order
+
     return {
       jobStats: {
         active: activeJobs,
@@ -147,6 +180,7 @@ export const getDashboardMetrics = async () => {
         title: role.job_title,
         applicants_count: role.applicant_count || 0
       })),
+      applicationStatusData,
       lastUpdated: new Date().toISOString()
     };
   } catch (error) {

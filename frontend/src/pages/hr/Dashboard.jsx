@@ -9,7 +9,8 @@ import {
   PlusIcon,
   ClipboardDocumentListIcon,
   ChartBarIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ChartPieIcon
 } from '@heroicons/react/24/outline';
 import { getDashboardMetrics } from '../../services/dashboardMetrics';
 import StatCard from '../../components/dashboard/StatCard';
@@ -246,6 +247,58 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+
+            {/* Application Status Distribution - New Section */}
+            <div className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                    <ChartPieIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">Application Status Distribution</h2>
+                </div>
+              </div>
+              
+              {metrics.applicationStatusData && metrics.applicationStatusData.length > 0 ? (
+                <div className="space-y-4">
+                  {metrics.applicationStatusData.map((item) => (
+                    <div key={item.status} className="group">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center">
+                          <div 
+                            className={`w-3 h-3 rounded-full mr-2 bg-${item.color}-500`}
+                            aria-hidden="true"
+                          ></div>
+                          <p className="font-medium text-gray-900 capitalize">
+                            {item.status} 
+                          </p>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {item.count} ({metrics.applicantStats.total > 0 
+                            ? Math.round((item.count / metrics.applicantStats.total) * 100) 
+                            : 0}%)
+                        </span>
+                      </div>
+                      <div className="relative w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div
+                          className={`absolute left-0 top-0 h-full rounded-full transition-all duration-500 ease-out bg-${item.color}-500`}
+                          style={{ 
+                            width: `${metrics.applicantStats.total > 0 
+                              ? (item.count / metrics.applicantStats.total) * 100 
+                              : 0}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No application data available
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
