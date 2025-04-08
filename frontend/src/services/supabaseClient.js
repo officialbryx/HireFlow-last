@@ -3,9 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Add some debugging to verify variables are loading
-console.log("Supabase URL available:", !!supabaseUrl);
-console.log("Supabase Key available:", !!supabaseKey);
+
 
 // Create a custom cookieStorage implementation that matches the expected interface
 const cookieStorage = {
@@ -46,6 +44,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
     storageKey: "sb-auth-token",
     flowType: "pkce", // Use PKCE flow for added security
-    debug: import.meta.env.VITE_MODE === "development",
+    // debug: import.meta.env.VITE_MODE === "development",
   },
 });
