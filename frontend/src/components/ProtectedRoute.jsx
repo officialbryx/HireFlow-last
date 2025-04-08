@@ -43,11 +43,17 @@ const ProtectedRoute = ({ children }) => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    // Check if there's a deliberate logout in progress via the location state
+    const isDeliberateLogout = location.state?.isDeliberateLogout;
+    
     return <Navigate 
       to="/login" 
       state={{ 
         from: location.pathname,
-        message: 'Please log in to access this page' 
+        // Don't show any message if this is a deliberate logout
+        message: '',
+        // Preserve the deliberate logout flag
+        isDeliberateLogout: isDeliberateLogout || false
       }} 
       replace 
     />;

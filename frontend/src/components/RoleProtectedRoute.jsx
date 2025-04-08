@@ -77,7 +77,7 @@ const RoleProtectedRoute = ({ children, requiredRole }) => {
       to="/login" 
       state={{ 
         from: location.pathname,
-        message: 'Please log in to access this page' 
+        message: '' 
       }} 
       replace 
     />;
