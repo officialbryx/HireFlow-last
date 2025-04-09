@@ -623,7 +623,7 @@ def calculate_similarity(embedding1, embedding2):
     return cosine_similarity(embedding1, embedding2)[0][0]
 
 def compare_requirements(job_req, resume_info):
-    """Enhanced comparison with XGBoost-style binary classification"""
+    """Enhanced comparison with XGBoost binary classification"""
     results = {
         "skill_match": {"match_percentage": 0, "missing": []},
         "overall_match": {"score": 0, "qualified": False}
