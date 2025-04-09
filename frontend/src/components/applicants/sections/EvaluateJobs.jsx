@@ -114,15 +114,12 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       formData.append("jobPost", jobPost);
       formData.append("resume", resumeFile);
 
-      const corsProxy = "https://cors-anywhere.herokuapp.com/";
       const response = await axios({
         method: "post",
-        url: `${corsProxy}https://hireflow-backend-obv1.onrender.com/api/evaluate`,
+        url: "https://hireflow-backend-obv1.onrender.com/api/evaluate",
         data: formData,
         headers: {
           "Content-Type": "multipart/form-data",
-          "X-Requested-With": "XMLHttpRequest",
-          origin: "x-requested-with",
         },
         maxBodyLength: Infinity,
         timeout: 120000, // 2 minutes timeout

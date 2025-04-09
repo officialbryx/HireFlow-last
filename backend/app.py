@@ -6,13 +6,24 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": "*"}})
 
+# Configure CORS to allow everything
+CORS(app, 
+     resources={r"/*": {
+         "origins": "*",
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+         "supports_credentials": True,
+         "max_age": 3600
+     }})
+
+# Add CORS headers to all responses
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 UPLOAD_FOLDER = 'uploads'
@@ -26,12 +37,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/api/evaluate', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
-        # Accept all methods
-    if request.method == "OPTIONS":
-        return {"success": True}, 200
-    
+    # Handle preflight requests
+    if request.method == 'OPTIONS':
+        return jsonify({"success": True}), 200, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }
+        
     try:
         if 'resume' not in request.files:
             return jsonify({'error': 'No resume file provided'}), 400
