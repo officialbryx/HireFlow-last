@@ -6,11 +6,11 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)  # Super simple CORS - allow everything
+CORS(app, supports_credentials=True)  # Allow all CORS
 
 @app.after_request 
 def after_request(response):
-    # Accepting all incoming requests
+    # Allow everything
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': '*',
@@ -28,8 +28,8 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 @app.route('/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
     if request.method == 'OPTIONS':
-        return '', 200
-
+        return jsonify({'message': 'OK'}), 200  # Handle OPTIONS preflight
+        
     try:
         file = request.files.get('resume')
         job_post = request.form.get('jobPost')
