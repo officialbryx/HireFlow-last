@@ -25,7 +25,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-@app.route('/evaluate', methods=['POST', 'OPTIONS'])
+@app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
     if request.method == 'OPTIONS':
         return jsonify({'message': 'OK'}), 200  # Handle OPTIONS preflight

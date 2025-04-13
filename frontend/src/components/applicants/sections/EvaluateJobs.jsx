@@ -115,7 +115,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
     try {
       const response = await axios.post(
-        "https://hireflow-backend-obv1.onrender.com/evaluate",
+        "https://hireflow-backend-obv1.onrender.com/api/evaluate",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
