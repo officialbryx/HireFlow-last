@@ -123,7 +123,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
           },
           // Disable credentials to avoid preflight CORS issues
           withCredentials: false,
-          timeout: 300000,
+          timeout: 300000, // 5 minute timeout for long-running analysis
         }
       );
 

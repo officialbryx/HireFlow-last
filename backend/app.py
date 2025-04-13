@@ -6,14 +6,15 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-# Enable CORS fully with no restrictions
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+
+# Enable CORS for all routes and origins
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Add CORS headers to all responses
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-Auth-Token')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
@@ -51,9 +52,10 @@ def evaluate():
         return jsonify(result)
 
     except Exception as e:
+        print(f"Error processing request: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Add a test route to verify CORS is working
+# Add a test endpoint to verify CORS is working
 @app.route('/test', methods=['GET', 'OPTIONS'])
 def test():
     if request.method == 'OPTIONS':
@@ -62,4 +64,4 @@ def test():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
