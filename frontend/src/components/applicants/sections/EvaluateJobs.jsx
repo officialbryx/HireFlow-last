@@ -121,9 +121,11 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        withCredentials: false,
+        validateStatus: function (status) {
+          return status < 600; // Accept any status code to prevent axios from rejecting
+        },
         maxBodyLength: Infinity,
-        timeout: 120000, // 2 minutes timeout
+        timeout: 120000,
       });
 
       if (response.data.error) {
