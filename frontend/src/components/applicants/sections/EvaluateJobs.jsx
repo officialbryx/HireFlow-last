@@ -109,39 +109,24 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     setError(null);
     setResults(null);
 
+    const formData = new FormData();
+    formData.append("jobPost", jobPost);
+    formData.append("resume", resumeFile);
+
     try {
-      const formData = new FormData();
-      formData.append("jobPost", jobPost);
-      formData.append("resume", resumeFile);
-
-      const response = await axios({
-        method: "post",
-        url: "https://hireflow-backend-obv1.onrender.com",
-        data: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        validateStatus: function (status) {
-          return status >= 200 && status < 600;
-        },
-        maxBodyLength: Infinity,
-        timeout: 300000,
-        withCredentials: false,
-      });
-
-      if (response.data.error) {
-        throw new Error(response.data.error);
-      }
+      const response = await axios.post(
+        "https://hireflow-backend-obv1.onrender.com/evaluate",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: 300000,
+        }
+      );
 
       setResults(response.data);
     } catch (err) {
       console.error("Analysis error:", err);
-      setError(
-        err.response?.data?.error ||
-          err.message ||
-          "Error processing request. Please try again."
-      );
-      setResults(null);
+      setError("Error processing request. Please try again.");
     } finally {
       setIsLoading(false);
     }
