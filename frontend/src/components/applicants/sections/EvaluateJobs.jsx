@@ -116,16 +116,18 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
       const response = await axios({
         method: "post",
-        url: "https://hireflow-backend-obv1.onrender.com/api/evaluate",
+        url: "https://hireflow-backend-obv1.onrender.com", // <-- Changed this line
         data: formData,
         headers: {
           "Content-Type": "multipart/form-data",
+          Accept: "application/json",
         },
         validateStatus: function (status) {
-          return status < 600; // Accept any status code to prevent axios from rejecting
+          return status >= 200 && status < 600;
         },
         maxBodyLength: Infinity,
-        timeout: 120000,
+        timeout: 300000, // 5 minutes
+        withCredentials: true,
       });
 
       if (response.data.error) {
