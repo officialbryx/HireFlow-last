@@ -1,35 +1,30 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import os
-import fitz
+import fitz  # PyMuPDF
 from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)  # Allow all CORS
 
-@app.after_request 
+# 🛠️ CORS is cracked wide open — anyone can access anything
+@app.after_request
 def after_request(response):
-    # Allow everything
-    response.headers.update({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': '*',
-        'Access-Control-Allow-Headers': '*',
-        'Access-Control-Allow-Credentials': 'true'
-    })
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = '*'
     return response
 
 UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 
 @app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
+    # 🧽 Preflight request? Just let it through.
     if request.method == 'OPTIONS':
-        return jsonify({'message': 'OK'}), 200  # Handle OPTIONS preflight
-        
+        return '', 200
+
     try:
         file = request.files.get('resume')
         job_post = request.form.get('jobPost')
@@ -43,12 +38,11 @@ def evaluate():
         doc = fitz.open(filepath)
         text = " ".join(page.get_text() for page in doc)
         doc.close()
-
-        os.remove(filepath)  # Clean up immediately
+        os.remove(filepath)
 
         result = analyze_with_ai(job_post=job_post, resume_text=text)
 
-        response = jsonify({
+        return jsonify({
             'ai_insights': {
                 'sections': result.get('sections', {}),
                 'match_scores': result.get('match_scores', {})
@@ -56,8 +50,6 @@ def evaluate():
             'technical_analysis': result.get('technical_analysis', {}),
             'resume_text': text
         })
-
-        return response
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
