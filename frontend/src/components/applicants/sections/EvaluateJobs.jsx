@@ -118,7 +118,11 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         "https://hireflow-backend-obv1.onrender.com/api/evaluate",
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          // Disable credentials to avoid preflight CORS issues
+          withCredentials: false,
           timeout: 300000,
         }
       );
