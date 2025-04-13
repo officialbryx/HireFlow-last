@@ -7,15 +7,25 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Disable CORS completely
-app.config['CORS_HEADERS'] = 'Content-Type'
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
+# Configure CORS with complete unrestricted access
+app.config['CORS_HEADERS'] = '*'
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": "*",
+        "expose_headers": "*"
+    }
+}, supports_credentials=False)
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', '*')
-    response.headers.add('Access-Control-Allow-Methods', '*')
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Max-Age': '86400'
+    })
     return response
 
 # Upload folder and allowed file types
@@ -31,8 +41,18 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Resume Evaluation Endpoint
-@app.route('/api/evaluate', methods=['POST'])
+@app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
+    # Handle OPTIONS request
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': '*'
+        })
+        return response
+
     try:
         if 'resume' not in request.files:
             return jsonify({'error': 'No resume file provided'}), 400
