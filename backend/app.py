@@ -9,10 +9,7 @@ app = Flask(__name__)
 # Configure CORS for production frontend and API
 CORS(app, resources={
     r"/api/*": {
-        "origins": [
-            "https://hireflow-web.onrender.com",
-            "https://hireflow-backend-obv1.onrender.com"
-        ],
+        "origins": "*",  # Allow all origins temporarily for debugging
         "methods": ["POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "expose_headers": ["Content-Range", "X-Total-Count"],

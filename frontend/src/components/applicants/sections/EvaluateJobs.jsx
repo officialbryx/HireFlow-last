@@ -187,7 +187,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
             : "Loading applicant data..."}
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          {isLoading ? "This may take up to 2 minutes" : "Please wait"}
+          {isLoading ? "This may take up to 3-5 minutes" : "Please wait"}
         </p>
       </div>
     </div>
