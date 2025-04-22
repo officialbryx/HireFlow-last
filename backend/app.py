@@ -6,11 +6,7 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
-
-# Configure backend URL
-BACKEND_URL = os.environ.get('BACKEND_URL', 'https://hireflow-backend-obv1.onrender.com')
-app.config['BACKEND_URL'] = BACKEND_URL
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -23,29 +19,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    if origin:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    return response
-
-
-@app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
+@app.route('/api/evaluate', methods=['POST'])
 def evaluate():
-    if request.method == 'OPTIONS':
-        response = make_response()
-        origin = request.headers.get('Origin')
-        if origin:
-            response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        return response, 200
-        
     try:
         if 'resume' not in request.files:
             return jsonify({'error': 'No resume file provided'}), 400
