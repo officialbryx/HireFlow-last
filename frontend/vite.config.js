@@ -8,13 +8,11 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:10000", // Point to local backend
+        target: "https://hireflow-backend-obv1.onrender.com",
         changeOrigin: true,
-        secure: false,
-        cors: true, // Enable CORS for local testing
+        secure: true,
       },
     },
-    cors: true, // Enable CORS for local server
   },
   build: {
     rollupOptions: {

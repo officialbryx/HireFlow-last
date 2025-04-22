@@ -6,7 +6,11 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)  # Allow everything
+CORS(app)
+
+# Configure backend URL
+BACKEND_URL = os.environ.get('BACKEND_URL', 'https://hireflow-backend-obv1.onrender.com')
+app.config['BACKEND_URL'] = BACKEND_URL
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}

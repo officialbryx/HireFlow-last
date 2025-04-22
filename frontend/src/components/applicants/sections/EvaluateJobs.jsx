@@ -115,12 +115,12 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       formData.append("resume", resumeFile);
 
       const response = await axios.post(
-        "http://localhost:10000/api/evaluate",
+        "https://hireflow-backend-obv1.onrender.com/api/evaluate",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "*", //mightremove
           },
           withCredentials: false,
           timeout: 300000,
