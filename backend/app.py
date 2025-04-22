@@ -116,10 +116,35 @@ def evaluate():
                 # Return structured response
                 return jsonify({
                     'ai_insights': {
-                        'sections': ai_results.get('sections', {}),
-                        'match_scores': ai_results.get('match_scores', {})
+                        'sections': ai_results.get('sections', {
+                            'skills_analysis': {
+                                'title': 'Skills Analysis',
+                                'content': 'Analysis not available'
+                            },
+                            'qualification_summary': {
+                                'title': 'Qualification Summary', 
+                                'content': 'Analysis not available'
+                            }
+                        }),
+                        'match_scores': {
+                            'overall_match': ai_results.get('match_scores', {}).get('overall_match', 0),
+                            'skills_match': ai_results.get('match_scores', {}).get('skills_match', 0),
+                            'qualified': ai_results.get('match_scores', {}).get('qualified', False)
+                        }
                     },
-                    'technical_analysis': ai_results.get('technical_analysis', {}),
+                    'technical_analysis': ai_results.get('technical_analysis', {
+                        'personal_info': {},
+                        'skills': {
+                            'matched_skills': [],
+                            'missing_skills': []
+                        },
+                        'experience': {},
+                        'education': {},
+                        'job_match': {
+                            'key_requirements': [],
+                            'recommendations': []
+                        }
+                    }),
                     'resume_text': text
                 })
                 
