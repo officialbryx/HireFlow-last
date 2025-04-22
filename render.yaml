@@ -18,9 +18,9 @@ services:
       - key: OPENAI_API_BASE
         value: https://api.deepseek.com/v1
       - key: CORS_ORIGINS
-        value: "https://hireflow-web.onrender.com"
+        value: "*" # Allow all origins
       - key: CORS_ORIGIN
-        value: https://hireflow-web.onrender.com
+        value: "*" # Allow all origins
       - key: FLASK_ENV
         value: production
       - key: FLASK_APP

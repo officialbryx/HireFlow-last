@@ -9,12 +9,12 @@ app = Flask(__name__)
 # Configure CORS for production frontend and API
 CORS(app, resources={
     r"/api/*": {
-        "origins": "*",  # Allow all origins temporarily for debugging
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Content-Range", "X-Total-Count"],
+        "origins": "*",  # Allow all origins
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["*"],  # Allow all headers
+        "expose_headers": ["*"],  # Expose all headers
         "supports_credentials": True,
-        "max_age": 120  # Cache preflight requests
+        "max_age": 86400  # Cache preflight requests for 1 day
     }
 })
 
