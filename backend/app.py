@@ -26,6 +26,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 @app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
+@cross_origin()
 def evaluate():
     # Handle preflight OPTIONS request
     if request.method == 'OPTIONS':
@@ -57,6 +58,7 @@ def evaluate():
 
 # Add a test endpoint to verify CORS is working
 @app.route('/test', methods=['GET', 'OPTIONS'])
+@cross_origin()
 def test():
     if request.method == 'OPTIONS':
         return jsonify({"success": True}), 200
