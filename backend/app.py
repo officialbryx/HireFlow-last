@@ -127,24 +127,24 @@ def evaluate():
                             }
                         }),
                         'match_scores': {
-                            'overall_match': ai_results.get('match_scores', {}).get('overall_match', 0),
-                            'skills_match': ai_results.get('match_scores', {}).get('skills_match', 0),
-                            'qualified': ai_results.get('match_scores', {}).get('qualified', False)
+                            'overall_match': match_scores.get('score', 0),  # Changed from overall_match to score
+                            'skills_match': match_scores.get('match_percentage', 0),  # Changed from skills_match
+                            'qualified': match_scores.get('qualified', False)
                         }
                     },
-                    'technical_analysis': ai_results.get('technical_analysis', {
-                        'personal_info': {},
+                    'technical_analysis': {
+                        'personal_info': ai_results.get('personal_info', {}),
                         'skills': {
-                            'matched_skills': [],
-                            'missing_skills': []
+                            'matched_skills': ai_results.get('matched_skills', []),
+                            'missing_skills': ai_results.get('skill_match', {}).get('missing', [])
                         },
-                        'experience': {},
-                        'education': {},
+                        'experience': ai_results.get('experience', {}),
+                        'education': ai_results.get('education', {}),
                         'job_match': {
-                            'key_requirements': [],
-                            'recommendations': []
+                            'key_requirements': ai_results.get('key_requirements', []),
+                            'recommendations': ai_results.get('recommendations', [])
                         }
-                    }),
+                    },
                     'resume_text': text
                 })
                 
