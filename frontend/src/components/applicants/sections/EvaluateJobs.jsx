@@ -129,7 +129,54 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         throw new Error(response.data.error);
       }
 
-      setResults(response.data);
+      // Log the response to check the structure
+      console.log("AI Analysis Response:", response.data);
+
+      // Format the results for display
+      const formattedResults = {
+        ai_insights: {
+          match_scores: {
+            overall_match: response.data.overall_match.score || 0,
+            skills_match: response.data.skill_match.match_percentage || 0,
+            qualified: response.data.overall_match.qualified || false,
+          },
+          sections: {
+            skills_analysis: {
+              title: "Skills Analysis",
+              content:
+                `Skills Match: ${response.data.skill_match.match_percentage}%\n` +
+                `Missing Skills:\n${response.data.skill_match.missing
+                  .map((skill) => `- ${skill}`)
+                  .join("\n")}`,
+            },
+            qualification_summary: {
+              title: "Qualification Summary",
+              content:
+                `Overall Match Score: ${response.data.overall_match.score}%\n` +
+                `Qualification Status: ${
+                  response.data.overall_match.qualified
+                    ? "Qualified"
+                    : "Not Qualified"
+                }`,
+            },
+          },
+        },
+        technical_analysis: {
+          personal_info: response.data.personal_info || {},
+          skills: {
+            matched_skills: response.data.matched_skills || [],
+            missing_skills: response.data.skill_match.missing || [],
+          },
+          experience: response.data.experience || {},
+          education: response.data.education || {},
+          job_match: {
+            key_requirements: response.data.key_requirements || [],
+            recommendations: response.data.recommendations || [],
+          },
+        },
+      };
+
+      setResults(formattedResults);
     } catch (err) {
       console.error("Analysis error:", err);
       setError(
