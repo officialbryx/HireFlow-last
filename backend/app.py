@@ -6,7 +6,7 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, origins="*", allow_headers="*", expose_headers="*", methods=["GET", "POST", "OPTIONS"])
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -15,6 +15,12 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.before_request
+def log_request_info():
+    print("Headers:", request.headers)
+    print("Body:", request.get_data())
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
