@@ -6,7 +6,7 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -19,8 +19,13 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Add this part to handle CORS for all routes
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'  # Allow all origins
+    response.headers['Access-Control-Allow-Headers'] = '*'  # Allow all headers
+    response.headers['Access-Control-Allow-Methods'] = '*'  # Allow all methods
+    return response
 
 @app.before_request
 def log_request_info():
