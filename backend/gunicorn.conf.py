@@ -1,13 +1,14 @@
 # Gunicorn configuration file
 import multiprocessing
+import os
 
 # Server socket
-bind = "0.0.0.0:10000"
+bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
 backlog = 2048
 
 # Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
-worker_class = 'sync'
+workers = int(os.environ.get('WEB_CONCURRENCY', 3))
+worker_class = 'gevent'  # Change to gevent for better async handling
 worker_connections = 1000
 timeout = 300  # 5 minutes timeout
 keepalive = 2
