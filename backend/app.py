@@ -6,7 +6,20 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
+# Configure CORS for production frontend and API
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "https://hireflow-web.onrender.com",
+            "https://hireflow-backend-obv1.onrender.com"
+        ],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Range", "X-Total-Count"],
+        "supports_credentials": True,
+        "max_age": 120  # Cache preflight requests
+    }
+})
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -18,6 +31,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
@@ -93,5 +115,11 @@ def evaluate():
         }), 500
 
 if __name__ == '__main__':
-    app.config['TIMEOUT'] = 120  # Set server timeout to 2 minutes
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 10000))  # Changed default from 5000 to 10000
+    app.config['TIMEOUT'] = 120
+    # Enable production settings
+    app.run(
+        host='0.0.0.0',  # Allow external connections
+        port=port,
+        debug=False      # Disable debug in production
+    )
