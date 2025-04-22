@@ -114,13 +114,18 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       formData.append("jobPost", jobPost);
       formData.append("resume", resumeFile);
 
-      const response = await axios.post("/api/evaluate", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: false,
-        timeout: 300000,
-      });
+      const response = await axios.post(
+        "http://localhost:10000/api/evaluate",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Access-Control-Allow-Origin": "*",
+          },
+          withCredentials: false,
+          timeout: 300000,
+        }
+      );
 
       if (response.data.error) {
         throw new Error(response.data.error);
