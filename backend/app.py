@@ -30,12 +30,15 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', '*')
     return response
 
-@app.route('/api/evaluate', methods=['OPTIONS'])
-def handle_options():
-    return '', 200
-
-@app.route('/api/evaluate', methods=['POST'])
+@app.route('/api/evaluate', methods=['POST', 'OPTIONS'])
 def evaluate():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
+        
     try:
         if 'resume' not in request.files:
             return jsonify({'error': 'No resume file provided'}), 400
