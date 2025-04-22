@@ -1,24 +1,28 @@
 # PDF Processing
 PyMuPDF==1.23.8
 
-# Machine Learning & NLP
-torch>=2.0.0
-transformers>=4.36.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
-spacy>=3.7.0
-nltk>=3.8.1
+# Machine Learning & NLP  
+torch==2.0.0  # Pin version for stability
+transformers==4.36.0  # Pin version
+numpy==1.24.0  # Pin version
+scikit-learn==1.3.0  # Pin version
+spacy==3.7.0  # Pin version
+nltk==3.8.1  # Pin version
 regex==2023.10.3
+pandas==2.1.0  # Pin version
+
+# OpenAI and Data Processing
+openai==1.66.5  # Remove [datalib] since pandas is specified separately
+pandas==2.1.0  # Explicitly include pandas
 
 # Web Server
-gunicorn==21.2.0
+gunicorn==20.1.0
 gevent==23.9.1
 
 # Web Framework
-Flask>=3.0.0
-Flask-CORS>=4.0.0
-Werkzeug>=3.0.0
+Flask==3.0.0  # Pin version
+Flask-CORS==4.0.0  # Pin version
+Werkzeug==3.0.0  # Pin version
 
 # Additional Dependencies
-python-dateutil>=2.8.2
-openai==1.66.5
+python-dateutil==2.8.2  # Pin version

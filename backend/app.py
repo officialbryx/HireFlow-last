@@ -146,14 +146,20 @@ def evaluate():
         }), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))  # Changed default from 5000 to 10000
+    port = int(os.environ.get('PORT', 10000))
     app.config['TIMEOUT'] = 300  # 5 minutes timeout
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"  # Enable keep-alive connections
-    # Enable production settings
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    
+    # Configure memory limit for workers
+    import resource
+    resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, -1))  # 512MB memory limit
+    
+    # Enable production settings with optimized worker config
     app.run(
-        host='0.0.0.0',  # Allow external connections
+        host='0.0.0.0',
         port=port,
-        debug=False,      # Disable debug in production
+        debug=False,
         threaded=True,
-        processes=3  # Adjust based on your server capacity
+        processes=2  # Reduced from 3 to prevent memory issues
     )
