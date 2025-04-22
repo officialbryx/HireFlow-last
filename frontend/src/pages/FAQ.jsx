@@ -37,7 +37,7 @@ const FAQ = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
-              <FAQHeader title="Job Seeker FAQ" />
+              <FAQHeader title="Job Seeker FAQ" userType="applicant" />
               <SearchHeader
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}

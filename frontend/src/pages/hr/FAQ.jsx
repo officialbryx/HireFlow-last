@@ -1,27 +1,27 @@
-import { useState, useMemo } from 'react';
-import HRNavbar from '../../components/HRNavbar';
-import { faqData } from '../../data/faqData';
-import { useFAQSearch } from '../../hooks/useFAQSearch';
-import { 
+import { useState, useMemo } from "react";
+import HRNavbar from "../../components/HRNavbar";
+import { faqData } from "../../data/faqData";
+import { useFAQSearch } from "../../hooks/useFAQSearch";
+import {
   SearchHeader,
   FAQSection,
   EmptySearchResult,
-  FAQHeader
-} from '../../components/faq/FAQComponents';
+  FAQHeader,
+} from "../../components/faq/FAQComponents";
 
 const FAQ = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [activeQuestions, setActiveQuestions] = useState({});
 
   // Memoize the FAQ sections
-  const faqSections = useMemo(() => faqData, []); 
+  const faqSections = useMemo(() => faqData, []);
 
   // Use the custom hook for search functionality
-  const { 
-    searchQuery, 
+  const {
+    searchQuery,
     setSearchQuery,
     filteredSections,
-    getTextSegments  // renamed from highlightMatches
+    getTextSegments, // renamed from highlightMatches
   } = useFAQSearch(faqSections, setActiveSection, setActiveQuestions);
 
   // Toggle section expansion
@@ -31,10 +31,10 @@ const FAQ = () => {
 
   // Toggle question expansion
   const toggleQuestion = (sectionIndex, questionIndex) => {
-    setActiveQuestions(prev => {
+    setActiveQuestions((prev) => {
       const key = `${sectionIndex}-${questionIndex}`;
       const newState = { ...prev };
-      
+
       // Toggle this question
       newState[key] = !prev[key];
       return newState;
@@ -49,13 +49,18 @@ const FAQ = () => {
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {/* Header with search */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
-              <FAQHeader title="Frequently Asked Questions" />
-              <SearchHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+              <FAQHeader title="Frequently Asked Questions" userType="hr" />
+              <SearchHeader
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
             </div>
 
             {/* FAQ content */}
             <div className="p-6">
-              {searchQuery && filteredSections.length === 0 && <EmptySearchResult />}
+              {searchQuery && filteredSections.length === 0 && (
+                <EmptySearchResult />
+              )}
 
               <div className="space-y-4">
                 {filteredSections.map((section, sectionIndex) => (
@@ -71,7 +76,7 @@ const FAQ = () => {
                   />
                 ))}
               </div>
-              
+
               {filteredSections.length > 0 && (
                 <div className="flex justify-end mt-6">
                   <button
@@ -80,20 +85,28 @@ const FAQ = () => {
                         setActiveSection(null);
                         setActiveQuestions({});
                       } else {
-                        setActiveSection(0); 
+                        setActiveSection(0);
                       }
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
-                    {activeSection !== null ? "Collapse all" : "Expand first section"}
+                    {activeSection !== null
+                      ? "Collapse all"
+                      : "Expand first section"}
                   </button>
                 </div>
               )}
             </div>
           </div>
-          
+
           <div className="text-center mt-8 text-sm text-gray-500">
-            Can&apos;t find what you&apos;re looking for? <a href="mailto:support@hireflow.com" className="text-blue-600 hover:underline">Contact support</a>
+            Can&apos;t find what you&apos;re looking for?{" "}
+            <a
+              href="mailto:support@hireflow.com"
+              className="text-blue-600 hover:underline"
+            >
+              Contact support
+            </a>
           </div>
         </div>
       </div>
