@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 import os
 import fitz  # PyMuPDF
@@ -6,17 +6,7 @@ from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-# Configure CORS for production frontend and API
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",  # Allow all origins
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["*"],  # Allow all headers
-        "expose_headers": ["*"],  # Expose all headers
-        "supports_credentials": True,
-        "max_age": 86400  # Cache preflight requests for 1 day
-    }
-})
+CORS(app)  # Allow everything
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -30,13 +20,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.after_request
-def add_security_headers(response):
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', '*')
+    response.headers.add('Access-Control-Allow-Methods', '*')
     return response
+
+@app.route('/api/evaluate', methods=['OPTIONS'])
+def handle_options():
+    return '', 200
 
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():

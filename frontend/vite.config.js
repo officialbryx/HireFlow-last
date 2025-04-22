@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
@@ -11,10 +10,9 @@ export default defineConfig({
         target: "https://hireflow-backend-obv1.onrender.com",
         changeOrigin: true,
         secure: false,
-        cors: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
-    cors: false,
   },
   build: {
     rollupOptions: {
