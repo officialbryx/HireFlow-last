@@ -4,6 +4,9 @@ import os
 import fitz  # PyMuPDF
 from aianalysis import analyze_with_ai
 from werkzeug.utils import secure_filename
+from werkzeug.serving import WSGIRequestHandler
+import signal
+from functools import wraps
 
 app = Flask(__name__)
 # Configure CORS for production frontend and API
@@ -41,7 +44,27 @@ def add_security_headers(response):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return response
 
+def timeout_handler(signum, frame):
+    raise TimeoutError("Request timed out")
+
+def timeout_decorator(seconds):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Set the signal handler and a timeout
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                # Disable the alarm
+                signal.alarm(0)
+            return result
+        return wrapper
+    return decorator
+
 @app.route('/api/evaluate', methods=['POST'])
+@timeout_decorator(300)  # 5 minutes timeout
 def evaluate():
     try:
         if 'resume' not in request.files:
@@ -107,6 +130,14 @@ def evaluate():
             
         return jsonify({'error': 'Invalid file type'}), 400
         
+    except TimeoutError:
+        if 'filepath' in locals() and os.path.exists(filepath):
+            os.remove(filepath)
+        return jsonify({
+            'error': 'Request timed out',
+            'status': 'failed',
+            'message': 'The request took too long to process'
+        }), 504
     except Exception as e:
         return jsonify({
             'error': str(e),
@@ -116,10 +147,13 @@ def evaluate():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))  # Changed default from 5000 to 10000
-    app.config['TIMEOUT'] = 120
+    app.config['TIMEOUT'] = 300  # 5 minutes timeout
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"  # Enable keep-alive connections
     # Enable production settings
     app.run(
         host='0.0.0.0',  # Allow external connections
         port=port,
-        debug=False      # Disable debug in production
+        debug=False,      # Disable debug in production
+        threaded=True,
+        processes=3  # Adjust based on your server capacity
     )
