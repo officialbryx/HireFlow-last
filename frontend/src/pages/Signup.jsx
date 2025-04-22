@@ -111,7 +111,7 @@ const Signup = () => {
         firstName: formData.firstName,
         middleName: formData.middleName,
         lastName: formData.lastName,
-        userType: formData.userType
+        userType: formData.userType,
       });
 
       // Success handling remains the same since cookies are handled by Supabase
@@ -164,9 +164,9 @@ const Signup = () => {
 
   const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
- // Replace the existing handleReturn function
+  // Replace the existing handleReturn function
   const handleReturn = () => {
-    navigate('/', { replace: true }); // Navigate to landing page
+    navigate("/", { replace: true }); // Navigate to landing page
   };
 
   return (
@@ -250,7 +250,7 @@ const Signup = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={formData.firstName}
-                  placeholder="Bryan"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -267,7 +267,7 @@ const Signup = () => {
                   className={getInputClassName("middleName")}
                   onChange={handleChange}
                   value={formData.middleName}
-                  placeholder="Apostol"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -287,7 +287,7 @@ const Signup = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={formData.lastName}
-                  placeholder="Tiamzon"
+                  placeholder=""
                 />
               </div>
             </div>
