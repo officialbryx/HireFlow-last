@@ -10,7 +10,6 @@ import {
   ClockIcon,
   DocumentTextIcon,
   ArrowLeftIcon,
-  DocumentArrowDownIcon,
   XMarkIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -134,16 +133,6 @@ const ApplicationDetails = () => {
         return 2;
       default:
         return 1;
-    }
-  };
-
-  const handleDownloadResume = async () => {
-    if (application?.resume_url) {
-      try {
-        await applicationsApi.downloadResume(application.resume_url);
-      } catch (error) {
-        console.error("Error downloading resume", error);
-      }
     }
   };
 
@@ -478,24 +467,6 @@ const ApplicationDetails = () => {
                         </p>
                       </div>
                     </div>
-
-                    {application?.resume_url && (
-                      <div className="flex items-start">
-                        <DocumentTextIcon className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">
-                            Resume
-                          </p>
-                          <button
-                            onClick={handleDownloadResume}
-                            className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center bg-blue-50 px-3 py-1.5 rounded-md transition-colors hover:bg-blue-100"
-                          >
-                            <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
-                            Download Resume
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
