@@ -9,6 +9,14 @@ services:
         value: 3.11.9
       - key: PORT
         value: 10000
+      - key: CORS_ALLOW_ALL
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: CORS_METHODS
+        value: "GET,POST,OPTIONS,PUT,DELETE"
+      - key: CORS_HEADERS
+        value: "*"
       - key: OPENAI_API_KEY
         value: sk-3c492431b34d413db1e3f4f2f126b0e4
       - key: SUPABASE_URL
