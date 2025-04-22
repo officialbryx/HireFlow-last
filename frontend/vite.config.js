@@ -11,15 +11,9 @@ export default defineConfig({
         target: "https://hireflow-backend-obv1.onrender.com",
         changeOrigin: true,
         secure: true,
-        configure: (proxy, options) => {
+        configure: (proxy) => {
           proxy.on("error", (err, req, res) => {
-            console.log("proxy error", err);
-          });
-          proxy.on("proxyReq", (proxyReq, req, res) => {
-            proxyReq.setHeader(
-              "origin",
-              "https://hireflow-backend-obv1.onrender.com"
-            );
+            console.error("Proxy error:", err);
           });
         },
       },
