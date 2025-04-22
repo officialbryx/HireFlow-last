@@ -120,10 +120,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Access-Control-Allow-Origin": "*", //mightremove
           },
-          withCredentials: false,
-          timeout: 300000,
+          timeout: 300000, // 5 minutes
         }
       );
 
