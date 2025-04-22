@@ -41,6 +41,7 @@ def request_entity_too_large(error):
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
     try:
+        app.logger.debug(f"AI analysis result: {ai_results}")
         if 'resume' not in request.files:
             return jsonify({'error': 'No resume file provided'}), 400
         
@@ -89,21 +90,25 @@ def evaluate():
                 except Exception as e:
                     if os.path.exists(filepath):
                         os.remove(filepath)
+                    app.logger.error(f"Processing error: {str(e)}")  # Log the error
                     raise Exception(f"Processing error: {str(e)}")
                 
             except Exception as e:
                 if os.path.exists(filepath):
                     os.remove(filepath)
+                app.logger.error(f"File handling error: {str(e)}")  # Log the error
                 raise Exception(f"File handling error: {str(e)}")
             
         return jsonify({'error': 'Invalid file type'}), 400
         
     except Exception as e:
+        app.logger.error(f"Server error: {str(e)}")  # Log the error
         return jsonify({
             'error': str(e),
             'status': 'failed',
             'message': 'An error occurred during processing'
         }), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
