@@ -93,5 +93,7 @@ def evaluate():
         }), 500
 
 if __name__ == '__main__':
-    app.config['TIMEOUT'] = 300  # Set server timeout to 2 minutes
-    app.run(debug=True, port=10000)
+    port = int(os.environ.get('PORT', 10000))
+    print(f"Starting server on port {port}")
+    app.config['TIMEOUT'] = 300
+    app.run(host='0.0.0.0', port=port, debug=True)
