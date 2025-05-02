@@ -302,35 +302,15 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                   Resume
                 </h2>
               </div>
-              <div
-                className={`border-2 ${
-                  isDragging
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-dashed border-gray-300"
-                } rounded-lg p-6 flex flex-col items-center justify-center h-64 relative`}
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file && file.type === "application/pdf") {
-                      setResumeFile(file);
-                    } else if (file) {
-                      alert("Please upload a PDF file");
-                      e.target.value = "";
-                    }
-                  }}
-                  accept=".pdf"
-                  className="hidden"
-                  id="resume-upload"
-                  aria-label="Upload resume"
-                  required={!resumeFile}
-                />
-                {resumeFile ? (
+              <div className="border-2 border-gray-100 rounded-lg p-6 flex flex-col items-center justify-center h-64 bg-gray-50">
+                {loadingData ? (
+                  // Loading state
+                  <>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
+                    <p className="mt-4 text-sm text-gray-500">Loading resume...</p>
+                  </>
+                ) : resumeFile ? (
+                  // Resume loaded state
                   <>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -349,15 +329,16 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                     <p className="mt-4 text-sm text-gray-700 font-medium">
                       Resume loaded: {resumeFile.name}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      You can replace it with another file if needed
+                    <p className="mt-2 text-xs text-gray-500">
+                      Resume fetched from database
                     </p>
                   </>
                 ) : (
+                  // Error state
                   <>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-12 w-12 text-gray-400"
+                      className="h-12 w-12 text-red-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -366,25 +347,14 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <p className="mt-4 text-sm text-gray-500">
-                      {loadingData
-                        ? "Loading resume..."
-                        : "Drag and drop your resume or click to browse"}
+                    <p className="mt-4 text-sm text-red-600">
+                      Failed to load resume from database
                     </p>
                   </>
                 )}
-                <label
-                  htmlFor="resume-upload"
-                  className="mt-4 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-medium cursor-pointer hover:bg-blue-100 transition duration-200"
-                >
-                  {resumeFile ? "Replace File" : "Choose File"}
-                </label>
-                <p className="mt-2 text-xs text-gray-500">
-                  Supported format: PDF
-                </p>
               </div>
             </div>
           </div>
