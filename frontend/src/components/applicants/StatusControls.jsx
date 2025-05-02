@@ -7,7 +7,8 @@ const StatusControls = ({
   applicantId,
   jobId, 
   applicantUserId, 
-  currentStatus, 
+  currentStatus,
+  isShortlisted,  // Add this prop
   onStatusUpdated,
   getBadgeColor,
   jobTitle = "this position" // Default value if not provided
@@ -16,6 +17,10 @@ const StatusControls = ({
   const [activeStatus, setActiveStatus] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
+  const [isShortlisting, setIsShortlisting] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
+
+  const isFinalStatus = (status) => ['accepted', 'rejected'].includes(status);
 
   const getStatusNotificationMessage = (status) => {
     switch(status) {
@@ -37,11 +42,11 @@ const StatusControls = ({
       case 'pending':
         return `Are you sure you want to set this application to pending review?`;
       case 'accepted':
-        return `Are you sure you want to accept this candidate?`;
+        return `WARNING: This action cannot be undone. Are you sure you want to accept this candidate?`;
       case 'interview':
         return `Are you sure you want to move this candidate to the interview stage?`;
       case 'rejected':
-        return `Are you sure you want to reject this candidate? This action will notify the candidate.`;
+        return `WARNING: This action cannot be undone. Are you sure you want to reject this candidate? This action will notify the candidate.`;
       default:
         return `Are you sure you want to update the status to ${status}?`;
     }
@@ -85,10 +90,79 @@ const StatusControls = ({
     }
   };
 
+  const handleShortlistToggle = async () => {
+    if (!applicantId) return;
+
+    try {
+      setIsShortlisting(true);
+      const newShortlistedStatus = !isShortlisted;
+
+      await applicationsApi.updateApplicantShortlist(applicantId, newShortlistedStatus);
+
+      if (onStatusUpdated) {
+        onStatusUpdated(applicantId, {
+          shortlisted: newShortlistedStatus,
+        });
+      }
+
+      setJustUpdated(true);
+      setTimeout(() => setJustUpdated(false), 1500);
+
+    } catch (error) {
+      console.error("Error updating shortlist status:", error);
+    } finally {
+      setIsShortlisting(false);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-wrap gap-2 mt-4">
-        {currentStatus !== 'pending' && (
+        {/* Add shortlist button */}
+        <button
+          onClick={handleShortlistToggle}
+          disabled={isShortlisting || isFinalStatus(currentStatus)}
+          className={`px-3 py-1 text-sm rounded-md flex items-center ${
+            isShortlisting || isFinalStatus(currentStatus)
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : isShortlisted
+              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300'
+              : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200'
+          }`}
+        >
+          {isShortlisting ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-3 w-3 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Updating...
+            </>
+          ) : isShortlisted ? (
+            "Remove from Shortlist"
+          ) : (
+            "Add to Shortlist"
+          )}
+        </button>
+
+        {/* Show Set to Pending only for debugging final statuses */}
+        {isFinalStatus(currentStatus) && (
           <button
             disabled={isUpdating}
             onClick={() => initiateStatusChange('pending')}
@@ -111,21 +185,22 @@ const StatusControls = ({
                 <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Set to Pending
+                Debug: Set to Pending
               </>
             )}
           </button>
         )}
 
+        {/* Status control buttons - now always visible but conditionally disabled */}
         <button
-          disabled={isUpdating || currentStatus === 'accepted'}
+          disabled={isUpdating || isFinalStatus(currentStatus)}
           onClick={() => initiateStatusChange('accepted')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
             isUpdating && activeStatus === 'accepted' 
               ? 'bg-gray-200 text-gray-500'
-              : currentStatus === 'accepted'
-                ? 'bg-green-100 text-green-800 border border-green-300'
-                : 'bg-white text-green-800 border border-green-300 hover:bg-green-50'
+              : isFinalStatus(currentStatus)
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'bg-white text-green-800 border border-green-300 hover:bg-green-50'
           }`}
         >
           {isUpdating && activeStatus === 'accepted' ? (
@@ -147,14 +222,14 @@ const StatusControls = ({
         </button>
 
         <button
-          disabled={isUpdating || currentStatus === 'interview'}
+          disabled={isUpdating || isFinalStatus(currentStatus)}
           onClick={() => initiateStatusChange('interview')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
             isUpdating && activeStatus === 'interview' 
               ? 'bg-gray-200 text-gray-500'
-              : currentStatus === 'interview'
-                ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                : 'bg-white text-blue-800 border border-blue-300 hover:bg-blue-50'
+              : isFinalStatus(currentStatus)
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'bg-white text-blue-800 border border-blue-300 hover:bg-blue-50'
           }`}
         >
           {isUpdating && activeStatus === 'interview' ? (
@@ -176,14 +251,14 @@ const StatusControls = ({
         </button>
 
         <button
-          disabled={isUpdating || currentStatus === 'rejected'}
+          disabled={isUpdating || isFinalStatus(currentStatus)}
           onClick={() => initiateStatusChange('rejected')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
             isUpdating && activeStatus === 'rejected' 
               ? 'bg-gray-200 text-gray-500'
-              : currentStatus === 'rejected'
-                ? 'bg-red-100 text-red-800 border border-red-300'
-                : 'bg-white text-red-800 border border-red-300 hover:bg-red-50'
+              : isFinalStatus(currentStatus)
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'bg-white text-red-800 border border-red-300 hover:bg-red-50'
           }`}
         >
           {isUpdating && activeStatus === 'rejected' ? (
@@ -203,6 +278,24 @@ const StatusControls = ({
             </>
           )}
         </button>
+
+        {/* Show status indicator if status is final */}
+        {isFinalStatus(currentStatus) && (
+          <div className={`px-3 py-1 text-sm rounded-md flex items-center ${
+            currentStatus === 'accepted' 
+              ? 'bg-green-100 text-green-800 border border-green-300'
+              : 'bg-red-100 text-red-800 border border-red-300'
+          }`}>
+            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                d={currentStatus === 'accepted' 
+                  ? "M5 13l4 4L19 7"
+                  : "M6 18L18 6M6 6l12 12"}></path>
+            </svg>
+            {currentStatus === 'accepted' ? 'Accepted' : 'Rejected'}
+            {/* <span className="ml-2 text-xs">(Final)</span> */}
+          </div>
+        )}
       </div>
 
       <ConfirmationDialog
@@ -212,7 +305,7 @@ const StatusControls = ({
           setPendingStatus(null);
         }}
         onConfirm={handleConfirmedStatusChange}
-        title="Confirm Status Change"
+        title={isFinalStatus(pendingStatus) ? "Confirm Final Status Change" : "Confirm Status Change"}
         message={getConfirmationMessage(pendingStatus)}
       />
     </>
