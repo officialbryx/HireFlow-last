@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { applicationsApi } from "../../services/api/applicationsApi";
 import { jobsApi } from "../../services/api/jobsApi";
+import { evaluationApi } from "../../services/api/evaluationApi";
 import Avatar from "../common/Avatar";
 
 const RankCandidates = () => {
@@ -55,7 +56,7 @@ const RankCandidates = () => {
     fetchJobs();
   }, []);
 
-  // Fetch candidates when job selected
+  // Fetch candidates with evaluation results
   useEffect(() => {
     if (!selectedJob) {
       setCandidates([]);
@@ -65,26 +66,51 @@ const RankCandidates = () => {
     const fetchCandidates = async () => {
       setLoading(true);
       try {
-        const response = await applicationsApi.getApplicationsByJob(
-          selectedJob
+        const response = await applicationsApi.getApplicationsByJob(selectedJob);
+        
+        // Fetch evaluation results for each candidate
+        const candidatesWithEvaluation = await Promise.all(
+          response.map(async (candidate) => {
+            try {
+              const evaluationResult = await evaluationApi.getEvaluationResult(candidate.id);
+              return {
+                ...candidate,
+                matchScore: evaluationResult?.overall_match || 0,
+                skillMatch: evaluationResult?.skills_match || 0,
+                experienceScore: evaluationResult?.experience_score || 0,
+                educationScore: evaluationResult?.education_score || 0,
+                qualified: evaluationResult?.qualified || false,
+                ai_insights: evaluationResult?.ai_insights || null,
+                technical_analysis: evaluationResult?.technical_analysis || null,
+                evaluated: !!evaluationResult
+              };
+            } catch (error) {
+              console.error(`Error fetching evaluation for candidate ${candidate.id}:`, error);
+              return {
+                ...candidate,
+                matchScore: 0,
+                skillMatch: 0,
+                experienceScore: 0,
+                educationScore: 0,
+                qualified: false,
+                evaluated: false
+              };
+            }
+          })
         );
-        const rankedCandidates = response.map((candidate, index) => ({
-          ...candidate,
-          matchScore: Math.floor(Math.random() * 40) + 60,
-          skillMatch: Math.floor(Math.random() * 100),
-          experienceScore: Math.floor(Math.random() * 100),
-          educationScore: Math.floor(Math.random() * 100),
-          rank: index + 1,
-          shortlisted: Math.random() > 0.7, // Random shortlisted status for demo
-        }));
-        setOriginalCandidates(rankedCandidates); // Store original data
-        setCandidates(rankedCandidates);
+
+        // Sort candidates by evaluation scores
+        const sortedCandidates = candidatesWithEvaluation.sort((a, b) => b.matchScore - a.matchScore);
+        
+        setOriginalCandidates(sortedCandidates);
+        setCandidates(sortedCandidates);
       } catch (error) {
         console.error("Error fetching candidates:", error);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchCandidates();
   }, [selectedJob]);
 
@@ -621,19 +647,27 @@ const RankCandidates = () => {
                   {/* Match Score with improved visualization */}
                   <div className="col-span-2">
                     <div className="flex items-center">
-                      <div
-                        className={`h-12 w-12 rounded-full flex items-center justify-center text-white font-bold ${getQualityIndicator(
-                          candidate.matchScore
-                        )}`}
-                      >
-                        {candidate.matchScore}%
-                      </div>
-                      <div className="ml-2">
-                        <div className="text-xs font-medium text-gray-500">
-                          MATCH
+                      {!candidate.evaluated ? (
+                        <div className="text-sm text-gray-500">
+                          Not evaluated yet
                         </div>
-                        <div className="text-xs text-gray-400">Score</div>
-                      </div>
+                      ) : (
+                        <>
+                          <div
+                            className={`h-12 w-12 rounded-full flex items-center justify-center text-white font-bold ${getQualityIndicator(
+                              candidate.matchScore
+                            )}`}
+                          >
+                            {candidate.matchScore}%
+                          </div>
+                          <div className="ml-2">
+                            <div className="text-xs font-medium text-gray-500">
+                              MATCH
+                            </div>
+                            <div className="text-xs text-gray-400">Score</div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { jobsApi } from "../../../services/api/jobsApi";
 import { applicationsApi } from "../../../services/api/applicationsApi";
+import { evaluationApi } from "../../../services/api/evaluationApi";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { EvaluationReport } from "../../reports/EvaluationReport";
 
@@ -103,6 +104,32 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     populateData();
   }, [selectedApplicant, resume_url]);
 
+  // Add effect to load existing evaluation
+  useEffect(() => {
+    const loadExistingEvaluation = async () => {
+      if (!selectedApplicant?.id) return;
+      
+      try {
+        setLoadingData(true);
+        const existingEvaluation = await evaluationApi.getEvaluationResult(selectedApplicant.id);
+        
+        if (existingEvaluation) {
+          setResults(existingEvaluation);
+          // Notify parent to maintain evaluated state
+          if (onEvaluationComplete) {
+            onEvaluationComplete(existingEvaluation);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading evaluation:', error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadExistingEvaluation();
+  }, [selectedApplicant?.id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -128,6 +155,9 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       if (response.data.error) {
         throw new Error(response.data.error);
       }
+
+      // Save/Update results in Supabase
+      await evaluationApi.saveEvaluationResults(selectedApplicant.id, response.data);
 
       setResults(response.data);
       // Notify parent component that evaluation is complete
