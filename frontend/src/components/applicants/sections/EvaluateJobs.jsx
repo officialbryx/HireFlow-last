@@ -5,7 +5,7 @@ import { applicationsApi } from "../../../services/api/applicationsApi";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { EvaluationReport } from "../../reports/EvaluationReport";
 
-export const EvaluateJobs = ({ selectedApplicant, resume_url }) => {
+export const EvaluateJobs = ({ selectedApplicant, resume_url, onEvaluationComplete }) => {
   // State variables
   const [jobPost, setJobPost] = useState("");
   const [resumeFile, setResumeFile] = useState(null);
@@ -130,6 +130,10 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
       }
 
       setResults(response.data);
+      // Notify parent component that evaluation is complete
+      if (onEvaluationComplete) {
+        onEvaluationComplete(response.data);
+      }
     } catch (err) {
       console.error("Analysis error:", err);
       setError(

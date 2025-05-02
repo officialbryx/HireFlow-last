@@ -8,10 +8,11 @@ const StatusControls = ({
   jobId, 
   applicantUserId, 
   currentStatus,
-  isShortlisted,  // Add this prop
+  isShortlisted,
   onStatusUpdated,
   getBadgeColor,
-  jobTitle = "this position" // Default value if not provided
+  jobTitle = "this position",
+  isEvaluated = true
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeStatus, setActiveStatus] = useState(null);
@@ -118,12 +119,12 @@ const StatusControls = ({
   return (
     <>
       <div className="flex flex-wrap gap-2 mt-4">
-        {/* Add shortlist button */}
+        {/* Shortlist button */}
         <button
           onClick={handleShortlistToggle}
-          disabled={isShortlisting || isFinalStatus(currentStatus)}
+          disabled={isShortlisting || isFinalStatus(currentStatus) || !isEvaluated}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
-            isShortlisting || isFinalStatus(currentStatus)
+            isShortlisting || isFinalStatus(currentStatus) || !isEvaluated
               ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
               : isShortlisted
               ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300'
@@ -193,10 +194,10 @@ const StatusControls = ({
 
         {/* Status control buttons - now always visible but conditionally disabled */}
         <button
-          disabled={isUpdating || isFinalStatus(currentStatus)}
+          disabled={isUpdating || isFinalStatus(currentStatus) || !isEvaluated}
           onClick={() => initiateStatusChange('accepted')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
-            isUpdating && activeStatus === 'accepted' 
+            isUpdating || !isEvaluated
               ? 'bg-gray-200 text-gray-500'
               : isFinalStatus(currentStatus)
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
@@ -222,10 +223,10 @@ const StatusControls = ({
         </button>
 
         <button
-          disabled={isUpdating || isFinalStatus(currentStatus)}
+          disabled={isUpdating || isFinalStatus(currentStatus) || !isEvaluated}
           onClick={() => initiateStatusChange('interview')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
-            isUpdating && activeStatus === 'interview' 
+            isUpdating || !isEvaluated
               ? 'bg-gray-200 text-gray-500'
               : isFinalStatus(currentStatus)
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
@@ -251,10 +252,10 @@ const StatusControls = ({
         </button>
 
         <button
-          disabled={isUpdating || isFinalStatus(currentStatus)}
+          disabled={isUpdating || isFinalStatus(currentStatus) || !isEvaluated}
           onClick={() => initiateStatusChange('rejected')}
           className={`px-3 py-1 text-sm rounded-md flex items-center ${
-            isUpdating && activeStatus === 'rejected' 
+            isUpdating || !isEvaluated
               ? 'bg-gray-200 text-gray-500'
               : isFinalStatus(currentStatus)
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
@@ -297,6 +298,12 @@ const StatusControls = ({
           </div>
         )}
       </div>
+
+      {!isEvaluated && (
+        <p className="text-sm text-gray-500 mt-2">
+          Please evaluate the candidate first to enable status controls
+        </p>
+      )}
 
       <ConfirmationDialog
         isOpen={showConfirmation}

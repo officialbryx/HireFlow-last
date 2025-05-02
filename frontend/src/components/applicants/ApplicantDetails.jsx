@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { PersonalInfo } from "./sections/PersonalInfo";
 import { WorkExperience } from "./sections/WorkExperience";
@@ -21,6 +21,35 @@ const ApplicantDetails = ({
 }) => {
   const { showToast } = useToast();
   const [justUpdated, setJustUpdated] = useState(false);
+  const [evaluatedApplicants, setEvaluatedApplicants] = useState({});
+
+  // Update evaluation state when an applicant is evaluated
+  const handleEvaluationComplete = (results) => {
+    setEvaluatedApplicants((prev) => ({
+      ...prev,
+      [selectedApplicant.id]: results,
+    }));
+
+    // Also call onApplicantUpdated to persist the evaluation
+    if (onApplicantUpdated) {
+      onApplicantUpdated(selectedApplicant.id, {
+        evaluation_results: results,
+      });
+    }
+  };
+
+  // Load existing evaluation results when applicant changes
+  useEffect(() => {
+    if (
+      selectedApplicant?.evaluation_results &&
+      !evaluatedApplicants[selectedApplicant.id]
+    ) {
+      setEvaluatedApplicants((prev) => ({
+        ...prev,
+        [selectedApplicant.id]: selectedApplicant.evaluation_results,
+      }));
+    }
+  }, [selectedApplicant]);
 
   if (!selectedApplicant) {
     return (
@@ -109,6 +138,7 @@ const ApplicantDetails = ({
               jobTitle={company}
               onStatusUpdated={onApplicantUpdated}
               getBadgeColor={getBadgeColor}
+              isEvaluated={!!evaluatedApplicants[selectedApplicant.id]}
             />
           </div>
           {resume_url && (
@@ -165,6 +195,7 @@ const ApplicantDetails = ({
           <EvaluateJobs
             selectedApplicant={selectedApplicant}
             resume_url={resume_url}
+            onEvaluationComplete={handleEvaluationComplete}
           />
         ) : (
           <ScreeningQuestions questions={application_questions} />
