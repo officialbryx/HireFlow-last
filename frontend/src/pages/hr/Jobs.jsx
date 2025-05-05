@@ -43,6 +43,7 @@ const Jobs = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [applicantFilter, setApplicantFilter] = useState("all");
   const [jobIdFilter, setJobIdFilter] = useState(null);
+  const [applicationIdFilter, setApplicationIdFilter] = useState(null);
 
   const [searchParams] = useSearchParams();
 
@@ -99,20 +100,21 @@ const Jobs = () => {
   );
 
   useEffect(() => {
-    // Set active tab based on URL query parameter
     const tabParam = searchParams.get("tab");
-    if (
-      tabParam &&
-      ["view", "create", "archived", "applicants", "rank"].includes(tabParam)
-    ) {
+    if (tabParam && ["view", "create", "archived", "applicants", "rank"].includes(tabParam)) {
       setActiveTab(tabParam);
 
-      // If it's the applicants tab, check for filters
       if (tabParam === "applicants") {
         const jobIdParam = searchParams.get("jobId");
+        const applicationIdParam = searchParams.get("applicationId");
+        
         if (jobIdParam) {
           setJobIdFilter(jobIdParam);
           setApplicantFilter("all");
+        }
+
+        if (applicationIdParam) {
+          setApplicationIdFilter(applicationIdParam);
         }
       }
     }
@@ -363,7 +365,11 @@ const Jobs = () => {
               <ViewApplicants
                 initialFilter={applicantFilter}
                 jobIdFilter={jobIdFilter}
-                onClearFilters={() => setJobIdFilter(null)}
+                applicationIdFilter={applicationIdFilter}
+                onClearFilters={() => {
+                  setJobIdFilter(null);
+                  setApplicationIdFilter(null);
+                }}
               />
             )}
             {activeTab === "rank" && <RankCandidates />}

@@ -13,6 +13,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 export default function ViewApplicants({
   initialFilter = "all",
   jobIdFilter = null,
+  applicationIdFilter = null, // Add this prop
   onClearFilters,
 }) {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
@@ -25,6 +26,7 @@ export default function ViewApplicants({
   const [pageNumber, setPageNumber] = useState(1);
   const [companyFilter, setCompanyFilter] = useState("all");
   const [jobFilter, setJobFilter] = useState(jobIdFilter);
+  const [applicationFilter, setApplicationFilter] = useState(applicationIdFilter);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(5); // Edit to increase number of displayed applicants per page
   const [userId, setUserId] = useState(null);
@@ -56,6 +58,25 @@ export default function ViewApplicants({
     }
   }, [jobIdFilter]);
 
+  useEffect(() => {
+    if (applicationIdFilter) {
+      const findAndSelectApplicant = async () => {
+        try {
+          const response = await applicationsApi.getApplicationById(applicationIdFilter);
+          if (response) {
+            setApplicationFilter(applicationIdFilter);
+            handleSelectApplicant(response);
+          }
+        } catch (error) {
+          console.error('Error finding applicant:', error);
+          // Optionally show an error message to the user
+          // You might want to add error state and display it in the UI
+        }
+      };
+      findAndSelectApplicant();
+    }
+  }, [applicationIdFilter]);
+
   // Define query key based on all filters
   const applicantsQueryKey = [
     "applicants",
@@ -64,6 +85,7 @@ export default function ViewApplicants({
     statusFilter,
     companyFilter,
     jobFilter,
+    applicationFilter,
     searchTerm,
     userId, // Add userId to the query key so it refreshes when user changes
   ];
@@ -81,6 +103,7 @@ export default function ViewApplicants({
         status: statusFilter !== "all" ? statusFilter : null,
         company: companyFilter !== "all" ? companyFilter : null,
         job_id: jobFilter || null,
+        application_id: applicationFilter || null,
         search: searchTerm || null,
         creator_id: userId, // Add creator_id to filter by job owner
       };
@@ -120,6 +143,7 @@ export default function ViewApplicants({
             status: statusFilter !== "all" ? statusFilter : null,
             company: companyFilter !== "all" ? companyFilter : null,
             job_id: jobFilter || null,
+            application_id: applicationFilter || null,
             search: searchTerm || null,
             creator_id: userId, // Add creator_id to filter by job owner
           };
@@ -137,7 +161,7 @@ export default function ViewApplicants({
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, companyFilter, jobFilter, searchTerm]);
+  }, [statusFilter, companyFilter, jobFilter, applicationFilter, searchTerm]);
 
   // Handle applicant selection with cached resume analysis
   const handleSelectApplicant = async (applicant) => {
@@ -190,6 +214,7 @@ export default function ViewApplicants({
     setJobFilter(null);
     setStatusFilter("all");
     setCompanyFilter("all");
+    setApplicationFilter(null);
     setSearchTerm("");
     setCurrentPage(1);
     if (onClearFilters) onClearFilters();

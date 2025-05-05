@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Avatar from "../../../common/Avatar";
 import { getQualityIndicator } from "../utils/rankingUtils";
+import { useNavigate } from 'react-router-dom';
 
 const formatEducationDate = (dateString) => {
   if (!dateString) return '';
@@ -42,6 +43,13 @@ export const CandidateCard = ({
   isSelectedForBatch,
   totalCandidates,
 }) => {
+  const navigate = useNavigate();
+
+  const handleViewProfile = (e) => {
+    e.stopPropagation();
+    navigate(`/hr/jobs?tab=applicants&applicationId=${candidate.id}`);
+  };
+
   return (
     <div className="border rounded-xl bg-white border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
       {/* Main Row (Always visible) */}
@@ -227,10 +235,7 @@ export const CandidateCard = ({
         <div className="col-span-2 text-right">
           <button
             className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Add your view profile handler here
-            }}
+            onClick={handleViewProfile}
           >
             View Profile
           </button>

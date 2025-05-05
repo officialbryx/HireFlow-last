@@ -726,4 +726,45 @@ export const applicationsApi = {
       throw error;
     }
   },
+
+  // Add this method to the applicationsApi object
+  async getApplicationById(applicationId) {
+    try {
+      const { data, error } = await supabase
+        .from("applications")
+        .select(`
+          *,
+          job_posting:job_posting_id (
+            job_title,
+            company_name
+          )
+        `)
+        .eq('id', applicationId)
+        .single();
+
+      if (error) throw error;
+
+      if (!data) {
+        throw new Error('Application not found');
+      }
+
+      // Transform the data to match the expected format
+      return {
+        ...data,
+        personal_info: data.personal_info || {},
+        contact_info: data.contact_info || {},
+        address: data.address || {},
+        work_experience: Array.isArray(data.work_experience) ? data.work_experience : [],
+        education: Array.isArray(data.education) ? data.education : [],
+        skills: Array.isArray(data.skills) ? data.skills : [],
+        websites: Array.isArray(data.websites) ? data.websites : [],
+        application_questions: data.application_questions || {},
+        company: data.job_posting?.company_name || data.company,
+        job_title: data.job_posting?.job_title
+      };
+    } catch (error) {
+      console.error("Error in getApplicationById:", error);
+      throw error;
+    }
+  }
 };
