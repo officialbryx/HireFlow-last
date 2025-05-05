@@ -30,12 +30,29 @@ export const evaluationApi = {
         .from('evaluation_results')
         .select('*')
         .eq('application_id', applicationId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single()
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific Supabase errors
+        if (error.code === 'PGRST116') {
+          // No results found - return null instead of throwing
+          return null;
+        }
+        throw error;
+      }
+
+      // If no data but also no error, return null
+      if (!data) {
+        return null;
+      }
+
       return data;
     } catch (error) {
       console.error('Error fetching evaluation result:', error);
+      // Return null instead of throwing for not found cases
+      if (error.status === 406 || error.code === 'PGRST116') {
+        return null;
+      }
       throw error;
     }
   }

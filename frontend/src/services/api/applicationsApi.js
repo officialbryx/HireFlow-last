@@ -618,7 +618,8 @@ export const applicationsApi = {
         education: Array.isArray(app.education) ? app.education : [],
         skills: Array.isArray(app.skills) ? app.skills : [],
         websites: Array.isArray(app.websites) ? app.websites : [],
-        application_questions: app.application_questions || {}
+        application_questions: app.application_questions || {},
+        isShortlisted: app.shortlisted || false,
       }));
       
       return transformedData;
