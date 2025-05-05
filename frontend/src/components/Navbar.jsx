@@ -9,6 +9,7 @@ import {
   BuildingOffice2Icon,
   QuestionMarkCircleIcon,
   DocumentTextIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import JobseekerNotificationsDropdown from "./notifications/JobseekerNotificationsDropdown";
 
@@ -63,6 +64,11 @@ const Navbar = () => {
                 to="/applications"
               />
               <JobseekerNotificationsDropdown />
+              <NavItem
+                icon={<UserCircleIcon className="h-5 w-5" />}
+                text="Profile"
+                to="/profile"
+              />
               <NavItem
                 icon={<Cog6ToothIcon className="h-5 w-5" />}
                 text="Settings"

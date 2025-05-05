@@ -29,6 +29,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AuthRedirect from "./components/AuthRedirect"; // Adjust the path as needed
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import RoleRedirect from "./components/RoleRedirect"; // Adjust the path as needed
+import Profile from "./components/Profile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,39 +90,182 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <Routes>
         {/* Public Routes - Only accessible when not logged in */}
-        <Route path="/" element={<AuthRedirect publicOnly><LandingPage /></AuthRedirect>} />
-        <Route path="/signup" element={<AuthRedirect publicOnly><Signup /></AuthRedirect>} />
-        <Route path="/login" element={<AuthRedirect publicOnly><Login /></AuthRedirect>} />
-        <Route path="/forgot-password" element={<AuthRedirect publicOnly><ForgotPassword /></AuthRedirect>} />
-        
+        <Route
+          path="/"
+          element={
+            <AuthRedirect publicOnly>
+              <LandingPage />
+            </AuthRedirect>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <AuthRedirect publicOnly>
+              <Signup />
+            </AuthRedirect>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthRedirect publicOnly>
+              <Login />
+            </AuthRedirect>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <AuthRedirect publicOnly>
+              <ForgotPassword />
+            </AuthRedirect>
+          }
+        />
+
         {/* Global public routes - Accessible to everyone */}
         <Route path="/about" element={<About />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/cookies" element={<Cookies />} />
-        
+
         {/* User settings - Available to both roles */}
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Protected Jobseeker Routes */}
-        <Route path="/jobposts" element={<RoleProtectedRoute requiredRole="jobseeker"><JobPosts /></RoleProtectedRoute>} />
-        <Route path="/faq" element={<RoleProtectedRoute requiredRole="jobseeker"><JobSeekerFAQ /></RoleProtectedRoute>} />
-        <Route path="/apply/:company" element={<RoleProtectedRoute requiredRole="jobseeker"><Apply /></RoleProtectedRoute>} />
-        <Route path="/apply/:company/:jobId" element={<RoleProtectedRoute requiredRole="jobseeker"><Apply /></RoleProtectedRoute>} />
-        <Route path="/applications/notifications" element={<RoleProtectedRoute requiredRole="jobseeker"><ApplicationNotifications /></RoleProtectedRoute>} />
-        <Route path="/companies" element={<RoleProtectedRoute requiredRole="jobseeker"><Companies /></RoleProtectedRoute>} />
-        <Route path="/applications/:id" element={<RoleProtectedRoute requiredRole="jobseeker"><ApplicationDetails /></RoleProtectedRoute>} />
-        <Route path="/applications" element={<RoleProtectedRoute requiredRole="jobseeker"><MyApplications /></RoleProtectedRoute>} />
-        
+        <Route
+          path="/jobposts"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <JobPosts />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <JobSeekerFAQ />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/apply/:company"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <Apply />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/apply/:company/:jobId"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <Apply />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/applications/notifications"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <ApplicationNotifications />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/companies"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <Companies />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/applications/:id"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <ApplicationDetails />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/applications"
+          element={
+            <RoleProtectedRoute requiredRole="jobseeker">
+              <MyApplications />
+            </RoleProtectedRoute>
+          }
+        />
+
         {/* Protected HR/Employer Routes */}
-        <Route path="/createjobpost" element={<RoleProtectedRoute requiredRole="employer"><CreateJobPost /></RoleProtectedRoute>} />
-        <Route path="/jobs" element={<RoleProtectedRoute requiredRole="employer"><Jobs /></RoleProtectedRoute>} />
-        <Route path="/hr/dashboard" element={<RoleProtectedRoute requiredRole="employer"><Dashboard /></RoleProtectedRoute>} />
-        <Route path="/hr/jobs/*" element={<RoleProtectedRoute requiredRole="employer"><Jobs /></RoleProtectedRoute>} />
-        <Route path="/hr/faq" element={<RoleProtectedRoute requiredRole="employer"><FAQ /></RoleProtectedRoute>} />
-        <Route path="/hr/notifications" element={<RoleProtectedRoute requiredRole="employer"><Notifications /></RoleProtectedRoute>} />
-        
+        <Route
+          path="/createjobpost"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <CreateJobPost />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <Jobs />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/dashboard"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <Dashboard />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/jobs/*"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <Jobs />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/faq"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <FAQ />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/hr/notifications"
+          element={
+            <RoleProtectedRoute requiredRole="employer">
+              <Notifications />
+            </RoleProtectedRoute>
+          }
+        />
+
+        {/* Profile Route */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Catch-all route - Redirect based on user role */}
         <Route path="*" element={<RoleRedirect />} />
       </Routes>
