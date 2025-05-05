@@ -15,7 +15,10 @@ export const useRankCandidates = () => {
   const [filters, setFilters] = useState({
     shortlisted: false,
     minimumSkillMatch: 0,
+    minimumOverallMatch: 0,
     educationLevel: "any",
+    fieldOfStudy: "",
+    hasWorkExperience: false
   });
   const [expandedCandidates, setExpandedCandidates] = useState({});
   const [batchProcessing, setBatchProcessing] = useState(false);
@@ -130,34 +133,56 @@ export const useRankCandidates = () => {
     fetchCandidates();
   }, [selectedJob]);
 
-  // Add new useEffect for filtering
+  // Update filtering useEffect
   useEffect(() => {
     if (!originalCandidates.length) return;
 
     const filteredCandidates = originalCandidates.filter(candidate => {
       // Filter by minimum skill match
-      if (candidate.skillMatch < filters.minimumSkillMatch) {
+      if (filters.minimumSkillMatch > 0 && 
+          candidate.skillMatch < filters.minimumSkillMatch) {
+        return false;
+      }
+
+      // Filter by minimum overall match
+      if (filters.minimumOverallMatch > 0 && 
+          candidate.matchScore < filters.minimumOverallMatch) {
         return false;
       }
 
       // Filter by education level
       if (filters.educationLevel !== 'any') {
-        const educationLevels = {
-          high_school: 0,
-          associate: 1,
-          bachelor: 2,
-          master: 3,
-          phd: 4
+        const degree = candidate.education?.[0]?.degree?.toLowerCase() || '';
+        const educationMatches = {
+          'high_school': ['high school', 'secondary'],
+          'associate': ['associate', 'diploma'],
+          'bachelor': ['bachelor', 'bs', 'bsc', 'bachelor of science'],
+          'master': ['master', 'ms', 'ma', 'mba'],
+          'phd': ['phd', 'doctorate']
         };
 
-        const candidateLevel = candidate.evaluationResult?.education?.highest_degree?.toLowerCase() || '';
-        const requiredLevel = educationLevels[filters.educationLevel];
+        const requiredLevel = filters.educationLevel;
+        const matchingTerms = educationMatches[requiredLevel] || [];
+        const hasRequiredLevel = matchingTerms.some(term => degree.includes(term));
 
-        // Check if candidate's education meets or exceeds required level
-        const candidateLevelValue = educationLevels[candidateLevel] || -1;
-        if (candidateLevelValue < requiredLevel) {
-          return false;
-        }
+        if (!hasRequiredLevel) return false;
+      }
+
+      // Filter by field of study
+      if (filters.fieldOfStudy) {
+        const fieldOfStudy = candidate.education?.[0]?.field_of_study?.toLowerCase() || '';
+        // Handle common abbreviations
+        const searchTerm = filters.fieldOfStudy.toLowerCase();
+        const fieldMatches = {
+          'cs': ['cs', 'computer science'],
+          'it': ['it', 'information technology'],
+          'is': ['is', 'information systems']
+        };
+
+        const matchTerms = fieldMatches[searchTerm] || [searchTerm];
+        const hasMatchingField = matchTerms.some(term => fieldOfStudy.includes(term));
+
+        if (!hasMatchingField) return false;
       }
 
       // Filter by shortlisted status
@@ -165,10 +190,18 @@ export const useRankCandidates = () => {
         return false;
       }
 
+      // Filter by work experience
+      if (filters.hasWorkExperience) {
+        if (candidate.no_work_experience || 
+            !candidate.work_experience?.length) {
+          return false;
+        }
+      }
+
       return true;
     });
 
-    // Sort filtered candidates by ranking criteria
+    // Sort filtered candidates
     const sortedCandidates = filteredCandidates.sort((a, b) => {
       switch (rankingCriteria) {
         case 'skills':
