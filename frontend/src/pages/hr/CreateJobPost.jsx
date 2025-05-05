@@ -221,7 +221,7 @@ const CreateJobPost = ({
                       value={formData.salary_range}
                       onChange={handleInputChange}
                       className="block w-full pl-10 border border-gray-300 rounded-md shadow-sm p-2"
-                      placeholder="e.g. $80,000 - $100,000"
+                      placeholder="e.g. ₱ - ₱₱₱"
                       required
                     />
                   </div>
