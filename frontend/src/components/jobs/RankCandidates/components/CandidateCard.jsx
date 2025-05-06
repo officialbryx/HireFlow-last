@@ -10,29 +10,68 @@ import {
   ClockIcon,
   MapPinIcon,
   BuildingOfficeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
 import Avatar from "../../../common/Avatar";
 import { getQualityIndicator } from "../utils/rankingUtils";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import StatusControls from "../../../applicants/StatusControls";
 import { applicationsApi } from "../../../../services/api/applicationsApi";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from 'react-hot-toast'; 
+import { toast } from "react-hot-toast";
+
+const getStatusIndicator = (status) => {
+  switch (status?.toLowerCase()) {
+    case "accepted":
+      return {
+        bgColor: "bg-green-100",
+        textColor: "text-green-800",
+        icon: "✓",
+        iconBg: "bg-green-500",
+        label: "Accepted",
+      };
+    case "rejected":
+      return {
+        bgColor: "bg-red-100",
+        textColor: "text-red-800",
+        icon: "×",
+        iconBg: "bg-red-500",
+        label: "Rejected",
+      };
+    case "interview":
+      return {
+        bgColor: "bg-blue-100",
+        textColor: "text-blue-800",
+        icon: "◷",
+        iconBg: "bg-blue-500",
+        label: "Interviewing",
+      };
+    default:
+      return {
+        bgColor: "bg-gray-100",
+        textColor: "text-gray-800",
+        icon: "○",
+        iconBg: "bg-gray-500",
+        label: "Pending",
+      };
+  }
+};
 
 const formatEducationDate = (dateString) => {
-  if (!dateString) return '';
-  
+  if (!dateString) return "";
+
   // Check if the date is in MM/YYYY format
-  const parts = dateString.split('/');
+  const parts = dateString.split("/");
   if (parts.length === 2) {
     const month = parts[0];
     const year = parts[1];
     return year; // Return just the year
   }
-  
+
   // Fallback to full date parsing if not in MM/YYYY format
   const date = new Date(dateString);
-  return !isNaN(date) ? date.getFullYear() : '';
+  return !isNaN(date) ? date.getFullYear() : "";
 };
 
 export const CandidateCard = ({
@@ -58,33 +97,43 @@ export const CandidateCard = ({
   const handleStatusUpdate = async (applicantId, updates) => {
     try {
       // Optimistically update the UI first
-      queryClient.setQueryData(['candidates', candidate.job_posting_id], (oldData) => {
-        if (!oldData) return oldData;
-        return oldData.map(c => 
-          c.id === applicantId 
-            ? { ...c, ...updates } 
-            : c
-        );
-      });
+      queryClient.setQueryData(
+        ["candidates", candidate.job_posting_id],
+        (oldData) => {
+          if (!oldData) return oldData;
+          return oldData.map((c) =>
+            c.id === applicantId ? { ...c, ...updates } : c
+          );
+        }
+      );
 
       // Make the API calls
       if (updates.status) {
-        await applicationsApi.updateApplicationStatus(applicantId, updates.status);
+        await applicationsApi.updateApplicationStatus(
+          applicantId,
+          updates.status
+        );
       }
-      
-      if (typeof updates.shortlisted === 'boolean') {
-        await applicationsApi.updateApplicantShortlist(applicantId, updates.shortlisted);
+
+      if (typeof updates.shortlisted === "boolean") {
+        await applicationsApi.updateApplicantShortlist(
+          applicantId,
+          updates.shortlisted
+        );
       }
-      
+
       // Invalidate and refetch to ensure data consistency
-      await queryClient.invalidateQueries(['candidates', candidate.job_posting_id]);
-      
-      toast.success('Status updated successfully');
+      await queryClient.invalidateQueries([
+        "candidates",
+        candidate.job_posting_id,
+      ]);
+
+      toast.success("Status updated successfully");
     } catch (error) {
       // Revert the optimistic update on error
-      queryClient.invalidateQueries(['candidates', candidate.job_posting_id]);
-      console.error('Error updating status:', error);
-      toast.error('Failed to update status');
+      queryClient.invalidateQueries(["candidates", candidate.job_posting_id]);
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -169,11 +218,16 @@ export const CandidateCard = ({
               size={12}
               className="border-2 border-white shadow"
             />
-            {candidate.matchScore >= 85 && (
-              <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
-                <span className="text-white text-xs font-bold">✓</span>
+            {/* Add status indicator badge */}
+            <span
+              className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full ${
+                getStatusIndicator(candidate.status).iconBg
+              } border-2 border-white flex items-center justify-center`}
+            >
+              <span className="text-white text-xs font-bold">
+                {getStatusIndicator(candidate.status).icon}
               </span>
-            )}
+            </span>
           </div>
           <div className="ml-4 flex-grow">
             <h3 className="text-sm font-medium text-gray-900 flex items-center group">
@@ -184,6 +238,14 @@ export const CandidateCard = ({
                   isExpanded ? "rotate-90" : ""
                 }`}
               />
+              {/* Add status label */}
+              <span
+                className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  getStatusIndicator(candidate.status).bgColor
+                } ${getStatusIndicator(candidate.status).textColor}`}
+              >
+                {getStatusIndicator(candidate.status).label}
+              </span>
             </h3>
             <p className="text-xs text-gray-500">
               {candidate.email || candidate.personal_info?.email || ""}
@@ -202,6 +264,8 @@ export const CandidateCard = ({
             </div>
           </div>
         </div>
+
+        
 
         {/* Match Score */}
         <div className="col-span-2">
@@ -280,6 +344,48 @@ export const CandidateCard = ({
         </div>
       </div>
 
+      {/* Status Message - Now spans full width under the main info */}
+      {(candidate.status === "accepted" || candidate.status === "rejected") && (
+          <div className="col-span-12 ">
+            <div
+              className={`${
+                candidate.status === "accepted"
+                  ? "bg-green-50 border-green-200"
+                  : "bg-red-50 border-red-200"
+              } border rounded-md p-2.5`}
+            >
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  {candidate.status === "accepted" ? (
+                    <CheckCircleIcon
+                      className="h-5 w-5 text-green-400"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <XCircleIcon
+                      className="h-5 w-5 text-red-400"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <div className="ml-3">
+                  <p
+                    className={`text-sm font-medium ${
+                      candidate.status === "accepted"
+                        ? "text-green-800"
+                        : "text-red-800"
+                    }`}
+                  >
+                    {candidate.status === "accepted"
+                      ? "This candidate has been accepted for this position"
+                      : "This candidate was not selected for this position"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* Expanded Content */}
       {isExpanded && (
         <div className="p-5 bg-white border-t border-gray-100">
@@ -305,7 +411,7 @@ export const CandidateCard = ({
                 applicantId={candidate.id}
                 jobId={candidate.job_posting_id}
                 applicantUserId={candidate.user_id}
-                currentStatus={candidate.status || 'pending'}
+                currentStatus={candidate.status || "pending"}
                 isShortlisted={candidate.shortlisted || false}
                 onStatusUpdated={handleStatusUpdate}
                 getBadgeColor={(status) => getQualityIndicator(status)}
@@ -419,23 +525,19 @@ const ExperienceSection = ({ workExperience = [] }) => {
   );
 };
 
-const SkillsAnalysisSection = ({
-  skills = [],
-  skillMatch,
-  matchScore
-}) => {
-    const scores = [
-        { 
-          label: "Overall Match", 
-          value: matchScore, // Use matchScore prop instead of candidate.matchScore
-          color: getQualityIndicator(matchScore).replace('bg-', '')
-        },
-        { 
-          label: "Skills Match", 
-          value: skillMatch, 
-          color: skillMatch >= 80 ? 'green' : skillMatch >= 60 ? 'blue' : 'amber'
-        }
-      ];
+const SkillsAnalysisSection = ({ skills = [], skillMatch, matchScore }) => {
+  const scores = [
+    {
+      label: "Overall Match",
+      value: matchScore, // Use matchScore prop instead of candidate.matchScore
+      color: getQualityIndicator(matchScore).replace("bg-", ""),
+    },
+    {
+      label: "Skills Match",
+      value: skillMatch,
+      color: skillMatch >= 80 ? "green" : skillMatch >= 60 ? "blue" : "amber",
+    },
+  ];
 
   return (
     <div className="space-y-4">
@@ -490,7 +592,9 @@ const SkillsAnalysisSection = ({
               </span>
             ))}
             {skills.length === 0 && (
-              <p className="text-sm text-gray-500 italic">No skills identified</p>
+              <p className="text-sm text-gray-500 italic">
+                No skills identified
+              </p>
             )}
           </div>
         </div>
