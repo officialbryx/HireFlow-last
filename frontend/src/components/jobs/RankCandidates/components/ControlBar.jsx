@@ -22,6 +22,7 @@ export const ControlBar = ({
   batchProgress,
   handleBatchEvaluation,
   areFiltersActive,
+  onBatchStatusUpdate, // Add this prop
 }) => {
   return (
     <div className="p-4 border-b border-gray-200">
@@ -105,6 +106,7 @@ export const ControlBar = ({
             setSelectedForBatch={setSelectedForBatch}
             batchProgress={batchProgress}
             handleBatchEvaluation={handleBatchEvaluation}
+            onBatchStatusUpdate={onBatchStatusUpdate} // Pass it through
           />
         </div>
 

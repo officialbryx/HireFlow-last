@@ -31,6 +31,7 @@ const RankCandidates = () => {
     batchProgress,
     handleBatchEvaluation,
     areFiltersActive,
+    handleBatchStatusUpdate,
   } = useRankCandidates();
 
   return (
@@ -64,6 +65,7 @@ const RankCandidates = () => {
         handleBatchEvaluation={handleBatchEvaluation}
         setSelectedForBatch={setSelectedForBatch}
         areFiltersActive={areFiltersActive}
+        onBatchStatusUpdate={handleBatchStatusUpdate}
       />
 
       {/* Filters */}

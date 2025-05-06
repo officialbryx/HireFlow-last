@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { jobsApi } from "../../../../services/api/jobsApi";
 import { evaluationApi } from "../../../../services/api/evaluationApi";
 import { applicationsApi } from "../../../../services/api/applicationsApi";
+import { toast } from "react-hot-toast";
 
 export const useRankCandidates = () => {
   const queryClient = useQueryClient();
@@ -136,6 +137,51 @@ export const useRankCandidates = () => {
     }
   }, [batchProcessing]);
 
+  const handleBatchStatusUpdate = async (selectedIds, updates) => {
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading(`Updating ${selectedIds.length} candidates...`);
+
+      // Optimistically update the UI
+      queryClient.setQueryData(['candidates', selectedJob], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map(candidate => 
+          selectedIds.includes(candidate.id) 
+            ? { ...candidate, ...updates }
+            : candidate
+        );
+      });
+
+      // Process each candidate in the batch
+      const promises = selectedIds.map(async (id) => {
+        if (updates.status) {
+          await applicationsApi.updateApplicationStatus(id, updates.status);
+        }
+        if (typeof updates.shortlisted === 'boolean') {
+          await applicationsApi.updateApplicantShortlist(id, updates.shortlisted);
+        }
+      });
+
+      await Promise.all(promises);
+
+      // Clear batch selection after successful update
+      setSelectedForBatch([]);
+      setBatchProcessing(false);
+
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries(['candidates', selectedJob]);
+
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success(`Successfully updated ${selectedIds.length} candidates`);
+    } catch (error) {
+      console.error('Error updating batch status:', error);
+      toast.error('Failed to update candidates');
+      // Revert optimistic update on error
+      queryClient.invalidateQueries(['candidates', selectedJob]);
+    }
+  };
+
   return {
     loading: isLoading,
     jobs,
@@ -159,5 +205,6 @@ export const useRankCandidates = () => {
     moveUp,
     moveDown,
     areFiltersActive,
+    handleBatchStatusUpdate,
   };
 };
