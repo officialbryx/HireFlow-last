@@ -11,8 +11,8 @@ import {
   ArrowRightIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
-// Replace api import with direct applicationsApi import
 import { applicationsApi } from "../services/api/applicationsApi";
+import { supabase } from "../services/supabaseClient";
 
 const stages = [
   { id: 1, name: "My Information" },
@@ -23,12 +23,11 @@ const stages = [
 ];
 
 const Apply = () => {
-  const { company, jobId } = useParams(); // Add jobId parameter
+  const { company, jobId } = useParams();
   const navigate = useNavigate();
   const [currentStage, setCurrentStage] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    // Personal Information
     previouslyEmployed: false,
     country: "",
     givenName: "",
@@ -44,8 +43,6 @@ const Apply = () => {
     phoneType: "",
     phoneCode: "",
     phoneNumber: "",
-
-    // Experience
     workExperience: [
       {
         jobTitle: "",
@@ -72,8 +69,6 @@ const Apply = () => {
     resume: null,
     websites: [""],
     linkedin: "",
-
-    // Application Questions - Initialize all as empty strings to trigger validation
     applicationQuestions: {
       previouslyProcessed: "",
       previouslyProcessedWithCompany: "",
@@ -84,21 +79,117 @@ const Apply = () => {
       nonCompete: "",
       filipinoCitizen: "",
       internationalStudies: "",
-      applyVisa: "", // Changed from false to empty string
+      applyVisa: "",
     },
-
-    // Terms
     termsAccepted: false,
   });
   const [fieldErrors, setFieldErrors] = useState({});
 
+  const fetchProfileData = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [profileResult, workExpResult, eduResult, skillsResult] =
+        await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.from("work_experiences").select("*").eq("user_id", user.id),
+          supabase.from("education").select("*").eq("user_id", user.id),
+          supabase.from("skills").select("skill_name").eq("user_id", user.id),
+        ]);
+
+      // Fetch resume file if there's a resume_url
+      let resumeFile = null;
+      if (profileResult.data?.resume_url) {
+        try {
+          const response = await fetch(profileResult.data.resume_url);
+          const blob = await response.blob();
+          resumeFile = new File([blob], "resume.pdf", {
+            type: "application/pdf",
+          });
+        } catch (error) {
+          console.error("Error fetching resume file:", error);
+        }
+      }
+
+      const formattedWorkExp =
+        workExpResult.data?.map((exp) => ({
+          jobTitle: exp.job_title || "",
+          company: exp.company || "",
+          location: exp.location || "",
+          currentWork: exp.current_work || false,
+          fromDate: formatDateFromDB(exp.from_date),
+          toDate: exp.to_date ? formatDateFromDB(exp.to_date) : "",
+          description: exp.description || "",
+        })) || [];
+
+      const formattedEdu =
+        eduResult.data?.map((edu) => ({
+          school: edu.school || "",
+          degree: edu.degree || "",
+          fieldOfStudy: edu.field_of_study || "",
+          gpa: edu.gpa || "",
+          fromYear: formatDateFromDB(edu.from_date),
+          toYear: formatDateFromDB(edu.to_date),
+        })) || [];
+
+      setFormData((prev) => ({
+        ...prev,
+        givenName: profileResult.data?.first_name || "",
+        middleName: profileResult.data?.middle_name || "",
+        familyName: profileResult.data?.last_name || "",
+        suffix: profileResult.data?.suffix || "",
+        country: profileResult.data?.country || "",
+        street: profileResult.data?.street || "",
+        additionalAddress: profileResult.data?.additional_address || "",
+        city: profileResult.data?.city || "",
+        province: profileResult.data?.province || "",
+        postalCode: profileResult.data?.postal_code || "",
+        phoneType: profileResult.data?.phone_type || "",
+        phoneCode: profileResult.data?.phone_code || "",
+        phoneNumber: profileResult.data?.phone_number || "",
+        email: user.email || "",
+        workExperience:
+          formattedWorkExp.length > 0 ? formattedWorkExp : prev.workExperience,
+        education: formattedEdu.length > 0 ? formattedEdu : prev.education,
+        skills: skillsResult.data?.map((s) => s.skill_name) || [],
+        noWorkExperience: profileResult.data?.no_work_experience || false,
+        resume: resumeFile, // Add the fetched resume file
+        resume_url: profileResult.data?.resume_url || "", // Add the resume URL
+        previouslyEmployed: false,
+        applicationQuestions: {
+          previouslyProcessed: "no",
+          previouslyProcessedWithCompany: "no",
+          directlyEmployed: "no",
+          relativesInCompany: "no",
+          relativesInIndustry: "no",
+          currentEmployerBond: "no",
+          nonCompete: "no",
+          filipinoCitizen: "yes",
+          internationalStudies: "no",
+          applyVisa: "no",
+        },
+        termsAccepted: true, // Automatically accept terms when using Quick Apply
+      }));
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    }
+  };
+
+  const formatDateFromDB = (dbDate) => {
+    if (!dbDate) return "";
+    const date = new Date(dbDate);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${year}`;
+  };
+
   const renderStageIndicator = () => (
     <div className="mb-12">
       <div className="flex justify-between items-center relative">
-        {/* Connecting line that sits behind the circles */}
         <div className="absolute top-4 left-0 right-0 h-1 bg-gray-200" />
-
-        {/* Circles and labels */}
         <div className="relative flex justify-between w-full">
           {stages.map((stage) => (
             <div key={stage.id} className="flex flex-col items-center">
@@ -106,10 +197,10 @@ const Apply = () => {
                 className={`rounded-full h-9 w-9 flex items-center justify-center border-2 shadow-sm transition-all duration-300
                 ${
                   currentStage > stage.id
-                    ? "border-blue-600 bg-blue-600" // Completed stage
+                    ? "border-blue-600 bg-blue-600"
                     : currentStage === stage.id
-                    ? "border-blue-600 bg-white ring-4 ring-blue-100" // Current stage
-                    : "border-gray-300 bg-white" // Future stage
+                    ? "border-blue-600 bg-white ring-4 ring-blue-100"
+                    : "border-gray-300 bg-white"
                 }`}
               >
                 {currentStage > stage.id ? (
@@ -147,12 +238,10 @@ const Apply = () => {
   );
 
   const handleSaveAndContinue = () => {
-    // Clear previous errors
     setFieldErrors({});
 
     let isValid = true;
 
-    // Stage-specific validation
     switch (currentStage) {
       case 1:
         const myInfoValidation = MyInformation.validator.validate(
@@ -162,7 +251,6 @@ const Apply = () => {
         isValid = myInfoValidation.isValid;
         break;
       case 2:
-        // Check for resume before proceeding with other validations
         if (!formData.resume) {
           setFieldErrors({ resume: "Resume is required before proceeding" });
           isValid = false;
@@ -198,7 +286,6 @@ const Apply = () => {
       return;
     }
 
-    // Continue with stage progression if validation passes
     setCurrentStage((prev) => Math.min(prev + 1, stages.length));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -207,7 +294,6 @@ const Apply = () => {
     try {
       setIsSubmitting(true);
 
-      // Format the application data
       const applicationData = {
         job_posting_id: jobId,
         company: company,
@@ -255,13 +341,12 @@ const Apply = () => {
           to_year: edu.toYear,
         })),
         skills: formData.skills,
-        resume_file: formData.resume, // Pass the actual file object
+        resume_file: formData.resume,
         websites: formData.websites.filter((url) => url),
         linkedin_url: formData.linkedin,
         application_questions: formData.applicationQuestions,
         terms_accepted: formData.termsAccepted,
         status: "pending",
-        // Add these fields at the top level
         phone_type: formData.phoneType,
         phone_code: formData.phoneCode,
         phone_number: formData.phoneNumber,
@@ -274,7 +359,6 @@ const Apply = () => {
         throw new Error("Failed to submit application");
       }
 
-      // Redirect on success
       navigate("/jobposts");
     } catch (error) {
       console.error("Failed to submit application:", error);
@@ -287,18 +371,15 @@ const Apply = () => {
     }
   };
 
-  // Add validation before submission
   const validateApplication = () => {
     const errors = {};
 
-    // Required fields validation
     if (!formData.givenName) errors.givenName = "First name is required";
     if (!formData.familyName) errors.familyName = "Last name is required";
     if (!formData.email) errors.email = "Email is required";
     if (!formData.phoneNumber) errors.phoneNumber = "Phone number is required";
     if (!formData.country) errors.country = "Country is required";
 
-    // Work experience validation
     if (
       !formData.noWorkExperience &&
       (!formData.workExperience || formData.workExperience.length === 0)
@@ -307,12 +388,10 @@ const Apply = () => {
         "Work experience is required unless marked as no experience";
     }
 
-    // Education validation
     if (!formData.education || formData.education.length === 0) {
       errors.education = "Education details are required";
     }
 
-    // Terms acceptance
     if (!formData.termsAccepted) {
       errors.terms = "You must accept the terms to continue";
     }
@@ -383,9 +462,17 @@ const Apply = () => {
               </h1>
               <p className="text-blue-600 font-medium">{company}</p>
             </div>
-            <div className="mt-3 sm:mt-0 flex items-center text-sm text-gray-500">
-              <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-500" />
-              <span>Application Form</span>
+            <div className="mt-3 sm:mt-0 flex items-center gap-4">
+              <button
+                onClick={fetchProfileData}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Quick Apply
+              </button>
+              <div className="flex items-center text-sm text-gray-500">
+                <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-500" />
+                <span>Application Form</span>
+              </div>
             </div>
           </div>
 
@@ -416,7 +503,7 @@ const Apply = () => {
                 Previous Step
               </button>
             ) : (
-              <div></div> // Empty div to maintain layout
+              <div></div>
             )}
             <button
               onClick={
@@ -469,7 +556,6 @@ const Apply = () => {
           </div>
         </div>
 
-        {/* Progress indicator at bottom */}
         <div className="mt-6 max-w-4xl mx-auto px-4">
           <div className="flex justify-between items-center text-sm text-gray-500">
             <span>
