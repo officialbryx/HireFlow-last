@@ -14,6 +14,10 @@ import {
 import Avatar from "../../../common/Avatar";
 import { getQualityIndicator } from "../utils/rankingUtils";
 import { useNavigate } from 'react-router-dom';
+import StatusControls from "../../../applicants/StatusControls";
+import { applicationsApi } from "../../../../services/api/applicationsApi";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from 'react-hot-toast'; 
 
 const formatEducationDate = (dateString) => {
   if (!dateString) return '';
@@ -43,11 +47,45 @@ export const CandidateCard = ({
   isSelectedForBatch,
   totalCandidates,
 }) => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const handleViewProfile = (e) => {
     e.stopPropagation();
     navigate(`/hr/jobs?tab=applicants&applicationId=${candidate.id}`);
+  };
+
+  const handleStatusUpdate = async (applicantId, updates) => {
+    try {
+      // Optimistically update the UI first
+      queryClient.setQueryData(['candidates', candidate.job_posting_id], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map(c => 
+          c.id === applicantId 
+            ? { ...c, ...updates } 
+            : c
+        );
+      });
+
+      // Make the API calls
+      if (updates.status) {
+        await applicationsApi.updateApplicationStatus(applicantId, updates.status);
+      }
+      
+      if (typeof updates.shortlisted === 'boolean') {
+        await applicationsApi.updateApplicantShortlist(applicantId, updates.shortlisted);
+      }
+      
+      // Invalidate and refetch to ensure data consistency
+      await queryClient.invalidateQueries(['candidates', candidate.job_posting_id]);
+      
+      toast.success('Status updated successfully');
+    } catch (error) {
+      // Revert the optimistic update on error
+      queryClient.invalidateQueries(['candidates', candidate.job_posting_id]);
+      console.error('Error updating status:', error);
+      toast.error('Failed to update status');
+    }
   };
 
   return (
@@ -255,14 +293,26 @@ export const CandidateCard = ({
             />
           </div>
           {/* Action Buttons */}
-          <div className="mt-5 flex justify-end space-x-3 border-t border-gray-200 pt-3">
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-              View Full Profile
-            </button>
-            <button className="inline-flex items-center px-4 py-2 shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-              <CalendarIcon className="h-4 w-4 mr-1.5" />
-              Schedule Interview
-            </button>
+          <div className="mt-5 border-t border-gray-200 pt-3">
+            <div className="flex justify-between items-center">
+              <button
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                onClick={handleViewProfile}
+              >
+                View Full Profile
+              </button>
+              <StatusControls
+                applicantId={candidate.id}
+                jobId={candidate.job_posting_id}
+                applicantUserId={candidate.user_id}
+                currentStatus={candidate.status || 'pending'}
+                isShortlisted={candidate.shortlisted || false}
+                onStatusUpdated={handleStatusUpdate}
+                getBadgeColor={(status) => getQualityIndicator(status)}
+                jobTitle={candidate.job_title || "this position"}
+                isEvaluated={candidate.evaluated}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-// import { applicationsApi, jobsApi, evaluationApi } from "../../../../services/api";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { jobsApi } from "../../../../services/api/jobsApi";
 import { evaluationApi } from "../../../../services/api/evaluationApi";
 import { applicationsApi } from "../../../../services/api/applicationsApi";
 
 export const useRankCandidates = () => {
-  const [loading, setLoading] = useState(true);
-  const [jobs, setJobs] = useState([]);
+  const queryClient = useQueryClient();
   const [selectedJob, setSelectedJob] = useState(null);
-  const [candidates, setCandidates] = useState([]);
-  const [originalCandidates, setOriginalCandidates] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [rankingCriteria, setRankingCriteria] = useState("overall");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -22,6 +20,56 @@ export const useRankCandidates = () => {
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [selectedForBatch, setSelectedForBatch] = useState([]);
   const [batchProgress, setBatchProgress] = useState(0);
+
+  // Use React Query for candidates with evaluations
+  const { data: candidates = [], isLoading } = useQuery({
+    queryKey: ['candidates', selectedJob],
+    queryFn: async () => {
+      if (!selectedJob) return [];
+      
+      // First get all applications for the job
+      const applications = await applicationsApi.getApplicationsByJob(selectedJob);
+      
+      // Get evaluation results for all applications
+      const applicationIds = applications.map(app => app.id);
+      const evaluationResults = await evaluationApi.getBatchEvaluationResults(applicationIds);
+      
+      // Merge applications with their evaluation results
+      const candidatesWithEvaluation = applications.map(application => {
+        const evaluation = evaluationResults.find(result => result.application_id === application.id);
+        
+        return {
+          ...application,
+          matchScore: evaluation?.overall_match || 0,
+          skillMatch: evaluation?.skills_match || 0,
+          experienceScore: evaluation?.experience_score || 0,
+          educationScore: evaluation?.education_score || 0,
+          qualified: evaluation?.qualified || false,
+          evaluated: !!evaluation,
+          evaluationResult: evaluation,
+          rank: 0 // Will be calculated after sorting
+        };
+      });
+
+      // Sort candidates based on ranking criteria
+      const sortedCandidates = candidatesWithEvaluation.sort((a, b) => {
+        if (rankingCriteria === 'skills') {
+          return b.skillMatch - a.skillMatch;
+        }
+        return b.matchScore - a.matchScore;
+      });
+
+      // Add rank numbers
+      return sortedCandidates.map((candidate, index) => ({
+        ...candidate,
+        rank: index + 1
+      }));
+    },
+    enabled: !!selectedJob,
+    refetchOnWindowFocus: true,
+    staleTime: 30000,
+    cacheTime: 300000
+  });
 
   const toggleCandidate = (candidateId) => {
     setExpandedCandidates((prev) => ({
@@ -60,7 +108,6 @@ export const useRankCandidates = () => {
     });
   };
 
-  // Add this helper function
   const areFiltersActive = () => {
     return filters.minimumSkillMatch > 0 ||
            filters.minimumOverallMatch > 0 ||
@@ -76,119 +123,10 @@ export const useRankCandidates = () => {
         setJobs(jobsData.filter((job) => job.status !== "archived"));
       } catch (error) {
         console.error("Error fetching jobs:", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchJobs();
   }, []);
-
-  // Fetch candidates
-  useEffect(() => {
-    if (!selectedJob) {
-      setCandidates([]);
-      return;
-    }
-
-    const fetchCandidates = async () => {
-      setLoading(true);
-      try {
-        const response = await applicationsApi.getApplicationsByJob(selectedJob);
-        const candidatesWithEvaluation = await Promise.all(
-          response.map(async (candidate) => {
-            try {
-              const evaluationResult = await evaluationApi.getEvaluationResult(candidate.id);
-              
-              return {
-                ...candidate,
-                matchScore: evaluationResult?.overall_match || 0,
-                skillMatch: evaluationResult?.skills_match || 0,
-                experienceScore: evaluationResult?.experience_score || 0,
-                educationScore: evaluationResult?.education_score || 0,
-                qualified: evaluationResult?.qualified || false,
-                evaluated: true,
-                needsEvaluation: false,
-                evaluationResult, // Include full evaluation results
-                shortlisted: candidate.shortlisted 
-              };
-            } catch (error) {
-              console.error(`Error processing candidate ${candidate.id}:`, error);
-              return {
-                ...candidate,
-                matchScore: 0,
-                skillMatch: 0,
-                experienceScore: 0,
-                educationScore: 0,
-                qualified: false,
-                evaluated: false,
-                error: true
-              };
-            }
-          })
-        );
-
-        setOriginalCandidates(candidatesWithEvaluation);
-        // Initial filtering will happen through the useEffect
-      } catch (error) {
-        console.error("Error fetching candidates:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCandidates();
-  }, [selectedJob]);
-
-  // Update filtering useEffect
-  useEffect(() => {
-    if (!originalCandidates.length) return;
-
-    let filteredResults = [...originalCandidates];
-
-    // Apply skill match filter
-    if (filters.minimumSkillMatch > 0) {
-      filteredResults = filteredResults.filter(
-        candidate => (candidate.skillMatch || 0) >= filters.minimumSkillMatch
-      );
-    }
-
-    // Apply overall match filter
-    if (filters.minimumOverallMatch > 0) {
-      filteredResults = filteredResults.filter(
-        candidate => (candidate.matchScore || 0) >= filters.minimumOverallMatch
-      );
-    }
-
-    // Apply evaluated only filter - check for evaluation_results instead of evaluated flag
-    if (filters.evaluatedOnly) {
-      filteredResults = filteredResults.filter(
-        candidate => !!candidate.evaluationResult // Changed from evaluation_results to evaluationResult
-      );
-    }
-
-    // Apply shortlisted only filter
-    if (filters.shortlistedOnly) {
-      filteredResults = filteredResults.filter(
-        candidate => candidate.shortlisted === true
-      );
-    }
-
-    // Sort candidates based on ranking criteria
-    const sortedCandidates = filteredResults.sort((a, b) => {
-      if (rankingCriteria === 'skills') {
-        return (b.skillMatch || 0) - (a.skillMatch || 0);
-      }
-      return (b.matchScore || 0) - (a.matchScore || 0);
-    });
-
-    // Update ranks after filtering and sorting
-    const rankedCandidates = sortedCandidates.map((candidate, index) => ({
-      ...candidate,
-      rank: index + 1
-    }));
-
-    setCandidates(rankedCandidates);
-  }, [filters, rankingCriteria, originalCandidates]);
 
   // Add cleanup effect when batch processing is toggled off
   useEffect(() => {
@@ -199,12 +137,11 @@ export const useRankCandidates = () => {
   }, [batchProcessing]);
 
   return {
-    loading,
+    loading: isLoading,
     jobs,
     selectedJob,
     setSelectedJob,
     candidates,
-    setCandidates,
     rankingCriteria,
     setRankingCriteria,
     showFilters,
@@ -218,7 +155,6 @@ export const useRankCandidates = () => {
     selectedForBatch,
     setSelectedForBatch,
     batchProgress,
-    originalCandidates,
     toggleCandidate,
     moveUp,
     moveDown,
