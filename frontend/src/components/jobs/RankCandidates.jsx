@@ -1,9 +1,3 @@
-import { useState, useEffect } from "react";
-import {
-  ChevronDownIcon,
-  AdjustmentsHorizontalIcon,
-  DocumentTextIcon,
-} from "@heroicons/react/24/outline";
 import { useRankCandidates } from "./RankCandidates/hooks/useRankCandidates";
 import { ControlBar } from "./RankCandidates/components/ControlBar";
 import { FilterBar } from "./RankCandidates/components/FilterBar";
@@ -35,7 +29,8 @@ const RankCandidates = () => {
     selectedForBatch,
     setSelectedForBatch,
     batchProgress,
-    handleBatchEvaluation
+    handleBatchEvaluation,
+    areFiltersActive,
   } = useRankCandidates();
 
   return (
@@ -68,6 +63,7 @@ const RankCandidates = () => {
         batchProgress={batchProgress}
         handleBatchEvaluation={handleBatchEvaluation}
         setSelectedForBatch={setSelectedForBatch}
+        areFiltersActive={areFiltersActive}
       />
 
       {/* Filters */}
