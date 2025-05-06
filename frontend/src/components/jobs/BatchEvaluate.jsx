@@ -201,43 +201,61 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
   };
 
   const renderApplicationsList = () => (
-    <div className="space-y-2 max-h-60 overflow-y-auto">
+    <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto px-2">
       {applications.map((app) => (
         <div
           key={app.id}
-          className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg"
+          className={`
+            flex items-center justify-between p-5
+            rounded-2xl transition-all duration-300
+            ${existingResults[app.id] ? 'bg-gray-50/80' : 'bg-white'}
+            hover:shadow-lg border border-gray-200
+            backdrop-blur-sm
+          `}
         >
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id={`app-${app.id}`}
-              checked={selectedApplications.includes(app.id)}
-              onChange={() => {
-                setSelectedApplications((prev) =>
-                  prev.includes(app.id)
-                    ? prev.filter((id) => id !== app.id)
-                    : [...prev, app.id]
-                );
-              }}
-              className="h-4 w-4 text-blue-600 rounded"
-              disabled={existingResults[app.id]}
-            />
-            <label htmlFor={`app-${app.id}`} className="ml-2">
-              {app.personal_info?.given_name} {app.personal_info?.family_name}
-            </label>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input
+                type="checkbox"
+                id={`app-${app.id}`}
+                checked={selectedApplications.includes(app.id)}
+                onChange={() => {
+                  setSelectedApplications((prev) =>
+                    prev.includes(app.id)
+                      ? prev.filter((id) => id !== app.id)
+                      : [...prev, app.id]
+                  );
+                }}
+                className="h-5 w-5 rounded-md text-blue-600 focus:ring-blue-500 transition-all"
+                disabled={existingResults[app.id]}
+              />
+              {existingResults[app.id] && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              )}
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor={`app-${app.id}`} className="text-gray-900 font-semibold">
+                {app.personal_info?.given_name} {app.personal_info?.family_name}
+              </label>
+              {existingResults[app.id] && (
+                <span className="text-sm text-gray-500">Previously evaluated</span>
+              )}
+            </div>
           </div>
 
           {existingResults[app.id] && (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-green-600 font-medium">
-                Already Evaluated - {existingResults[app.id].overall_match}%
-                Match
-              </span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  {existingResults[app.id].overall_match}% Match
+                </span>
+              </div>
               <button
-                onClick={() =>
-                  setEvaluationResults({ [app.id]: existingResults[app.id] })
-                }
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                onClick={() => setEvaluationResults({ [app.id]: existingResults[app.id] })}
+                className="px-4 py-2 text-sm font-medium text-blue-600 
+                          bg-blue-50 hover:bg-blue-100
+                          rounded-lg transition-colors duration-200"
               >
                 View Results
               </button>
@@ -255,91 +273,93 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
     const sections = aiInsights.sections || {};
 
     return (
-      <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
-        {/* Match Scores */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-blue-800">Overall Match</h4>
-            <p className="text-3xl font-bold text-blue-600">
-              {result.overall_match}%
-            </p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800">Skills Match</h4>
-            <p className="text-3xl font-bold text-green-600">
-              {result.skills_match}%
-            </p>
-          </div>
-          <div
-            className={`${
-              result.qualified ? "bg-green-50" : "bg-red-50"
-            } p-4 rounded-lg`}
-          >
-            <h4
-              className={`font-semibold ${
-                result.qualified ? "text-green-800" : "text-red-800"
-              }`}
-            >
-              Status
-            </h4>
-            <p
-              className={`text-xl font-bold ${
-                result.qualified ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {result.qualified ? "Qualified" : "Not Qualified"}
-            </p>
-          </div>
-        </div>
-
-        {/* AI Insights */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold text-gray-800 border-b pb-2">
-            AI Analysis
-          </h3>
-          {Object.entries(sections).map(([key, section]) => (
-            <div key={key} className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">
-                {section.title}
-              </h4>
-              <div className="text-gray-600 whitespace-pre-wrap">
-                {section.content}
-              </div>
+      <div className="bg-white p-8 rounded-2xl shadow-sm space-y-8">
+        {/* Match Scores Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl text-white">
+            <div className="relative z-10">
+              <h4 className="text-blue-100 font-medium">Overall Match</h4>
+              <p className="text-4xl font-bold mt-2">{result.overall_match}%</p>
             </div>
-          ))}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400 rounded-full opacity-20 transform translate-x-8 -translate-y-8"></div>
+          </div>
+          
+          <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl text-white">
+            <div className="relative z-10">
+              <h4 className="text-green-100 font-medium">Skills Match</h4>
+              <p className="text-4xl font-bold mt-2">{result.skills_match}%</p>
+            </div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-green-400 rounded-full opacity-20 transform translate-x-8 -translate-y-8"></div>
+          </div>
+
+          <div className={`relative overflow-hidden bg-gradient-to-br 
+            ${result.qualified ? 'from-emerald-500 to-emerald-600' : 'from-red-500 to-red-600'} 
+            p-6 rounded-2xl text-white`}
+          >
+            <div className="relative z-10">
+              <h4 className="text-white/90 font-medium">Qualification Status</h4>
+              <p className="text-2xl font-bold mt-2">
+                {result.qualified ? 'Qualified' : 'Not Qualified'}
+              </p>
+            </div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full opacity-10 transform translate-x-8 -translate-y-8"></div>
+          </div>
         </div>
 
-        {/* Technical Analysis Summary */}
+        {/* AI Analysis Section */}
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-gray-800 flex items-center space-x-2">
+            <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>AI Analysis</span>
+          </h3>
+          
+          <div className="grid gap-6">
+            {Object.entries(sections).map(([key, section]) => (
+              <div key={key} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                  {section.title}
+                </h4>
+                <div className="text-gray-600 prose max-w-none">
+                  {section.content}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Technical Analysis Section */}
         {result.technical_analysis && (
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-gray-800 border-b pb-2">
-              Technical Analysis
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-gray-800 flex items-center space-x-2">
+              <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+              </svg>
+              <span>Technical Analysis</span>
             </h3>
-            {Object.entries(result.technical_analysis).map(
-              ([category, data]) => (
-                <div key={category} className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-2">
-                    {category
-                      .split("_")
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                      )
-                      .join(" ")}
+
+            <div className="grid gap-6">
+              {Object.entries(result.technical_analysis).map(([category, data]) => (
+                <div key={category} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                    {category.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                   </h4>
                   {Array.isArray(data) ? (
-                    <ul className="list-disc list-inside space-y-1">
+                    <ul className="space-y-2">
                       {data.map((item, index) => (
-                        <li key={index} className="text-gray-600">
-                          {item}
+                        <li key={index} className="flex items-center space-x-2 text-gray-600">
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                          <span>{item}</span>
                         </li>
                       ))}
                     </ul>
-                  ) : typeof data === "object" ? (
-                    <div className="space-y-2">
+                  ) : typeof data === 'object' ? (
+                    <div className="space-y-3">
                       {Object.entries(data).map(([key, value]) => (
-                        <div key={key} className="text-gray-600">
-                          <span className="font-medium">{key}: </span>
-                          {value}
+                        <div key={key} className="flex items-start">
+                          <span className="font-medium text-gray-700 min-w-[120px]">{key}:</span>
+                          <span className="text-gray-600 ml-4">{value}</span>
                         </div>
                       ))}
                     </div>
@@ -347,8 +367,8 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
                     <p className="text-gray-600">{data}</p>
                   )}
                 </div>
-              )
-            )}
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -356,21 +376,38 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6">Batch Resume Evaluation</h2>
+    <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50/50">
+      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 
+                          bg-clip-text text-transparent">
+              Batch Resume Evaluation
+            </h2>
+            <p className="text-gray-500 mt-2">Evaluate multiple applications simultaneously</p>
+          </div>
+          {selectedJob && (
+            <div className="px-4 py-2 bg-blue-50 rounded-lg">
+              <span className="text-sm text-blue-700 font-medium">
+                {selectedApplications.length} application{selectedApplications.length !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Job Selection */}
-        <div className="mb-6">
+        <div className="mb-8">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Job Posting
           </label>
           <select
-            className="w-full border border-gray-300 rounded-md px-3 py-2"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3.5 bg-white
+                     focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                     shadow-sm transition-all duration-200"
             onChange={handleJobSelect}
             value={selectedJob?.id || ""}
           >
-            <option value="">Select a job...</option>
+            <option value="">Select a job posting...</option>
             {jobs.map((job) => (
               <option key={job.id} value={job.id}>
                 {job.job_title} - {job.company_name}
@@ -381,7 +418,7 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
         {/* Applications Selection */}
         {selectedJob && (
-          <div className="mb-6">
+          <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">
               Select Applications to Evaluate
             </h3>
@@ -391,14 +428,19 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
 
         {/* Progress Bar */}
         {isLoading && (
-          <div className="mb-6">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div className="mb-8">
+            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full 
+                          transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 mt-2 flex items-center">
+              <svg className="animate-spin h-4 w-4 mr-2 text-blue-600" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
               Processing {Math.round(progress)}% complete...
             </p>
           </div>
@@ -408,11 +450,17 @@ ${skills.length > 0 ? skills.map((s) => `- ${s}`).join("\n") : "Not specified"}
         <button
           onClick={handleBatchEvaluate}
           disabled={isLoading || selectedApplications.length === 0}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
+                    py-3 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 
+                    disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
+                    transition-all duration-300 transform hover:-translate-y-0.5
+                    shadow-md hover:shadow-lg font-medium text-lg"
         >
           {isLoading
             ? "Evaluating..."
-            : `Evaluate ${selectedApplications.length} Selected Applications`}
+            : `Evaluate ${selectedApplications.length} Selected Application${
+                selectedApplications.length !== 1 ? 's' : ''
+              }`}
         </button>
 
         {/* Results */}
