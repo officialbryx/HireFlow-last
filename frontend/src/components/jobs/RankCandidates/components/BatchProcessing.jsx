@@ -126,17 +126,12 @@ export const BatchProcessing = ({
                   {batchProgress}%
                 </span>
               </div>
-            ) : selectedForBatch.length > 0 ? (
-              <button
-                onClick={handleBatchEvaluation}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Start Processing ({selectedForBatch.length})
-              </button>
             ) : (
-              <span className="text-sm text-gray-500">
-                Select candidates to evaluate
-              </span>
+              selectedForBatch.length === 0 && (
+                <span className="text-sm text-gray-500">
+                  Select candidates to evaluate
+                </span>
+              )
             )}
           </div>
         )}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { applicationsApi } from '../../services/api/applicationsApi';
 import { notificationsApi } from '../../services/api/notificationsApi';
-import ConfirmationDialog from '../common/ConfirmationDialog';
+import {ConfirmationDialog} from '../common/ConfirmationDialog';
 
 const StatusControls = ({ 
   applicantId,

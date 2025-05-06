@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { jobsApi } from "../../../../services/api/jobsApi";
 import { evaluationApi } from "../../../../services/api/evaluationApi";
 import { applicationsApi } from "../../../../services/api/applicationsApi";
 import { toast } from "react-hot-toast";
+import { sortCandidatesByRankingCriteria } from '../utils/rankingUtils';
 
 export const useRankCandidates = () => {
   const queryClient = useQueryClient();
@@ -21,9 +22,10 @@ export const useRankCandidates = () => {
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [selectedForBatch, setSelectedForBatch] = useState([]);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [candidates, setCandidates] = useState([]);
 
-  // Use React Query for candidates with evaluations
-  const { data: candidates = [], isLoading } = useQuery({
+  // Use React Query for initial candidates fetch
+  const { data: fetchedCandidates = [], isLoading } = useQuery({
     queryKey: ['candidates', selectedJob],
     queryFn: async () => {
       if (!selectedJob) return [];
@@ -48,29 +50,71 @@ export const useRankCandidates = () => {
           qualified: evaluation?.qualified || false,
           evaluated: !!evaluation,
           evaluationResult: evaluation,
+          shortlisted: application.shortlisted || false,
           rank: 0 // Will be calculated after sorting
         };
       });
 
-      // Sort candidates based on ranking criteria
-      const sortedCandidates = candidatesWithEvaluation.sort((a, b) => {
-        if (rankingCriteria === 'skills') {
-          return b.skillMatch - a.skillMatch;
-        }
-        return b.matchScore - a.matchScore;
-      });
-
-      // Add rank numbers
-      return sortedCandidates.map((candidate, index) => ({
-        ...candidate,
-        rank: index + 1
-      }));
+      // Return the raw data - sorting will be handled by applyFiltersAndSort
+      return candidatesWithEvaluation;
     },
     enabled: !!selectedJob,
     refetchOnWindowFocus: true,
     staleTime: 30000,
     cacheTime: 300000
   });
+
+  // Update local candidates state when fetched data changes
+  useEffect(() => {
+    if (fetchedCandidates.length > 0) {
+      const filteredAndSortedCandidates = applyFiltersAndSort(fetchedCandidates);
+      setCandidates(filteredAndSortedCandidates);
+    }
+  }, [fetchedCandidates, rankingCriteria, filters]);
+
+  const sortCandidatesByRankingCriteria = (candidatesList, criteria) => {
+    return [...candidatesList]
+      .sort((a, b) => {
+        switch (criteria) {
+          case "overall":
+            return b.matchScore - a.matchScore;
+          case "skills":
+            return b.skillMatch - a.skillMatch;
+          case "experience":
+            return b.experienceScore - a.experienceScore;
+          case "education":
+            return b.educationScore - a.educationScore;
+          default:
+            return b.matchScore - a.matchScore;
+        }
+      })
+      .map((candidate, index) => ({
+        ...candidate,
+        rank: index + 1,
+      }));
+  };
+
+  const applyFiltersAndSort = (candidatesList) => {
+    // First apply filters
+    let filteredCandidates = candidatesList.filter(candidate => {
+      if (filters.minimumSkillMatch > 0 && candidate.skillMatch < filters.minimumSkillMatch) {
+        return false;
+      }
+      if (filters.minimumOverallMatch > 0 && candidate.matchScore < filters.minimumOverallMatch) {
+        return false;
+      }
+      if (filters.evaluatedOnly && !candidate.evaluated) {
+        return false;
+      }
+      if (filters.shortlistedOnly && !candidate.shortlisted) {
+        return false;
+      }
+      return true;
+    });
+
+    // Then sort by ranking criteria
+    return sortCandidatesByRankingCriteria(filteredCandidates, rankingCriteria);
+  };
 
   const toggleCandidate = (candidateId) => {
     setExpandedCandidates((prev) => ({
@@ -188,6 +232,7 @@ export const useRankCandidates = () => {
     selectedJob,
     setSelectedJob,
     candidates,
+    setCandidates,
     rankingCriteria,
     setRankingCriteria,
     showFilters,

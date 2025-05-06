@@ -64,7 +64,9 @@ export const ControlBar = ({
                          text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                          appearance-none bg-white"
               value={rankingCriteria}
-              onChange={(e) => setRankingCriteria(e.target.value)}
+              onChange={(e) => {
+                setRankingCriteria(e.target.value);
+              }}
             >
               <option value="overall">Overall Match</option>
               <option value="skills">Skills Match</option>
