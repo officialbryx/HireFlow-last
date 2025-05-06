@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { pdfjs } from "react-pdf";
 import { applicationsApi } from "../../services/api/applicationsApi";
 import { supabase } from "../../services/supabaseClient"; // Add this import
+import { evaluationApi } from "../../services/api/evaluationApi"; // Add this import
 import ApplicantsList from "../applicants/ApplicantsList";
 import ApplicantDetails from "../applicants/ApplicantDetails";
 import PdfModal from "../applicants/modals/PdfModal";
@@ -98,27 +99,54 @@ export default function ViewApplicants({
   } = useQuery({
     queryKey: applicantsQueryKey,
     queryFn: async () => {
-      // Build filters object
+      // Get applicants data
       const filters = {
         status: statusFilter !== "all" ? statusFilter : null,
         company: companyFilter !== "all" ? companyFilter : null,
         job_id: jobFilter || null,
         application_id: applicationFilter || null,
         search: searchTerm || null,
-        creator_id: userId, // Add creator_id to filter by job owner
+        creator_id: userId,
       };
 
-      // This assumes you've updated applicationsApi.fetchApplications to support pagination
       const result = await applicationsApi.fetchApplications(
         currentPage,
         pageSize,
         filters
       );
+
+      // Fetch evaluation status for each applicant
+      if (result.data) {
+        const applicantsWithEvaluation = await Promise.all(
+          result.data.map(async (applicant) => {
+            try {
+              const evaluation = await evaluationApi.getEvaluationResult(applicant.id);
+              return {
+                ...applicant,
+                evaluated: !!evaluation,
+                evaluation_results: evaluation
+              };
+            } catch (error) {
+              console.error(`Error fetching evaluation for applicant ${applicant.id}:`, error);
+              return {
+                ...applicant,
+                evaluated: false
+              };
+            }
+          })
+        );
+        
+        return {
+          ...result,
+          data: applicantsWithEvaluation
+        };
+      }
+
       return result;
     },
-    keepPreviousData: true, // Keep showing previous data while new data is loading
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!userId, // Only run query when userId is available
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    enabled: !!userId,
   });
 
   // Extract data from query result
@@ -168,6 +196,13 @@ export default function ViewApplicants({
     setSelectedApplicant(applicant);
     setActiveTab("details");
 
+    // If applicant already has evaluation results, use those
+    if (applicant.evaluation_results) {
+      setAnalysis(applicant.evaluation_results);
+      return;
+    }
+
+    // Otherwise proceed with resume analysis if available
     if (applicant?.resume_url) {
       // Try to get cached analysis first
       const analysisKey = ["resumeAnalysis", applicant.resume_url];

@@ -13,12 +13,10 @@ export const useRankCandidates = () => {
   const [rankingCriteria, setRankingCriteria] = useState("overall");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    shortlisted: false,
     minimumSkillMatch: 0,
     minimumOverallMatch: 0,
-    educationLevel: "any",
-    fieldOfStudy: "",
-    hasWorkExperience: false
+    evaluatedOnly: false,
+    shortlistedOnly: false
   });
   const [expandedCandidates, setExpandedCandidates] = useState({});
   const [batchProcessing, setBatchProcessing] = useState(false);
@@ -60,6 +58,14 @@ export const useRankCandidates = () => {
         rank: idx + 1
       }));
     });
+  };
+
+  // Add this helper function
+  const areFiltersActive = () => {
+    return filters.minimumSkillMatch > 0 ||
+           filters.minimumOverallMatch > 0 ||
+           filters.evaluatedOnly ||
+           filters.shortlistedOnly;
   };
 
   // Fetch jobs
@@ -137,82 +143,42 @@ export const useRankCandidates = () => {
   useEffect(() => {
     if (!originalCandidates.length) return;
 
-    const filteredCandidates = originalCandidates.filter(candidate => {
-      // Filter by minimum skill match
-      if (filters.minimumSkillMatch > 0 && 
-          candidate.skillMatch < filters.minimumSkillMatch) {
-        return false;
+    let filteredResults = [...originalCandidates];
+
+    // Apply skill match filter
+    if (filters.minimumSkillMatch > 0) {
+      filteredResults = filteredResults.filter(
+        candidate => (candidate.skillMatch || 0) >= filters.minimumSkillMatch
+      );
+    }
+
+    // Apply overall match filter
+    if (filters.minimumOverallMatch > 0) {
+      filteredResults = filteredResults.filter(
+        candidate => (candidate.matchScore || 0) >= filters.minimumOverallMatch
+      );
+    }
+
+    // Apply evaluated only filter - check for evaluation_results instead of evaluated flag
+    if (filters.evaluatedOnly) {
+      filteredResults = filteredResults.filter(
+        candidate => !!candidate.evaluationResult // Changed from evaluation_results to evaluationResult
+      );
+    }
+
+    // Apply shortlisted only filter
+    if (filters.shortlistedOnly) {
+      filteredResults = filteredResults.filter(
+        candidate => candidate.shortlisted === true
+      );
+    }
+
+    // Sort candidates based on ranking criteria
+    const sortedCandidates = filteredResults.sort((a, b) => {
+      if (rankingCriteria === 'skills') {
+        return (b.skillMatch || 0) - (a.skillMatch || 0);
       }
-
-      // Filter by minimum overall match
-      if (filters.minimumOverallMatch > 0 && 
-          candidate.matchScore < filters.minimumOverallMatch) {
-        return false;
-      }
-
-      // Filter by education level
-      if (filters.educationLevel !== 'any') {
-        const degree = candidate.education?.[0]?.degree?.toLowerCase() || '';
-        const educationMatches = {
-          'high_school': ['high school', 'secondary'],
-          'associate': ['associate', 'diploma'],
-          'bachelor': ['bachelor', 'bs', 'bsc', 'bachelor of science'],
-          'master': ['master', 'ms', 'ma', 'mba'],
-          'phd': ['phd', 'doctorate']
-        };
-
-        const requiredLevel = filters.educationLevel;
-        const matchingTerms = educationMatches[requiredLevel] || [];
-        const hasRequiredLevel = matchingTerms.some(term => degree.includes(term));
-
-        if (!hasRequiredLevel) return false;
-      }
-
-      // Filter by field of study
-      if (filters.fieldOfStudy) {
-        const fieldOfStudy = candidate.education?.[0]?.field_of_study?.toLowerCase() || '';
-        // Handle common abbreviations
-        const searchTerm = filters.fieldOfStudy.toLowerCase();
-        const fieldMatches = {
-          'cs': ['cs', 'computer science'],
-          'it': ['it', 'information technology'],
-          'is': ['is', 'information systems']
-        };
-
-        const matchTerms = fieldMatches[searchTerm] || [searchTerm];
-        const hasMatchingField = matchTerms.some(term => fieldOfStudy.includes(term));
-
-        if (!hasMatchingField) return false;
-      }
-
-      // Filter by shortlisted status
-      if (filters.shortlisted && !candidate.shortlisted) {
-        return false;
-      }
-
-      // Filter by work experience
-      if (filters.hasWorkExperience) {
-        if (candidate.no_work_experience || 
-            !candidate.work_experience?.length) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    // Sort filtered candidates
-    const sortedCandidates = filteredCandidates.sort((a, b) => {
-      switch (rankingCriteria) {
-        case 'skills':
-          return b.skillMatch - a.skillMatch;
-        case 'experience':
-          return b.experienceScore - a.experienceScore;
-        case 'education':
-          return b.educationScore - a.educationScore;
-        default: // overall
-          return b.matchScore - a.matchScore;
-      }
+      return (b.matchScore || 0) - (a.matchScore || 0);
     });
 
     // Update ranks after filtering and sorting
@@ -256,5 +222,6 @@ export const useRankCandidates = () => {
     toggleCandidate,
     moveUp,
     moveDown,
+    areFiltersActive,
   };
 };
