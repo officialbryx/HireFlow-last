@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../services/supabaseClient"; // Updated import path
 import Navbar from "./Navbar";
 import {
   UserCircleIcon,
   PhoneIcon,
   EnvelopeIcon,
   MapPinIcon,
-  CameraIcon,
   BriefcaseIcon,
   AcademicCapIcon,
   PlusCircleIcon,
   DocumentTextIcon,
-  GlobeAltIcon,
   TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -31,10 +30,148 @@ const suffixOptions = [
 ];
 
 const countries = [
-  { code: "US", name: "United States" },
-  { code: "GB", name: "United Kingdom" },
+  { code: "AF", name: "Afghanistan" },
+  { code: "AL", name: "Albania" },
+  { code: "DZ", name: "Algeria" },
+  { code: "AD", name: "Andorra" },
+  { code: "AO", name: "Angola" },
+  { code: "AG", name: "Antigua and Barbuda" },
+  { code: "AR", name: "Argentina" },
+  { code: "AM", name: "Armenia" },
+  { code: "AU", name: "Australia" },
+  { code: "AT", name: "Austria" },
+  { code: "AZ", name: "Azerbaijan" },
+  { code: "BS", name: "Bahamas" },
+  { code: "BH", name: "Bahrain" },
+  { code: "BD", name: "Bangladesh" },
+  { code: "BB", name: "Barbados" },
+  { code: "BY", name: "Belarus" },
+  { code: "BE", name: "Belgium" },
+  { code: "BZ", name: "Belize" },
+  { code: "BJ", name: "Benin" },
+  { code: "BT", name: "Bhutan" },
+  { code: "BO", name: "Bolivia" },
+  { code: "BA", name: "Bosnia and Herzegovina" },
+  { code: "BW", name: "Botswana" },
+  { code: "BR", name: "Brazil" },
+  { code: "BN", name: "Brunei" },
+  { code: "BG", name: "Bulgaria" },
+  { code: "BF", name: "Burkina Faso" },
+  { code: "BI", name: "Burundi" },
+  { code: "KH", name: "Cambodia" },
+  { code: "CM", name: "Cameroon" },
   { code: "CA", name: "Canada" },
-  // ... other countries
+  { code: "CV", name: "Cape Verde" },
+  { code: "CF", name: "Central African Republic" },
+  { code: "TD", name: "Chad" },
+  { code: "CL", name: "Chile" },
+  { code: "CN", name: "China" },
+  { code: "CO", name: "Colombia" },
+  { code: "KM", name: "Comoros" },
+  { code: "CG", name: "Congo" },
+  { code: "CR", name: "Costa Rica" },
+  { code: "HR", name: "Croatia" },
+  { code: "CU", name: "Cuba" },
+  { code: "CY", name: "Cyprus" },
+  { code: "CZ", name: "Czech Republic" },
+  { code: "DK", name: "Denmark" },
+  { code: "DJ", name: "Djibouti" },
+  { code: "DM", name: "Dominica" },
+  { code: "DO", name: "Dominican Republic" },
+  { code: "EC", name: "Ecuador" },
+  { code: "EG", name: "Egypt" },
+  { code: "SV", name: "El Salvador" },
+  { code: "GQ", name: "Equatorial Guinea" },
+  { code: "ER", name: "Eritrea" },
+  { code: "EE", name: "Estonia" },
+  { code: "ET", name: "Ethiopia" },
+  { code: "FJ", name: "Fiji" },
+  { code: "FI", name: "Finland" },
+  { code: "FR", name: "France" },
+  { code: "GA", name: "Gabon" },
+  { code: "GM", name: "Gambia" },
+  { code: "GE", name: "Georgia" },
+  { code: "DE", name: "Germany" },
+  { code: "GH", name: "Ghana" },
+  { code: "GR", name: "Greece" },
+  { code: "GD", name: "Grenada" },
+  { code: "GT", name: "Guatemala" },
+  { code: "GN", name: "Guinea" },
+  { code: "GY", name: "Guyana" },
+  { code: "HT", name: "Haiti" },
+  { code: "HN", name: "Honduras" },
+  { code: "HU", name: "Hungary" },
+  { code: "IS", name: "Iceland" },
+  { code: "IN", name: "India" },
+  { code: "ID", name: "Indonesia" },
+  { code: "IR", name: "Iran" },
+  { code: "IQ", name: "Iraq" },
+  { code: "IE", name: "Ireland" },
+  { code: "IL", name: "Israel" },
+  { code: "IT", name: "Italy" },
+  { code: "JM", name: "Jamaica" },
+  { code: "JP", name: "Japan" },
+  { code: "JO", name: "Jordan" },
+  { code: "KZ", name: "Kazakhstan" },
+  { code: "KE", name: "Kenya" },
+  { code: "KR", name: "South Korea" },
+  { code: "KW", name: "Kuwait" },
+  { code: "KG", name: "Kyrgyzstan" },
+  { code: "LA", name: "Laos" },
+  { code: "LV", name: "Latvia" },
+  { code: "LB", name: "Lebanon" },
+  { code: "LS", name: "Lesotho" },
+  { code: "LR", name: "Liberia" },
+  { code: "LY", name: "Libya" },
+  { code: "LI", name: "Liechtenstein" },
+  { code: "LT", name: "Lithuania" },
+  { code: "LU", name: "Luxembourg" },
+  { code: "MG", name: "Madagascar" },
+  { code: "MW", name: "Malawi" },
+  { code: "MY", name: "Malaysia" },
+  { code: "MV", name: "Maldives" },
+  { code: "ML", name: "Mali" },
+  { code: "MT", name: "Malta" },
+  { code: "MX", name: "Mexico" },
+  { code: "MD", name: "Moldova" },
+  { code: "MC", name: "Monaco" },
+  { code: "MN", name: "Mongolia" },
+  { code: "ME", name: "Montenegro" },
+  { code: "MA", name: "Morocco" },
+  { code: "MZ", name: "Mozambique" },
+  { code: "NA", name: "Namibia" },
+  { code: "NP", name: "Nepal" },
+  { code: "NL", name: "Netherlands" },
+  { code: "NZ", name: "New Zealand" },
+  { code: "NI", name: "Nicaragua" },
+  { code: "NE", name: "Niger" },
+  { code: "NG", name: "Nigeria" },
+  { code: "NO", name: "Norway" },
+  { code: "OM", name: "Oman" },
+  { code: "PK", name: "Pakistan" },
+  { code: "PA", name: "Panama" },
+  { code: "PG", name: "Papua New Guinea" },
+  { code: "PY", name: "Paraguay" },
+  { code: "PE", name: "Peru" },
+  { code: "PH", name: "Philippines" },
+  { code: "PL", name: "Poland" },
+  { code: "PT", name: "Portugal" },
+  { code: "QA", name: "Qatar" },
+  { code: "RO", name: "Romania" },
+  { code: "RU", name: "Russia" },
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "SG", name: "Singapore" },
+  { code: "ZA", name: "South Africa" },
+  { code: "ES", name: "Spain" },
+  { code: "SE", name: "Sweden" },
+  { code: "CH", name: "Switzerland" },
+  { code: "TH", name: "Thailand" },
+  { code: "TR", name: "Turkey" },
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "US", name: "United States" },
+  { code: "VN", name: "Vietnam" },
+  { code: "ZW", name: "Zimbabwe" },
 ];
 
 const degreeOptions = [
@@ -113,9 +250,118 @@ const Profile = () => {
     ],
     skills: [],
     noWorkExperience: false,
+    resume_url: "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [skillInput, setSkillInput] = useState("");
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  const fetchProfileData = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch all data in parallel for better performance
+      const [profileResult, workExpResult, eduResult, skillsResult] =
+        await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.from("work_experiences").select("*").eq("user_id", user.id),
+          supabase.from("education").select("*").eq("user_id", user.id),
+          supabase.from("skills").select("skill_name").eq("user_id", user.id),
+        ]);
+
+      // Handle any errors
+      if (profileResult.error) throw profileResult.error;
+      if (workExpResult.error) throw workExpResult.error;
+      if (eduResult.error) throw eduResult.error;
+      if (skillsResult.error) throw skillsResult.error;
+
+      // Format work experience data
+      const formattedWorkExp = workExpResult.data.map((exp) => ({
+        jobTitle: exp.job_title || "",
+        company: exp.company || "",
+        location: exp.location || "",
+        currentWork: exp.current_work || false,
+        fromDate: exp.from_date ? formatDateFromDB(exp.from_date) : "",
+        toDate: exp.to_date ? formatDateFromDB(exp.to_date) : "",
+        description: exp.description || "",
+      }));
+
+      // Format education data
+      const formattedEdu = eduResult.data.map((edu) => ({
+        school: edu.school || "",
+        degree: edu.degree || "",
+        fieldOfStudy: edu.field_of_study || "",
+        gpa: edu.gpa || "",
+        fromYear: edu.from_date ? formatDateFromDB(edu.from_date) : "",
+        toYear: edu.to_date ? formatDateFromDB(edu.to_date) : "",
+      }));
+
+      // Update form data with fetched data, including email from auth user
+      setFormData({
+        givenName: profileResult.data?.first_name || "",
+        middleName: profileResult.data?.middle_name || "",
+        familyName: profileResult.data?.last_name || "",
+        suffix: profileResult.data?.suffix || "",
+        country: profileResult.data?.country || "",
+        street: profileResult.data?.street || "",
+        additionalAddress: profileResult.data?.additional_address || "",
+        city: profileResult.data?.city || "",
+        province: profileResult.data?.province || "",
+        postalCode: profileResult.data?.postal_code || "",
+        phoneType: profileResult.data?.phone_type || "",
+        phoneCode: profileResult.data?.phone_code || "",
+        phoneNumber: profileResult.data?.phone_number || "",
+        noWorkExperience: profileResult.data?.no_work_experience || false,
+        email: user.email || "", // Add email from auth user
+        workExperience:
+          formattedWorkExp.length > 0
+            ? formattedWorkExp
+            : [
+                {
+                  jobTitle: "",
+                  company: "",
+                  location: "",
+                  currentWork: false,
+                  fromDate: "",
+                  toDate: "",
+                  description: "",
+                },
+              ],
+        education:
+          formattedEdu.length > 0
+            ? formattedEdu
+            : [
+                {
+                  school: "",
+                  degree: "",
+                  fieldOfStudy: "",
+                  gpa: "",
+                  fromYear: "",
+                  toYear: "",
+                },
+              ],
+        skills: skillsResult.data?.map((s) => s.skill_name) || [],
+        resume_url: profileResult.data?.resume_url || "",
+      });
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    }
+  };
+
+  // Add helper function to format dates from DB
+  const formatDateFromDB = (dbDate) => {
+    if (!dbDate) return "";
+    const date = new Date(dbDate);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${year}`;
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -241,8 +487,157 @@ const Profile = () => {
     }));
   };
 
+  const handleViewResume = () => {
+    if (formData.resume_url) {
+      window.open(formData.resume_url, "_blank");
+    }
+  };
+
   const handleSave = async () => {
-    console.log("Saving profile data:", formData);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Upload resume if it exists and is a file
+      let resume_url = formData.resume_url; // Keep existing URL if no new file
+      if (formData.resume && formData.resume instanceof File) {
+        const fileExt = formData.resume.name.split(".").pop();
+        const fileName = `${user.id}-${Math.random()
+          .toString(36)
+          .slice(2)}.${fileExt}`;
+        const filePath = `resumes/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("resumes")
+          .upload(filePath, formData.resume);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL for the uploaded file
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("resumes").getPublicUrl(filePath);
+
+        resume_url = publicUrl;
+      }
+
+      // Update profile with resume URL
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          first_name: formData.givenName || "",
+          middle_name: formData.middleName || "",
+          last_name: formData.familyName || "",
+          suffix: formData.suffix || "",
+          country: formData.country || "",
+          street: formData.street || "",
+          additional_address: formData.additionalAddress || "",
+          city: formData.city || "",
+          province: formData.province || "",
+          postal_code: formData.postalCode || "",
+          phone_type: formData.phoneType || "",
+          phone_code: formData.phoneCode || "",
+          phone_number: formData.phoneNumber || "",
+          no_work_experience: formData.noWorkExperience || false,
+          resume_url: resume_url, // Add resume URL to profile update
+        })
+        .eq("id", user.id);
+
+      if (profileError) throw profileError;
+
+      // Delete existing work experiences
+      await supabase.from("work_experiences").delete().eq("user_id", user.id);
+
+      // Insert new work experiences with properly formatted dates
+      if (!formData.noWorkExperience && formData.workExperience.length > 0) {
+        const formattedWorkExperience = formData.workExperience.map((exp) => {
+          // Parse the MM/YYYY format and create a valid date
+          const fromParts = exp.fromDate ? exp.fromDate.split("/") : null;
+          const toParts = exp.toDate ? exp.toDate.split("/") : null;
+
+          const fromDate = fromParts
+            ? `${fromParts[1]}-${fromParts[0]}-01`
+            : null;
+          const toDate = exp.currentWork
+            ? null
+            : toParts
+            ? `${toParts[1]}-${toParts[0]}-01`
+            : null;
+
+          return {
+            user_id: user.id,
+            job_title: exp.jobTitle || "",
+            company: exp.company || "",
+            location: exp.location || "",
+            current_work: exp.currentWork || false,
+            from_date: fromDate,
+            to_date: toDate,
+            description: exp.description || "",
+          };
+        });
+
+        const { error: workError } = await supabase
+          .from("work_experiences")
+          .insert(formattedWorkExperience);
+
+        if (workError) throw workError;
+      }
+
+      // Delete existing education records
+      await supabase.from("education").delete().eq("user_id", user.id);
+
+      // Insert new education records with properly formatted dates
+      if (formData.education.length > 0) {
+        const formattedEducation = formData.education.map((edu) => {
+          // Parse the MM/YYYY format and create a valid date
+          const fromParts = edu.fromYear ? edu.fromYear.split("/") : null;
+          const toParts = edu.toYear ? edu.toYear.split("/") : null;
+
+          const fromDate = fromParts
+            ? `${fromParts[1]}-${fromParts[0]}-01`
+            : null;
+          const toDate = toParts ? `${toParts[1]}-${toParts[0]}-01` : null;
+
+          return {
+            user_id: user.id,
+            school: edu.school || "",
+            degree: edu.degree || "",
+            field_of_study: edu.fieldOfStudy || "",
+            gpa: edu.gpa || null,
+            from_date: fromDate,
+            to_date: toDate,
+          };
+        });
+
+        const { error: eduError } = await supabase
+          .from("education")
+          .insert(formattedEducation);
+
+        if (eduError) throw eduError;
+      }
+
+      // Delete existing skills
+      await supabase.from("skills").delete().eq("user_id", user.id);
+
+      // Insert new skills
+      if (formData.skills.length > 0) {
+        const { error: skillsError } = await supabase.from("skills").insert(
+          formData.skills.map((skill) => ({
+            user_id: user.id,
+            skill_name: skill,
+          }))
+        );
+
+        if (skillsError) throw skillsError;
+      }
+
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      alert("Error updating profile. Please try again.");
+    }
   };
 
   const inputStyles = (fieldName) =>
@@ -925,7 +1320,10 @@ const Profile = () => {
                               accept=".pdf"
                               onChange={(e) => {
                                 const file = e.target.files[0];
-                                setFormData((prev) => ({ ...prev, resume: file }));
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  resume: file,
+                                }));
                                 if (setFieldErrors) {
                                   setFieldErrors((prev) => ({
                                     ...prev,
@@ -939,10 +1337,22 @@ const Profile = () => {
                           <p className="pl-1">or drag and drop</p>
                         </div>
                         <p className="text-xs text-gray-500">PDF up to 5MB</p>
-                        {formData.resume && (
+                        {(formData.resume || formData.resume_url) && (
                           <div className="mt-4 text-sm text-green-600 bg-green-50 py-2 px-4 rounded-md">
-                            <p className="font-medium">Selected file:</p>
-                            <p className="mt-1">{formData.resume.name}</p>
+                            <p className="font-medium">Resume:</p>
+                            <p className="mt-1">
+                              {formData.resume
+                                ? formData.resume.name
+                                : "Previously uploaded resume"}
+                            </p>
+                            {formData.resume_url && (
+                              <button
+                                onClick={handleViewResume}
+                                className="mt-2 text-blue-600 hover:text-blue-700 underline"
+                              >
+                                View Resume
+                              </button>
+                            )}
                           </div>
                         )}
                         {fieldErrors?.resume && (
@@ -953,31 +1363,6 @@ const Profile = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </FormSection>
-
-              <FormSection
-                icon={<GlobeAltIcon className="h-6 w-6 text-blue-500" />}
-                title="Online Presence"
-                description="Add your LinkedIn profile"
-              >
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-700">
-                    LinkedIn Profile
-                  </h4>
-                  <input
-                    type="url"
-                    name="linkedin"
-                    value={formData.linkedin || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        linkedin: e.target.value,
-                      }))
-                    }
-                    placeholder="https://www.linkedin.com/in/yourprofile"
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  />
                 </div>
               </FormSection>
             </div>
