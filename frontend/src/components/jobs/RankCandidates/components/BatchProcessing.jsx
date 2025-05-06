@@ -50,7 +50,7 @@ export const BatchProcessing = ({
           confirmText: 'Move to Interview',
           color: 'blue'
         };
-      case 'shortlist':
+      case 'shortlisted':
         return {
           title: 'Shortlist Candidates',
           action: 'shortlist',
@@ -104,7 +104,7 @@ export const BatchProcessing = ({
               batchProcessing ? "text-blue-500" : "text-gray-500"
             }`}
           />
-          Batch Evaluate
+          Batch 
           {selectedForBatch.length > 0 && (
             <span className="ml-1.5 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">
               {selectedForBatch.length}
