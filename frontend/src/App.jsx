@@ -269,7 +269,7 @@ const App = () => {
         {/* Catch-all route - Redirect based on user role */}
         <Route path="*" element={<RoleRedirect />} />
       </Routes>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 };

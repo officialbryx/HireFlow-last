@@ -234,7 +234,7 @@ const Dashboard = () => {
                 title="Total Applicants"
                 value={metrics.applicantStats.total}
                 icon={UserGroupIcon}
-                change={metrics.applicantStats.monthlyChange}
+                // change={metrics.applicantStats.monthlyChange}
                 changeType={metrics.applicantStats.changeType}  // Dynamic instead of hardcoded
                 onClick={() => handleCardClick('/hr/jobs?tab=applicants')}
               />
