@@ -14,7 +14,7 @@ print(f"Using device: {device}")
 # Configure DeepSeek client
 client = OpenAI(
     base_url="https://api.deepseek.com/v1",
-    api_key="sk-3c492431b34d413db1e3f4f2f126b0e4"
+    api_key=""
 )
 
 def analyze_technical_details(job_post: str, resume_text: str) -> Dict[str, Any]:
